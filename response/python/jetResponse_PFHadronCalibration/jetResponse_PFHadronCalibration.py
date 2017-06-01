@@ -27,7 +27,7 @@ args = argParser.parse_args()
 logger = get_logger(args.logLevel, logFile = None)
 
 max_events = -1
-max_files = 1
+max_files = 10
 
 dir_ref = [
     "/eos/cms/store/group/phys_jetmet/spandey/QCD/default_calib/step3/CRAB_UserFiles/crab_QCD_step3_RECO_902_default_May_30/170530_152352/0000/",
