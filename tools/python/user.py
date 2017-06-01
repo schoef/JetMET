@@ -8,3 +8,7 @@ if os.environ['USER'] in ['schoef', 'rschoefbeck', 'schoefbeck']:
     # Where the plots go
     plot_directory      = "/afs/hephy.at/user/r/rschoefbeck/www/"
     #plot_directory      = "/afs/cern.ch/work/s/schoef/www/"
+elif os.environ['USER'] in ['spandey']:
+
+    plot_directory      = "XXX"
+

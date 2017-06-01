@@ -11,6 +11,7 @@ from RootTools.core.standard import *
 
 #Helper
 import JetMET.tools.helpers as helpers
+import JetMET.tools.user as user
 
 # argParser
 import argparse
@@ -125,7 +126,7 @@ for i, h in enumerate(histos):
     h[0].__dict__.update(profiles[i].__dict__)
 
 jetResponsePlot = Plot.fromHisto(name = prefix+"jetResponseRatio_relval", histos = histos, texX = "new Jet p_{T}" , texY = "response ratio new/old" )
-plotting.draw(jetResponsePlot, plot_directory = "/afs/hephy.at/user/r/rschoefbeck/www/etc/", ratio = None, logY = False, logX = True, yRange=(0.7,1.2))
+plotting.draw(jetResponsePlot, plot_directory = user.plot_directory, ratio = None, logY = False, logX = True, yRange=(0.7,1.2))
 
 # Make eta plot
 profiles = [resp_eta  ]
@@ -135,4 +136,4 @@ for i, h in enumerate(histos):
     h[0].__dict__.update(profiles[i].__dict__)
 
 jetResponsePlot = Plot.fromHisto(name = prefix+"jetResponseRatio_eta_relval", histos = histos, texX = "new Jet #eta" , texY = "response ratio new/old" )
-plotting.draw(jetResponsePlot, plot_directory = "/afs/hephy.at/user/r/rschoefbeck/www/etc/", ratio = None, logY = False, logX = False, yRange=(0.7,1.2))
+plotting.draw(jetResponsePlot, plot_directory = user.plot_directory, ratio = None, logY = False, logX = False, yRange=(0.7,1.2))
