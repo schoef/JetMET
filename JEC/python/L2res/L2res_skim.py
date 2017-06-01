@@ -43,9 +43,9 @@ def get_parser():
     argParser.add_argument('--nJobs', action='store', nargs='?', type=int, default=1, help="Maximum number of simultaneous jobs." )    
     argParser.add_argument('--job', action='store', nargs='*', type=int, default=[], help="Run only jobs i" )
     argParser.add_argument('--minNJobs', action='store', nargs='?', type=int, default=1, help="Minimum number of simultaneous jobs." )
-    argParser.add_argument('--targetDir', action='store', nargs='?', type=str, default=user.data_output_directory, help="Name of the directory the post-processed files will be saved" ) #user.data_output_directory
+    argParser.add_argument('--targetDir', action='store', nargs='?', type=str, default=user.skim_ntuple_directory, help="Name of the directory the post-processed files will be saved" ) #user.data_output_directory
     #argParser.add_argument('--version', action='store', nargs='?', type=str, default='V1', help="JEC version" )
-    argParser.add_argument('--processingEra', action='store', nargs='?', type=str, default='v1', help="Name of the processing era" )
+    argParser.add_argument('--processingEra', action='store', nargs='?', type=str, default='v3', help="Name of the processing era" )
     argParser.add_argument('--skim', action='store', nargs='?', type=str, default='default', help="Skim conditions to be applied for post-processing" )
     argParser.add_argument('--small', action='store_true', help="Run the file on a small sample (for test purpose), bool flag set to True if used", default = False)
     return argParser
@@ -85,6 +85,7 @@ defSkim = options.skim.lower().startswith('default')
 skimConds = []
 if defSkim:
     skimConds.append( "nJet>=2&&0.5*(Jet_pt[0]+Jet_pt[1])>50" )
+    skimConds.append( "Sum$(LepGood_pt>20&&abs(LepGood_eta)<2.5&&LepGood_relIso03<0.4)==0" )
 
 #Samples: Load samples
 maxN = 1 if options.small else None
@@ -100,7 +101,8 @@ if isMC:
     puRW        = getReweightingFunction(data="PU_Run2016_36000_XSecCentral", mc='Summer16')
     puRWDown    = getReweightingFunction(data="PU_Run2016_36000_XSecDown",    mc='Summer16')
     puRWUp      = getReweightingFunction(data="PU_Run2016_36000_XSecUp",      mc='Summer16')
-        
+
+if options.small: options.targetDir+='_small'
 output_directory = os.path.join( options.targetDir, options.processingEra, options.skim, sample.name )
 
 if os.path.exists(output_directory) and options.overwrite:
@@ -173,7 +175,7 @@ if isMC:
     read_variables+= map( TreeVariable.fromString, [ 'nTrueInt/F', 'xsec/F', 'genWeight/F'] )
 
 new_variables += [\
-    "r_mpf/F", "asymmetry/F", "pt_avg/F", "chs_MEx_corr/F", "chs_MEy_corr/F", "chs_MEt_corr/F", "chs_MEphi_corr/F", "alpha/F", "tag_jet_index/I", "probe_jet_index/I", "third_jet_index/I"
+    "B/F", "A/F", "pt_avg/F", "chs_MEx_corr/F", "chs_MEy_corr/F", "chs_MEt_corr/F", "chs_MEphi_corr/F", "alpha/F", "tag_jet_index/I", "probe_jet_index/I", "third_jet_index/I", 'Jet[pt_corr/F]'
 ]
 
 if isData: new_variables.extend( ['jsonPassed/I'] )
@@ -213,7 +215,8 @@ def filler( event ):
 
     jets = getJets( r, jetColl="Jet", jetVars = jetVarNames)
 
-    for j in jets:
+    event.nJetGood = len(jets) #FIXME
+    for iJet, j in enumerate(jets):
         # 'Corr' correction level: L1L2L3 L2res
         if sample.isData:
             jet_corr_factor    =  jetCorrector_data.   correction( j['rawPt'], j['eta'], j['area'], r.rho, r.run )
@@ -224,7 +227,7 @@ def filler( event ):
         
         # corrected jet
         j['pt_corr']    =  jet_corr_factor * j['rawPt'] 
-
+        event.Jet_pt_corr[iJet] = j['pt_corr'] #FIXME
         # L1RC 
         j['pt_corr_RC'] =  jet_corr_factor_RC * j['rawPt'] 
 
@@ -246,7 +249,7 @@ def filler( event ):
 
     event.pt_avg      = 0.5*( tag_jet['pt'] + probe_jet['pt'] )
     event.alpha       = third_jet['pt']/event.pt_avg
-    event.asymmetry   = (probe_jet['pt'] - tag_jet['pt']) / (probe_jet['pt'] + tag_jet['pt'])
+    event.A           = (probe_jet['pt'] - tag_jet['pt']) / (probe_jet['pt'] + tag_jet['pt'])
 
     # MET corrections
     good_jets = filter( lambda j:j['pt_corr'] > 15, jets)
@@ -264,7 +267,7 @@ def filler( event ):
     event.chs_MEphi_corr  = atan2( event.chs_MEy_corr, event.chs_MEx_corr )
 
     # R(MPF)
-    event.r_mpf = 1 + ( event.chs_MEx_corr*tag_jet['pt']*cos(tag_jet['phi'])  + event.chs_MEy_corr*tag_jet['pt']*sin(tag_jet['phi']) ) / tag_jet['pt']**2
+    event.B = ( event.chs_MEx_corr*tag_jet['pt']*cos(tag_jet['phi'])  + event.chs_MEy_corr*tag_jet['pt']*sin(tag_jet['phi']) ) / tag_jet['pt'] / (tag_jet['pt'] + probe_jet['pt'])
 
 # Create a maker. Maker class will be compiled. This instance will be used as a parent in the loop
 treeMaker_parent = TreeMaker(

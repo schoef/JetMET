@@ -22,15 +22,17 @@ from JetMET.tools.objectSelection        import getFilterCut, getJets, jetVars
 # 
 import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
-argParser.add_argument('--logLevel',           action='store',      default='DEBUG',          nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging" )
+argParser.add_argument('--logLevel',           action='store',      default='INFO',          nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging" )
+argParser.add_argument('--triggers',           action='store',      default='DiPFJetAve',    nargs='?', choices=['DiPFJetAve', 'DiPFJetAve_HFJEC', 'PFJet'], help="trigger suite" )
+argParser.add_argument('--era',                action='store',      default='Run2016',       nargs='?', choices=['Run2016', 'Run2016BCD', 'Run2016EFearly', 'Run2016FlateG', 'Run2016H'], help="era" )
 argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?')#, default = True)
-argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res', help="subdirectory for plots")
+argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res',     help="subdirectory for plots")
 args = argParser.parse_args()
 
 if args.small:
     args.plot_directory += '_small'
 
-plot_directory = os.path.join( user_plot_directory, args.plot_directory )
+plot_directory = os.path.join( user_plot_directory, args.plot_directory, args.era, args.triggers )
 
 # Lumi for MC
 lumi = 35.9
@@ -79,55 +81,79 @@ logger_rt = logger_rt.get_logger(args.logLevel, logFile = None)
 
 
 from JetMET.JEC.samples.L2res_skim import *
-#h=QCD_Pt.get1DHistoFromDraw("pt_avg", [100,0,5000], weightString="weight")
 
-triggers_DiPFJetAve = [ 
-    "HLT_DiPFJetAve40",
-    "HLT_DiPFJetAve60",
-    "HLT_DiPFJetAve80",
-    "HLT_DiPFJetAve140",
-    "HLT_DiPFJetAve200",
-    "HLT_DiPFJetAve260",
-    "HLT_DiPFJetAve320",
-    "HLT_DiPFJetAve400",
-    "HLT_DiPFJetAve500",
-]
-triggers_PFJet = [
-    "HLT_PFJet40",
-    "HLT_PFJet60",
-    "HLT_PFJet80",
-    "HLT_PFJet140",
-    "HLT_PFJet200",
-    "HLT_PFJet260",
-    "HLT_PFJet320",
-    "HLT_PFJet400",
-    "HLT_PFJet450",
-    "HLT_PFJet500",
-]
-triggers_DiPFJetAve_HFJEC = [
-    "HLT_DiPFJetAve60_HFJEC",
-    "HLT_DiPFJetAve80_HFJEC",
-    "HLT_DiPFJetAve100_HFJEC",
-    "HLT_DiPFJetAve160_HFJEC",
-    "HLT_DiPFJetAve220_HFJEC",
-    "HLT_DiPFJetAve300_HFJEC",
+if args.era == 'Run2016':
+    data = JetHT_Run2016
+elif args.era == 'Run2016BCD':
+    data = JetHT_Run2016BCD
+elif args.era == 'Run2016EFearly':
+    data = JetHT_Run2016EFearly
+elif args.era == 'Run2016FlateG':
+    data = JetHT_Run2016FlateG
+elif args.era == 'Run2016H':
+    data = JetHT_Run2016H
+
+
+if args.triggers=='DiPFJetAve':
+    triggers = [ 
+        "HLT_DiPFJetAve40",
+        "HLT_DiPFJetAve60",
+        "HLT_DiPFJetAve80",
+        "HLT_DiPFJetAve140",
+        "HLT_DiPFJetAve200",
+        "HLT_DiPFJetAve260",
+        "HLT_DiPFJetAve320",
+        "HLT_DiPFJetAve400",
+        "HLT_DiPFJetAve500",
+    ]
+elif args.triggers == 'PFJet':
+    triggers = [
+        "HLT_PFJet40",
+        "HLT_PFJet60",
+        "HLT_PFJet80",
+        "HLT_PFJet140",
+        "HLT_PFJet200",
+        "HLT_PFJet260",
+        "HLT_PFJet320",
+        "HLT_PFJet400",
+        "HLT_PFJet450",
+        "HLT_PFJet500",
+    ]
+elif args.triggers == 'DiPFJetAve_HFJEC':
+    triggers = [
+        "HLT_DiPFJetAve60_HFJEC",
+        "HLT_DiPFJetAve80_HFJEC",
+        "HLT_DiPFJetAve100_HFJEC",
+        "HLT_DiPFJetAve160_HFJEC",
+        "HLT_DiPFJetAve220_HFJEC",
+        "HLT_DiPFJetAve300_HFJEC",
+    ]
+
+mc = QCD_Pt
+
+samples = [mc, data]
+
+selection = [
+   ("btb", "cos(Jet_phi[tag_jet_index] - Jet_phi[probe_jet_index]) < cos(2.7)"),
+   ("a30", "alpha<0.3"), 
 ]
 
-if args.small:
-    QCD_Pt.reduceFiles( to = 1 )
-    JetHT_Run2016.reduceFiles( to = 1 )
+for s in samples:   
+    s.addSelectionString( "&&".join(c[1] for c in selection))
+    if args.small:
+        s.reduceFiles( to = 1 )
+
+colors = [ ROOT.kRed, ROOT.kBlue, ROOT.kGreen, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet,  ROOT.kCyan, ROOT.kOrange - 1, ROOT.kViolet - 1, ROOT.kCyan + 3]
 
 variableString = "pt_avg"
 binning        = [100,0,1000]
 weightString   = "weight"
 
-triggers = triggers_DiPFJetAve
 
-h_MC = QCD_Pt.get1DHistoFromDraw(variableString = variableString, binning = binning, weightString=weightString+"*%f" % lumi )
-h_data    = {t:JetHT_Run2016.get1DHistoFromDraw(variableString = variableString, binning = binning, weightString=weightString+"&& %s "% t) for t in triggers }
-h_data_ps = {t:JetHT_Run2016.get1DHistoFromDraw(variableString = variableString, binning = binning, weightString="("+weightString+")*HLT_BIT_%s_v_Prescale * (%s==1) "% (t,t) ) for t in triggers }
+h_MC =      mc.get1DHistoFromDraw(variableString = variableString, binning = binning, weightString=weightString+"*%f" % lumi )
+h_data    = {t:data.get1DHistoFromDraw(variableString = variableString, binning = binning, weightString=weightString+"&& %s "% t) for t in triggers }
+h_data_ps = {t:data.get1DHistoFromDraw(variableString = variableString, binning = binning, weightString="("+weightString+")*HLT_BIT_%s_v_Prescale * (%s==1) "% (t,t) ) for t in triggers }
 
-colors = [ ROOT.kRed, ROOT.kBlue, ROOT.kGreen, ROOT.kMagenta, ROOT.kCyan, ROOT.kOrange, ROOT.kViolet, ROOT.kOrange - 1, ROOT.kViolet - 1]
 
 h_MC.style = styles.lineStyle( ROOT.kBlack ) 
 h_MC.legendText = "QCD Pt binned"
