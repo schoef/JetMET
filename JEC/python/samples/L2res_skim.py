@@ -12,8 +12,13 @@ JetHT_Run2016H_v2 = Sample.fromDirectory("JetHT_Run2016H_v2", skim_ntuple_direct
 JetHT_Run2016H_v3 = Sample.fromDirectory("JetHT_Run2016H_v3", skim_ntuple_directory+"/JetHT_Run2016H_v3")
 
 JetHT_Run2016BCD     = Sample.combine("JetHT_Run2016BCD", [JetHT_Run2016B, JetHT_Run2016C, JetHT_Run2016D])
+JetHT_Run2016E       = Sample.combine("JetHT_Run2016E", [JetHT_Run2016E])
 JetHT_Run2016EFearly = Sample.combine("JetHT_Run2016EFearly", [JetHT_Run2016E, JetHT_Run2016F])
 JetHT_Run2016EFearly.setSelectionString("run<=278801")
+JetHT_Run2016Fearly = Sample.combine("JetHT_Run2016Fearly", [ JetHT_Run2016F])
+JetHT_Run2016Fearly.setSelectionString("run<=278801")
+JetHT_Run2016Flate  = Sample.combine("JetHT_Run2016Flate",  [ JetHT_Run2016F])
+JetHT_Run2016Flate.setSelectionString("run>=278802")
 JetHT_Run2016FlateG  = Sample.combine("JetHT_Run2016FlateG", [JetHT_Run2016F, JetHT_Run2016G])
 JetHT_Run2016FlateG.setSelectionString("run>=278802")
 JetHT_Run2016H       = Sample.combine("JetHT_Run2016H", [JetHT_Run2016H_v2, JetHT_Run2016H_v3])
