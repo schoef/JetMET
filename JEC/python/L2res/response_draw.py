@@ -30,6 +30,7 @@ argParser.add_argument('--ptBinningVar',       action='store',      default='ave
 argParser.add_argument('--era',                action='store',      default='Run2016',       nargs='?', choices=['Run2016', 'Run2016BCD', 'Run2016EFearly', 'Run2016FlateG', 'Run2016H'], help="era" )
 argParser.add_argument('--phEF',               action='store',      default= -1,             type=float, help="max phEF in probe jet" )
 argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?')#, default = True)
+argParser.add_argument('--skipResponsePlots',                       action='store_true',     help='Skip A/B plots?', default = True)
 argParser.add_argument('--overwrite',                               action='store_true',     help='Overwrite results.pkl?')
 argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v3',  help="subdirectory for plots")
 args = argParser.parse_args()
@@ -84,6 +85,29 @@ def draw1DPlots(plots, dataMCScale):
         yRange         = (0.0003, "auto") if log else (0.001, "auto"),
         #scaling        = {0:1} if len(plot.stack)==2 else {},
         legend         = [ (0.15,0.91-0.035*5,0.95,0.91), 2 ],
+        drawObjects    = drawObjects( dataMCScale , lumi ) + p_drawObjects
+      )
+
+# Formatting for 1D plots
+def drawPtResponse(plots, dataMCScale):
+  for log in [ True]:
+    plot_directory_ = os.path.join(plot_directory, ("log" if log else "") )
+    for plot in plots:
+      #if not max(l[0].GetMaximum() for l in plot.histos): continue # Empty plot
+      p_drawObjects = map( lambda l:tex.DrawLatex(*l), getattr(plot, "drawObjects", [] ) )
+
+      if hasattr( plot, "subdir"):
+        plot_directory__ = os.path.join( plot_directory_, plot.subdir)
+      else:
+        plot_directory__ = plot_directory_
+
+      plotting.draw(plot,
+        plot_directory = plot_directory__,
+        ratio          = {'yRange':(0.9,1.1)} ,
+        logX = True, logY = False, sorting = False,
+        yRange         = (0.8, 1.2),
+        #scaling        = {0:1} if len(plot.stack)==2 else {},
+        legend         = [ (0.15,0.91-0.035*1,0.95,0.91), 2 ],
         drawObjects    = drawObjects( dataMCScale , lumi ) + p_drawObjects
       )
 
@@ -148,7 +172,7 @@ else:
     triggers = [ args.triggers ]
 
 mc = QCD_Pt
-samples = [mc, data]
+samples = [ mc, data ]
 
 selection = [
    ("tgb", "abs(Jet_eta[tag_jet_index])<1.3"),
@@ -217,9 +241,9 @@ else:
 # x ... A,B
 # y ... eta
 # z ... pt_avg
-projections = {}
+projections          = {} # Used to store projections of TH3D
 for var in [ "A", "B" ]:
-    projections[var] = {}
+    projections[var]          = {}
     for s in samples:
         projections[var][s.name] = {'neg_eta':{}, 'pos_eta':{}, 'abs_eta':{}}
         for i_aeta in range(len(abs_eta_thresholds)-1):
@@ -231,6 +255,7 @@ for var in [ "A", "B" ]:
             projections[var][s.name]['neg_eta'][eta_bin] = {}
             projections[var][s.name]['pos_eta'][eta_bin] = {}
             projections[var][s.name]['abs_eta'][eta_bin] = {}
+
             for i_pt_avg in range(len(pt_avg_thresholds)-1):
                 pt_avg_bin = tuple(pt_avg_thresholds[i_pt_avg:i_pt_avg+2])
                 bin_z      = h[var][s.name].GetZaxis().FindBin( 0.5*sum(pt_avg_bin)  ) 
@@ -244,13 +269,57 @@ for var in [ "A", "B" ]:
                     integral = projections[var][s.name][eta_flav][eta_bin][pt_avg_bin].Integral()
                     if integral>0: projections[var][s.name][eta_flav][eta_bin][pt_avg_bin].Scale(1./integral)
 
-            for eta_flav in ['neg_eta', 'pos_eta', 'abs_eta']:
-                histos = []
-                for i_pt_avg_bin, pt_avg_bin in enumerate(pt_avg_bins):
-                    histos.append( projections[var][s.name][eta_flav][eta_bin][pt_avg_bin])
-                    histos[-1].style = styles.lineStyle( colors[ i_pt_avg_bin ] ) 
-                    histos[-1].legendText = "%i #leq %s < %i" % ( pt_avg_bin[0], pt_binning_legendText, pt_avg_bin[1] )
+            if not args.skipResponsePlots:
+                for eta_flav in ['neg_eta', 'pos_eta', 'abs_eta']:
+                    histos = []
+                    for i_pt_avg_bin, pt_avg_bin in enumerate(pt_avg_bins):
+                        histos.append( projections[var][s.name][eta_flav][eta_bin][pt_avg_bin])
+                        histos[-1].style = styles.lineStyle( colors[ i_pt_avg_bin ] ) 
+                        histos[-1].legendText = "%i #leq %s < %i" % ( pt_avg_bin[0], pt_binning_legendText, pt_avg_bin[1] )
 
-                name = "%s_%s_%s_%i_%i" % ( s.name.replace('_'+args.era, ''), var, eta_flav, 1000*eta_bin[0], 1000*eta_bin[1] )
-                plot = Plot.fromHisto( name, [ [histo] for histo in histos], texX = var, texY = "Number of Events" )    
-                draw1DPlots( [plot], 1.)
+                    name = "%s_%s_%s_%i_%i" % ( s.name.replace('_'+args.era, ''), var, eta_flav, 1000*eta_bin[0], 1000*eta_bin[1] )
+                    plot = Plot.fromHisto( name, [ [histo] for histo in histos], texX = var, texY = "Number of Events" )    
+                    draw1DPlots( [plot], 1.)
+
+relative_corrections = {} # results
+for var in [ "A", "B" ]:
+    relative_corrections[var] = {}
+    for s in samples:
+        relative_corrections[var][s.name] = {}
+        for i_aeta in range(len(abs_eta_thresholds)-1):
+
+            eta_bin = tuple(abs_eta_thresholds[i_aeta:i_aeta+2])
+            relative_corrections[var][s.name][eta_bin] \
+                    = {k:ROOT.TH1D('rel_corr_'+k, 'rel_corr_'+k, len(pt_avg_thresholds) - 1, array.array('d', pt_avg_thresholds)) for k in ['neg_eta', 'pos_eta', 'abs_eta']}
+
+            for sign in [ 'neg_eta', 'pos_eta', 'abs_eta' ]:
+                for i_pt_avg_bin, pt_avg_bin in enumerate(pt_avg_bins):
+                    # make life easy
+                    shape = projections[var][s.name][sign][eta_bin][pt_avg_bin]
+                    h = relative_corrections[var][s.name][eta_bin][sign]
+                    
+                    mean_asymmetry        = shape.GetMean()             # Rather fit here
+                    mean_asymmetry_error  = shape.GetMeanError() 
+                  
+                    mean_response = (1 + mean_asymmetry)/(1 - mean_asymmetry)
+                    mean_response_error = 2.*mean_asymmetry_error/(1 - mean_asymmetry)**2 # f(x) = (1+x)/(1-x) -> f'(x) = 2/(x-1)**2
+ 
+                    h.SetBinContent( h.FindBin( 0.5*sum(pt_avg_bin) ), mean_response ) 
+                    h.SetBinError  ( h.FindBin( 0.5*sum(pt_avg_bin) ), mean_response_error ) 
+
+                relative_corrections[var][s.name][eta_bin][sign].style = styles.lineStyle( ROOT.kBlack if s.name == data.name else ROOT.kRed )
+                relative_corrections[var][s.name][eta_bin][sign].legendText = s.name 
+
+    for i_aeta in range(len(abs_eta_thresholds)-1):
+
+        eta_bin = tuple(abs_eta_thresholds[i_aeta:i_aeta+2])
+
+        for sign in [ 'neg_eta', 'pos_eta', 'abs_eta' ]:
+
+            name = "response_%s_%s_%i_%i" % (  var, eta_flav, 1000*eta_bin[0], 1000*eta_bin[1] )
+            plot = Plot.fromHisto( name, 
+                [ [relative_corrections[var][mc.name][eta_bin][sign]] , 
+                  [relative_corrections[var][data.name][eta_bin][sign]] ], 
+                texX = pt_binning_legendText, texY = "response" ) 
+            drawPtResponse( [plot], 1.)
+
