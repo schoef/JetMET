@@ -152,7 +152,7 @@ selection = [
 #tag_jet_bin = (163, 230)
 #probe_jet_abs_eta_bin = (2.853, 2.964 )
 tag_jet_bin             = tuple(args.ptBin)
-probe_jet_abs_eta_bin   = tuple(args.absEtaBin)
+probe_jet_abs_eta_bin   = tuple(args.etaBin)
 if args.etaSign   == -1:
     probe_jet_eta_cutstring = "-Jet_eta[probe_jet_index]"
     eta_string              = "negeta"
