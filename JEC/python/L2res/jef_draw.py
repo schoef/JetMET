@@ -159,7 +159,7 @@ if args.etaSign   == -1:
 elif args.etaSign == +1:
     probe_jet_eta_cutstring = "Jet_eta[probe_jet_index]"
     eta_string              = "poseta"
-else args.etaSign ==  0:
+elif args.etaSign ==  0:
     probe_jet_eta_cutstring = "abs(Jet_eta[probe_jet_index])"
     eta_string              = "abseta"
 
