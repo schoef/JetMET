@@ -28,6 +28,7 @@ argParser.add_argument('--logLevel',           action='store',      default='INF
 argParser.add_argument('--triggers',           action='store',      default='DiPFJetAve',    nargs='?', choices=['DiPFJetAve', 'DiPFJetAve_HFJEC', 'PFJet'], help="trigger suite" )
 argParser.add_argument('--ptBinningVar',       action='store',      default='ave',           nargs='?', choices=['ave', 'tag'], help="jet pT binning variable (pT avg or pT tag)" )
 argParser.add_argument('--era',                action='store',      default='Run2016',       nargs='?', choices=['Run2016', 'Run2016BCD', 'Run2016EFearly', 'Run2016FlateG', 'Run2016H'], help="era" )
+argParser.add_argument('--phEF',               action='store',      default= -1,             type=float, help="max phEF in probe jet" )
 argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?')#, default = True)
 argParser.add_argument('--overwrite',                               action='store_true',     help='Overwrite results.pkl?')
 argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v3',  help="subdirectory for plots")
@@ -40,6 +41,10 @@ if args.ptBinningVar == 'tag':
 else:
     pt_binning_legendText = 'p_{T,avg} '
     pt_binning_variable = "pt_avg"
+
+if args.phEF>0:
+    args.plot_directory += '_phEF%i' % ( 100*args.phEF )
+
 if args.small:
     args.plot_directory += '_small'
 
@@ -150,6 +155,9 @@ selection = [
    ("btb", "cos(Jet_phi[tag_jet_index] - Jet_phi[probe_jet_index]) < cos(2.7)"),
    ("a30", "alpha<0.3"), 
 ]
+
+if args.phEF>0:
+    selection.append( ("phEFprobe", "abs(Jet_phEF[probe_jet_index])<%f" % args.phEF ) )
 
 for s in samples:   
     s.addSelectionString( "&&".join(c[1] for c in selection))

@@ -26,7 +26,8 @@ argParser.add_argument('--logLevel',           action='store',      default='INF
 argParser.add_argument('--triggers',           action='store',      default='PFJet',         nargs='?', choices=['DiPFJetAve', 'DiPFJetAve_HFJEC', 'PFJet'], help="trigger suite" )
 argParser.add_argument('--observable',         action='store',      default='phEF',          nargs='?', choices=['phi', 'phEF', 'eEF', 'muEF', 'HFHEF', 'HFEMEF', 'chHEF', 'neHEF', 'phMult', 'eMult', 'muMult', 'HFHMult', 'HFEMMult', 'chHMult', 'neHMult'], help="Which jet observable?" )
 argParser.add_argument('--ptBin',              action='store',      default=(163, 230),      type = int,    nargs=2,  help="tag jet pt bin" )
-argParser.add_argument('--absEtaBin',          action='store',      default=(2.853, 2.964),  type = float,  nargs=2,  help="probe jet abs eta bin" )
+argParser.add_argument('--etaBin',             action='store',      default=(2.853, 2.964),  type = float,  nargs=2,  help="probe jet eta bin" )
+argParser.add_argument('--etaSign',            action='store',      default=0             ,  type = int,    choices = [-1,0,+1], help="sign of probe jet eta." )
 argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?')#, default = True)
 argParser.add_argument('--fraction',                                action='store_true',     help='plot energy fraction.')#, default = True)
 argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_jef_v3',     help="subdirectory for plots")
@@ -152,8 +153,19 @@ selection = [
 #probe_jet_abs_eta_bin = (2.853, 2.964 )
 tag_jet_bin             = tuple(args.ptBin)
 probe_jet_abs_eta_bin   = tuple(args.absEtaBin)
+if args.etaSign   == -1:
+    probe_jet_eta_cutstring = "-Jet_eta[probe_jet_index]"
+    eta_string              = "negeta"
+elif args.etaSign == +1:
+    probe_jet_eta_cutstring = "Jet_eta[probe_jet_index]"
+    eta_string              = "poseta"
+else args.etaSign ==  0:
+    probe_jet_eta_cutstring = "abs(Jet_eta[probe_jet_index])"
+    eta_string              = "abseta"
 
-kinSelectionString = "%f<Jet_pt[tag_jet_index]&&Jet_pt[tag_jet_index]<%f&&abs(Jet_eta[probe_jet_index])>%f&&abs(Jet_eta[probe_jet_index])<%f"% ( tag_jet_bin + probe_jet_abs_eta_bin )
+# kinematic selection on tag & probe jet
+kinSelectionString = "%f<Jet_pt[tag_jet_index]&&Jet_pt[tag_jet_index]<%f&& %s > %f && %s < %f"% ( tag_jet_bin[0], tag_jet_bin[1], probe_jet_eta_cutstring, probe_jet_abs_eta_bin[0], probe_jet_eta_cutstring, probe_jet_abs_eta_bin[1] )
+logger.info( "Jet selection: %s", kinSelectionString )
 
 for s in samples:   
     s.addSelectionString( "&&".join(c[1] for c in selection))
@@ -200,7 +212,7 @@ histos_data = [[h_data[s.name]] for s in data]
 
 f_postfix = '_frac' if args.fraction else ''
 
-plot = Plot.fromHisto( variableString+f_postfix+'_pt_%i_%i_abseta_%i_%i' % ( tag_jet_bin + (1000*probe_jet_abs_eta_bin[0], 1000*probe_jet_abs_eta_bin[1])), 
+plot = Plot.fromHisto( variableString+f_postfix+'_pt_%i_%i_%s_%i_%i' % ( tag_jet_bin[0], tag_jet_bin[1], eta_string, 1000*probe_jet_abs_eta_bin[0], 1000*probe_jet_abs_eta_bin[1]), 
 #    [ [ h_MC ] ] + histos_data, texX = texX, texY = "Number of Events" 
     histos_data, texX = texX, texY = "Number of Events" 
     )
