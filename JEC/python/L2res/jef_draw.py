@@ -32,7 +32,7 @@ argParser.add_argument('--small',                                   action='stor
 argParser.add_argument('--cleaned',                                 action='store_true',     help='Apply jet cleaning in data')#, default = True)
 argParser.add_argument('--bad',                                     action='store_true',     help='Cut on phEF*pT>300')#, default = True)
 argParser.add_argument('--fraction',                                action='store_true',     help='plot energy fraction.')#, default = True)
-argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_jef_v3',     help="subdirectory for plots")
+argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_jef_v4',     help="subdirectory for plots")
 args = argParser.parse_args()
 
 if args.cleaned:

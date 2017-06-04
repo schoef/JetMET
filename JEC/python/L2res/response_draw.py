@@ -33,7 +33,7 @@ argParser.add_argument('--small',                                   action='stor
 argParser.add_argument('--cleaned',                                 action='store_true',     help='Apply jet cleaning in data')#, default = True)
 argParser.add_argument('--skipResponsePlots',                       action='store_true',     help='Skip A/B plots?', default = True)
 argParser.add_argument('--overwrite',                               action='store_true',     help='Overwrite results.pkl?')
-argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v3',  help="subdirectory for plots")
+argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v4',  help="subdirectory for plots")
 args = argParser.parse_args()
 
 if args.ptBinningVar == 'tag':
