@@ -205,7 +205,7 @@ from JetMET.JEC.L2res.thresholds import pt_avg_thresholds, pt_avg_bins, eta_thre
 
 thresholds = [-1.2+x*2.4/96. for x in range(97)]
 
-weightString   = "weight"
+weightString  = "weight"
 
 results_file = os.path.join( plot_directory, 'results.pkl' )
 
