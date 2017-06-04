@@ -1,41 +1,78 @@
 #!/bin/sh
-python jef_draw.py --observable=phEF  --etaSign=+1    --ptBin 163 230 --etaBin 3.839 5.191 &
-python jef_draw.py --observable=phEF  --etaSign=+1    --ptBin 163 230 --etaBin 3.489 3.839 &
-python jef_draw.py --observable=phEF  --etaSign=+1    --ptBin 163 230 --etaBin 3.139 3.489 &
-python jef_draw.py --observable=phEF  --etaSign=+1    --ptBin 163 230 --etaBin 2.964 3.139  &
-python jef_draw.py --observable=phEF  --etaSign=+1    --ptBin 163 230 --etaBin 2.853 2.964  &
-python jef_draw.py --observable=phEF  --etaSign=+1    --ptBin 163 230 --etaBin 2.650 2.853  &
-python jef_draw.py --observable=phEF  --etaSign=+1    --ptBin 163 230 --etaBin 2.500 2.650  &
-python jef_draw.py --observable=phEF  --etaSign=+1    --ptBin 163 230 --etaBin 2.322 2.500 &
-python jef_draw.py --observable=phEF  --etaSign=+1    --ptBin 163 230 --etaBin 2.172 2.322 &
-python jef_draw.py --observable=phi   --etaSign=+1   --ptBin 163 230 --etaBin 3.839 5.191 &
-python jef_draw.py --observable=phi   --etaSign=+1   --ptBin 163 230 --etaBin 3.489 3.839 &
-python jef_draw.py --observable=phi   --etaSign=+1   --ptBin 163 230 --etaBin 3.139 3.489 &
-python jef_draw.py --observable=phi   --etaSign=+1   --ptBin 163 230 --etaBin 2.964 3.139  &
-python jef_draw.py --observable=phi   --etaSign=+1   --ptBin 163 230 --etaBin 2.853 2.964  &
-python jef_draw.py --observable=phi   --etaSign=+1   --ptBin 163 230 --etaBin 2.650 2.853  &
-python jef_draw.py --observable=phi   --etaSign=+1   --ptBin 163 230 --etaBin 2.500 2.650  &
-python jef_draw.py --observable=phi   --etaSign=+1   --ptBin 163 230 --etaBin 2.322 2.500 &
-python jef_draw.py --observable=phi   --etaSign=+1   --ptBin 163 230 --etaBin 2.172 2.322 &
-#python jef_draw.py --observable=phEF  --etaSign=-1    --ptBin 163 230 --etaBin 3.839 5.191 &
-#python jef_draw.py --observable=phEF  --etaSign=-1    --ptBin 163 230 --etaBin 3.489 3.839 &
-#python jef_draw.py --observable=phEF  --etaSign=-1    --ptBin 163 230 --etaBin 3.139 3.489 &
-#python jef_draw.py --observable=phEF  --etaSign=-1    --ptBin 163 230 --etaBin 2.964 3.139  &
-#python jef_draw.py --observable=phEF  --etaSign=-1    --ptBin 163 230 --etaBin 2.853 2.964  &
-#python jef_draw.py --observable=phEF  --etaSign=-1    --ptBin 163 230 --etaBin 2.650 2.853  &
-#python jef_draw.py --observable=phEF  --etaSign=-1    --ptBin 163 230 --etaBin 2.500 2.650  &
-#python jef_draw.py --observable=phEF  --etaSign=-1    --ptBin 163 230 --etaBin 2.322 2.500 &
-#python jef_draw.py --observable=phEF  --etaSign=-1    --ptBin 163 230 --etaBin 2.172 2.322 &
-#python jef_draw.py --observable=phi   --etaSign=-1   --ptBin 163 230 --etaBin 3.839 5.191 &
-#python jef_draw.py --observable=phi   --etaSign=-1   --ptBin 163 230 --etaBin 3.489 3.839 &
-#python jef_draw.py --observable=phi   --etaSign=-1   --ptBin 163 230 --etaBin 3.139 3.489 &
-#python jef_draw.py --observable=phi   --etaSign=-1   --ptBin 163 230 --etaBin 2.964 3.139  &
-#python jef_draw.py --observable=phi   --etaSign=-1   --ptBin 163 230 --etaBin 2.853 2.964  &
-#python jef_draw.py --observable=phi   --etaSign=-1   --ptBin 163 230 --etaBin 2.650 2.853  &
-#python jef_draw.py --observable=phi   --etaSign=-1   --ptBin 163 230 --etaBin 2.500 2.650  &
-#python jef_draw.py --observable=phi   --etaSign=-1   --ptBin 163 230 --etaBin 2.322 2.500 &
-#python jef_draw.py --observable=phi   --etaSign=-1   --ptBin 163 230 --etaBin 2.172 2.322 &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=+1    --ptBin 100 200 --etaBin 3.839 5.191 &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=+1    --ptBin 100 200 --etaBin 3.489 3.839 &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=+1    --ptBin 100 200 --etaBin 3.139 3.489 &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=+1    --ptBin 100 200 --etaBin 2.964 3.139  &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=+1    --ptBin 100 200 --etaBin 2.853 2.964  &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=+1    --ptBin 100 200 --etaBin 2.650 2.853  &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=+1    --ptBin 100 200 --etaBin 2.500 2.650  &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=+1    --ptBin 100 200 --etaBin 2.322 2.500 &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=+1    --ptBin 100 200 --etaBin 2.172 2.322 &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=-1    --ptBin 100 200 --etaBin 3.839 5.191 &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=-1    --ptBin 100 200 --etaBin 3.489 3.839 &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=-1    --ptBin 100 200 --etaBin 3.139 3.489 &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=-1    --ptBin 100 200 --etaBin 2.964 3.139  &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=-1    --ptBin 100 200 --etaBin 2.853 2.964  &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=-1    --ptBin 100 200 --etaBin 2.650 2.853  &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=-1    --ptBin 100 200 --etaBin 2.500 2.650  &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=-1    --ptBin 100 200 --etaBin 2.322 2.500 &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=-1    --ptBin 100 200 --etaBin 2.172 2.322 &
+#python jef_draw.py --cleaned --observable=phi   --etaSign=+1   --ptBin 100 200 --etaBin 3.839 5.191 &
+#python jef_draw.py --cleaned --observable=phi   --etaSign=+1   --ptBin 100 200 --etaBin 3.489 3.839 &
+#python jef_draw.py --cleaned --observable=phi   --etaSign=+1   --ptBin 100 200 --etaBin 3.139 3.489 &
+#python jef_draw.py --cleaned --observable=phi   --etaSign=+1   --ptBin 100 200 --etaBin 2.964 3.139  &
+#python jef_draw.py --cleaned --observable=phi   --etaSign=+1   --ptBin 100 200 --etaBin 2.853 2.964  &
+#python jef_draw.py --cleaned --observable=phi   --etaSign=+1   --ptBin 100 200 --etaBin 2.650 2.853  &
+#python jef_draw.py --cleaned --observable=phi   --etaSign=+1   --ptBin 100 200 --etaBin 2.500 2.650  &
+#python jef_draw.py --cleaned --observable=phi   --etaSign=+1   --ptBin 100 200 --etaBin 2.322 2.500 &
+#python jef_draw.py --cleaned --observable=phi   --etaSign=+1   --ptBin 100 200 --etaBin 2.172 2.322 &
+#python jef_draw.py --cleaned --observable=phi   --etaSign=-1   --ptBin 100 200 --etaBin 3.839 5.191 &
+#python jef_draw.py --cleaned --observable=phi   --etaSign=-1   --ptBin 100 200 --etaBin 3.489 3.839 &
+#python jef_draw.py --cleaned --observable=phi   --etaSign=-1   --ptBin 100 200 --etaBin 3.139 3.489 &
+#python jef_draw.py --cleaned --observable=phi   --etaSign=-1   --ptBin 100 200 --etaBin 2.964 3.139  &
+#python jef_draw.py --cleaned --observable=phi   --etaSign=-1   --ptBin 100 200 --etaBin 2.853 2.964  &
+#python jef_draw.py --cleaned --observable=phi   --etaSign=-1   --ptBin 100 200 --etaBin 2.650 2.853  &
+#python jef_draw.py --cleaned --observable=phi   --etaSign=-1   --ptBin 100 200 --etaBin 2.500 2.650  &
+#python jef_draw.py --cleaned --observable=phi   --etaSign=-1   --ptBin 100 200 --etaBin 2.322 2.500 &
+#python jef_draw.py --cleaned --observable=phi   --etaSign=-1   --ptBin 100 200 --etaBin 2.172 2.322 &
 
+
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=+1    --ptBin 200 500 --etaBin 3.839 5.191 &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=+1    --ptBin 200 500 --etaBin 3.489 3.839 &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=+1    --ptBin 200 500 --etaBin 3.139 3.489 &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=+1    --ptBin 200 500 --etaBin 2.964 3.139  &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=+1    --ptBin 200 500 --etaBin 2.853 2.964  &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=+1    --ptBin 200 500 --etaBin 2.650 2.853  &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=+1    --ptBin 200 500 --etaBin 2.500 2.650  &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=+1    --ptBin 200 500 --etaBin 2.322 2.500 &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=+1    --ptBin 200 500 --etaBin 2.172 2.322 &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=-1    --ptBin 200 500 --etaBin 3.839 5.191 &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=-1    --ptBin 200 500 --etaBin 3.489 3.839 &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=-1    --ptBin 200 500 --etaBin 3.139 3.489 &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=-1    --ptBin 200 500 --etaBin 2.964 3.139  &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=-1    --ptBin 200 500 --etaBin 2.853 2.964  &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=-1    --ptBin 200 500 --etaBin 2.650 2.853  &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=-1    --ptBin 200 500 --etaBin 2.500 2.650  &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=-1    --ptBin 200 500 --etaBin 2.322 2.500 &
+#python jef_draw.py --cleaned --observable=phEF  --etaSign=-1    --ptBin 200 500 --etaBin 2.172 2.322 &
+python jef_draw.py --bad --observable=phi   --etaSign=+1   --ptBin 200 500 --etaBin 3.839 5.191 &
+python jef_draw.py --bad --observable=phi   --etaSign=+1   --ptBin 200 500 --etaBin 3.489 3.839 &
+python jef_draw.py --bad --observable=phi   --etaSign=+1   --ptBin 200 500 --etaBin 3.139 3.489 &
+python jef_draw.py --bad --observable=phi   --etaSign=+1   --ptBin 200 500 --etaBin 2.964 3.139  &
+python jef_draw.py --bad --observable=phi   --etaSign=+1   --ptBin 200 500 --etaBin 2.853 2.964  &
+python jef_draw.py --bad --observable=phi   --etaSign=+1   --ptBin 200 500 --etaBin 2.650 2.853  &
+python jef_draw.py --bad --observable=phi   --etaSign=+1   --ptBin 200 500 --etaBin 2.500 2.650  &
+python jef_draw.py --bad --observable=phi   --etaSign=+1   --ptBin 200 500 --etaBin 2.322 2.500 &
+python jef_draw.py --bad --observable=phi   --etaSign=+1   --ptBin 200 500 --etaBin 2.172 2.322 &
+python jef_draw.py --bad --observable=phi   --etaSign=-1   --ptBin 200 500 --etaBin 3.839 5.191 &
+python jef_draw.py --bad --observable=phi   --etaSign=-1   --ptBin 200 500 --etaBin 3.489 3.839 &
+python jef_draw.py --bad --observable=phi   --etaSign=-1   --ptBin 200 500 --etaBin 3.139 3.489 &
+python jef_draw.py --bad --observable=phi   --etaSign=-1   --ptBin 200 500 --etaBin 2.964 3.139  &
+python jef_draw.py --bad --observable=phi   --etaSign=-1   --ptBin 200 500 --etaBin 2.853 2.964  &
+python jef_draw.py --bad --observable=phi   --etaSign=-1   --ptBin 200 500 --etaBin 2.650 2.853  &
+python jef_draw.py --bad --observable=phi   --etaSign=-1   --ptBin 200 500 --etaBin 2.500 2.650  &
+python jef_draw.py --bad --observable=phi   --etaSign=-1   --ptBin 200 500 --etaBin 2.322 2.500 &
+python jef_draw.py --bad --observable=phi   --etaSign=-1   --ptBin 200 500 --etaBin 2.172 2.322 &
 
 #python jef_draw.py --observable=eEF       --ptBin 163 230 --etaBin 2.853 2.964 
 #python jef_draw.py --observable=muEF      --ptBin 163 230 --etaBin 2.853 2.964 

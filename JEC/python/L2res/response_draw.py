@@ -30,6 +30,7 @@ argParser.add_argument('--ptBinningVar',       action='store',      default='ave
 argParser.add_argument('--era',                action='store',      default='Run2016',       nargs='?', choices=['Run2016', 'Run2016BCD', 'Run2016EFearly', 'Run2016FlateG', 'Run2016H'], help="era" )
 argParser.add_argument('--phEF',               action='store',      default= -1,             type=float, help="max phEF in probe jet" )
 argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?')#, default = True)
+argParser.add_argument('--cleaned',                                 action='store_true',     help='Apply jet cleaning in data')#, default = True)
 argParser.add_argument('--skipResponsePlots',                       action='store_true',     help='Skip A/B plots?', default = True)
 argParser.add_argument('--overwrite',                               action='store_true',     help='Overwrite results.pkl?')
 argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v3',  help="subdirectory for plots")
@@ -46,6 +47,8 @@ else:
 if args.phEF>0:
     args.plot_directory += '_phEF%i' % ( 100*args.phEF )
 
+if args.cleaned:
+    args.plot_directory += '_cleaned'
 if args.small:
     args.plot_directory += '_small'
 
@@ -105,9 +108,9 @@ def drawPtResponse(plots, dataMCScale):
         plot_directory = plot_directory__,
         ratio          = {'yRange':(0.9,1.1)} ,
         logX = True, logY = False, sorting = False,
-        yRange         = (0.8, 1.2),
+        yRange         = (0.5, 1.5),
         #scaling        = {0:1} if len(plot.stack)==2 else {},
-        legend         = [ (0.15,0.91-0.035*1,0.95,0.91), 2 ],
+        legend         = [ (0.15,0.91-0.035*2,0.95,0.91), 2 ],
         drawObjects    = drawObjects( dataMCScale , lumi ) + p_drawObjects
       )
 
@@ -190,6 +193,10 @@ for s in samples:
 
 # Add trigger selection to data
 data.addSelectionString( "("+"||".join(triggers)+")")
+if args.cleaned:
+    from JetMET.JEC.L2res.jet_cleaning import data_jet_cleaning
+    data.addSelectionString( data_jet_cleaning )
+
 
 #colors = [ ROOT.kRed, ROOT.kBlue, ROOT.kGreen, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet,  ROOT.kCyan, ROOT.kOrange - 1, ROOT.kViolet - 1, ROOT.kCyan + 3]
 colors = [ j+1 for j in range(0,9) ] + [ j+31 for j in range(9,18) ]
@@ -307,19 +314,26 @@ for var in [ "A", "B" ]:
                     h.SetBinContent( h.FindBin( 0.5*sum(pt_avg_bin) ), mean_response ) 
                     h.SetBinError  ( h.FindBin( 0.5*sum(pt_avg_bin) ), mean_response_error ) 
 
-                relative_corrections[var][s.name][eta_bin][sign].style = styles.lineStyle( ROOT.kBlack if s.name == data.name else ROOT.kRed )
-                relative_corrections[var][s.name][eta_bin][sign].legendText = s.name 
+                relative_corrections[var][s.name][eta_bin][sign].style = styles.lineStyle( 
+                    color = ROOT.kBlack if s.name == data.name else ROOT.kRed,
+                    dashed = (var == 'A')
+                    )
+                relative_corrections[var][s.name][eta_bin][sign].legendText = s.name + "( %s )" % ("Bal." if var=='A' else "MPF") 
 
-    for i_aeta in range(len(abs_eta_thresholds)-1):
+for i_aeta in range(len(abs_eta_thresholds)-1):
 
-        eta_bin = tuple(abs_eta_thresholds[i_aeta:i_aeta+2])
+    eta_bin = tuple(abs_eta_thresholds[i_aeta:i_aeta+2])
 
-        for sign in [ 'neg_eta', 'pos_eta', 'abs_eta' ]:
+    for sign in [ 'neg_eta', 'pos_eta', 'abs_eta' ]:
 
-            name = "response_%s_%s_%i_%i" % (  var, eta_flav, 1000*eta_bin[0], 1000*eta_bin[1] )
-            plot = Plot.fromHisto( name, 
-                [ [relative_corrections[var][mc.name][eta_bin][sign]] , 
-                  [relative_corrections[var][data.name][eta_bin][sign]] ], 
-                texX = pt_binning_legendText, texY = "response" ) 
-            drawPtResponse( [plot], 1.)
+        name = "response_%s_%i_%i" % (  eta_flav, 1000*eta_bin[0], 1000*eta_bin[1] )
+        plot = Plot.fromHisto( name, 
+            [ 
+              [relative_corrections['B'][mc.name][eta_bin][sign]] , 
+              [relative_corrections['B'][data.name][eta_bin][sign]], 
+              [relative_corrections['A'][mc.name][eta_bin][sign]] , 
+              [relative_corrections['A'][data.name][eta_bin][sign]] 
+            ], 
+            texX = pt_binning_legendText, texY = "response" ) 
+        drawPtResponse( [plot], 1.)
 

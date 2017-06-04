@@ -29,10 +29,16 @@ argParser.add_argument('--ptBin',              action='store',      default=(163
 argParser.add_argument('--etaBin',             action='store',      default=(2.853, 2.964),  type = float,  nargs=2,  help="probe jet eta bin" )
 argParser.add_argument('--etaSign',            action='store',      default=0             ,  type = int,    choices = [-1,0,+1], help="sign of probe jet eta." )
 argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?')#, default = True)
+argParser.add_argument('--cleaned',                                 action='store_true',     help='Apply jet cleaning in data')#, default = True)
+argParser.add_argument('--bad',                                     action='store_true',     help='Cut on phEF*pT>300')#, default = True)
 argParser.add_argument('--fraction',                                action='store_true',     help='plot energy fraction.')#, default = True)
 argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_jef_v3',     help="subdirectory for plots")
 args = argParser.parse_args()
 
+if args.cleaned:
+    args.plot_directory += '_cleaned'
+if args.bad:
+    args.plot_directory += '_bad'
 if args.small:
     args.plot_directory += '_small'
 
@@ -141,13 +147,18 @@ elif args.triggers == 'DiPFJetAve_HFJEC':
 #samples = [mc] +  data
 samples = data
 
+from JetMET.JEC.L2res.jet_cleaning import data_jet_cleaning
 for s in data:
     s.addSelectionString( "("+"||".join(triggers)+")")
+    if args.cleaned:
+        s.addSelectionString( data_jet_cleaning )
 
 selection = [
    ("btb", "cos(Jet_phi[tag_jet_index] - Jet_phi[probe_jet_index]) < cos(2.7)"),
    ("a30", "alpha<0.3"), 
 ]
+if args.bad:
+    selection.append( ("bad", "Jet_phEF[probe_jet_index]*Jet_pt[probe_jet_index]>250") )
 
 #tag_jet_bin = (163, 230)
 #probe_jet_abs_eta_bin = (2.853, 2.964 )
@@ -217,9 +228,16 @@ plot = Plot.fromHisto( variableString+f_postfix+'_pt_%i_%i_%s_%i_%i' % ( tag_jet
     histos_data, texX = texX, texY = "Number of Events" 
     )
       
+if args.etaSign == 0:
+    eta_string = "|#eta_{probe}|"
+elif args.etaSign == 1:
+    eta_string = "#eta_{probe}"
+elif args.etaSign == -1:
+    eta_string = "-#eta_{probe}"
+
 plot.drawObjects = [ 
     (0.55, 0.7, '%i #leq < p_{T,tag} < %i'% tag_jet_bin ),
-    (0.55, 0.65, '%4.3f #leq |#eta_{probe}| < %4.3f'% probe_jet_abs_eta_bin ),
+    (0.55, 0.65, '%4.3f #leq %s < %4.3f'% ( probe_jet_abs_eta_bin[0], eta_string, probe_jet_abs_eta_bin[1] ) ),
 ]
  
 draw1DPlots( [plot], 1.)
