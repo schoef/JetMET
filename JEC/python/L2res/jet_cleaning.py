@@ -11,4 +11,4 @@ thr = [
 e = "Jet_eta[probe_jet_index]"
 p = "Jet_phi[probe_jet_index]"
 
-data_jet_cleaning = '(!('+"||".join( [ "%s>%4.3f&&%s<%4.3f&&%s>%4.3f&&%s<%4.3f" % ( e, th[0], e, th[1], p, th[2], p, th[3] ) for th in thr ] ) + '))'
+jet_cleaning = '(!('+"||".join( [ "%s>%4.3f&&%s<%4.3f&&%s>%4.3f&&%s<%4.3f" % ( e, th[0], e, th[1], p, th[2], p, th[3] ) for th in thr ] ) + '))'

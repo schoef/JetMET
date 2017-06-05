@@ -194,8 +194,9 @@ for s in samples:
 # Add trigger selection to data
 data.addSelectionString( "("+"||".join(triggers)+")")
 if args.cleaned:
-    from JetMET.JEC.L2res.jet_cleaning import data_jet_cleaning
-    data.addSelectionString( data_jet_cleaning )
+    from JetMET.JEC.L2res.jet_cleaning import jet_cleaning
+    data.addSelectionString( jet_cleaning )
+    mc.addSelectionString( jet_cleaning )
 
 
 #colors = [ ROOT.kRed, ROOT.kBlue, ROOT.kGreen, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet,  ROOT.kCyan, ROOT.kOrange - 1, ROOT.kViolet - 1, ROOT.kCyan + 3]

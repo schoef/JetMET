@@ -147,11 +147,11 @@ elif args.triggers == 'DiPFJetAve_HFJEC':
 #samples = [mc] +  data
 samples = data
 
-from JetMET.JEC.L2res.jet_cleaning import data_jet_cleaning
+from JetMET.JEC.L2res.jet_cleaning import jet_cleaning
 for s in data:
     s.addSelectionString( "("+"||".join(triggers)+")")
     if args.cleaned:
-        s.addSelectionString( data_jet_cleaning )
+        s.addSelectionString( jet_cleaning )
 
 selection = [
    ("btb", "cos(Jet_phi[tag_jet_index] - Jet_phi[probe_jet_index]) < cos(2.7)"),
