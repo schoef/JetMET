@@ -6,6 +6,11 @@
 #
 import ROOT
 ROOT.gROOT.SetBatch(True)
+ROOT.gSystem.Load("libRooFit.so")
+ROOT.gSystem.Load("libRooFitCore.so")
+ROOT.gROOT.SetStyle("Plain")
+ROOT.gSystem.SetIncludePath( "-I$ROOFITSYS/include/" )
+
 import itertools
 import os
 import array
@@ -33,6 +38,7 @@ argParser.add_argument('--small',                                   action='stor
 argParser.add_argument('--cleaned',                                 action='store_true',     help='Apply jet cleaning in data')#, default = True)
 argParser.add_argument('--skipResponsePlots',                       action='store_true',     help='Skip A/B plots?')#, default = True)
 argParser.add_argument('--overwrite',                               action='store_true',     help='Overwrite results.pkl?')
+argParser.add_argument('--useFit',                                  action='store_true',     help='Use a fit to determine the mean')#, default= True
 argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v4',  help="subdirectory for plots")
 args = argParser.parse_args()
 
@@ -275,7 +281,8 @@ for var in [ "A", "B" ]:
                 # Normalize to 1
                 for eta_flav in ['neg_eta', 'pos_eta', 'abs_eta']:
                     integral = projections[var][s.name][eta_flav][eta_bin][pt_avg_bin].Integral()
-                    if integral>0: projections[var][s.name][eta_flav][eta_bin][pt_avg_bin].Scale(1./integral)
+                    # if using the fit, normalized data error goes balistics, therefore do not normalize
+                    if (integral>0 and not args.useFit): projections[var][s.name][eta_flav][eta_bin][pt_avg_bin].Scale(1./integral)
 
             if not args.skipResponsePlots:
                 for eta_flav in ['neg_eta', 'pos_eta', 'abs_eta']:
@@ -315,10 +322,65 @@ for var in [ "A", "B" ]:
                     # make life easy
                     shape = projections[var][s.name][sign][eta_bin][pt_avg_bin]
                     h = relative_corrections[var][s.name][eta_bin][sign]
-                    
-                    mean_asymmetry        = shape.GetMean()             # Rather fit here
-                    mean_asymmetry_error  = shape.GetMeanError() 
-                  
+
+                    if (args.useFit):
+                        logger.info( "Performing a gaussian fit to get the mean" )
+                        # declare the observable mean, and import the histogram to a RooDataHist
+                        asymmetry   = ROOT.RooRealVar(var+"-symmetry",var+"-symmetry",-10,10) ;
+                        dh          = ROOT.RooDataHist("datahistshape","datahistshape",ROOT.RooArgList(asymmetry),ROOT.RooFit.Import(shape)) ;
+                        
+                        # plot the data hist with error from sum of weighted events
+                        frame       = asymmetry.frame(ROOT.RooFit.Title('%s-symmetry' % (var)))
+                        if s.name == data.name:
+                            logger.info ("Settings for data with Poisson error bars")
+                            dh.plotOn(frame,ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson))
+                        else:
+                            logger.info ("Settings for mc with SumW2 error bars")
+                            dh.plotOn(frame,ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2)) ;
+
+                        # create a simple gaussian pdf
+                        gauss_mean  = ROOT.RooRealVar("mean","mean",0,-1.2,1.2)
+                        gauss_sigma = ROOT.RooRealVar("sigma","sigma",0.1,0,2)
+                        gauss       = ROOT.RooGaussian("gauss","gauss",asymmetry,gauss_mean,gauss_sigma) 
+                        
+                        # now do the fit and extract the parameters with the correct error
+                        if s.name == data.name:                            
+                            gauss.fitTo(dh,ROOT.RooFit.Save(),ROOT.RooFit.Range(dh.mean(asymmetry)-2*dh.sigma(asymmetry),dh.mean(asymmetry)+2*dh.sigma(asymmetry)))
+                        else:
+                            gauss.fitTo(dh,ROOT.RooFit.Save(),ROOT.RooFit.SumW2Error(True),ROOT.RooFit.Range(dh.mean(asymmetry)-2*dh.sigma(asymmetry),dh.mean(asymmetry)+2*dh.sigma(asymmetry)))
+                        gauss.plotOn(frame)
+
+                        argset_fit = ROOT.RooArgSet(gauss_mean,gauss_sigma)
+                        gauss.paramOn(frame,ROOT.RooFit.Format("NELU",ROOT.RooFit.AutoPrecision(1)),ROOT.RooFit.Layout(0.55)) 
+                        frame.SetMaximum(frame.GetMaximum()*1.2)
+
+                        # add chi2 info
+                        chi2_text = ROOT.TPaveText(0.3,0.8,0.4,0.9,"BRNDC")
+                        chi2_text.AddText("#chi^{2} fit = %s" %round(frame.chiSquare(6),2))
+                        chi2_text.SetTextSize(0.04)
+                        chi2_text.SetTextColor(2)
+                        chi2_text.SetShadowColor(0)
+                        chi2_text.SetFillColor(0)
+                        chi2_text.SetLineColor(0)
+                        frame.addObject(chi2_text)
+
+                        ## Dummy I don't know how to save them without hacking / butchering the code.
+                        c = ROOT.TCanvas()
+                        frame.Draw()
+                        fitname = "fitresult_%s_%i_%i_pt_%i_%i_%s_%s" % (  eta_flav, 1000*eta_bin[0], 1000*eta_bin[1], pt_avg_bin[0], pt_avg_bin[1], s.name, var )
+                        if not os.path.exists(plot_directory+"/fit/"): os.makedirs(plot_directory+"/fit/")
+                        c.SaveAs(plot_directory+"/fit/"+fitname+".pdf")
+                        c.SaveAs(plot_directory+"/fit/"+fitname+".png")
+
+                        mean_asymmetry        = gauss_mean.getVal()
+                        mean_asymmetry_error  = gauss_mean.getError()
+
+                        logger.debug ( "The asymmetric mean is %4.3f and the error is %4.3f" % (mean_asymmetry,mean_asymmetry_error))
+
+                    else:
+                        mean_asymmetry        = shape.GetMean()           
+                        mean_asymmetry_error  = shape.GetMeanError() 
+
                     mean_response = (1 + mean_asymmetry)/(1 - mean_asymmetry)
                     mean_response_error = 2.*mean_asymmetry_error/(1 - mean_asymmetry)**2 # f(x) = (1+x)/(1-x) -> f'(x) = 2/(x-1)**2
 
