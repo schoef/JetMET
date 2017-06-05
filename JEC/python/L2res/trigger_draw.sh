@@ -1,4 +1,4 @@
 #!/bin/sh
-python trigger_draw.sh --triggers=PFJet
-python trigger_draw.sh --triggers=DiPFJetAve_HFJEC
-python trigger_draw.sh --triggers=DiPFJetAve
+python trigger_draw.py --triggers=PFJet &
+python trigger_draw.py --triggers=DiPFJetAve_HFJEC &
+python trigger_draw.py --triggers=DiPFJetAve &

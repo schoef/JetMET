@@ -45,7 +45,7 @@ def get_parser():
     argParser.add_argument('--minNJobs', action='store', nargs='?', type=int, default=1, help="Minimum number of simultaneous jobs." )
     argParser.add_argument('--targetDir', action='store', nargs='?', type=str, default=user.skim_ntuple_directory, help="Name of the directory the post-processed files will be saved" ) #user.data_output_directory
     #argParser.add_argument('--version', action='store', nargs='?', type=str, default='V1', help="JEC version" )
-    argParser.add_argument('--processingEra', action='store', nargs='?', type=str, default='v3', help="Name of the processing era" )
+    argParser.add_argument('--processingEra', action='store', nargs='?', type=str, default='v5', help="Name of the processing era" )
     argParser.add_argument('--skim', action='store', nargs='?', type=str, default='default', help="Skim conditions to be applied for post-processing" )
     argParser.add_argument('--small', action='store_true', help="Run the file on a small sample (for test purpose), bool flag set to True if used", default = False)
     return argParser
@@ -121,7 +121,7 @@ except:
 #branches to be kept for data and MC
 branchKeepStrings_DATAMC = [\
     "run", "lumi", "evt", "isData", "rho", "nVert",
-    "met_chsPt", "met_chsPhi",
+    "met_*", "chsSumPt", 
 #        "metNoHF_pt", "metNoHF_phi",
 #        "puppiMet_pt","puppiMet_phi","puppiMet_sumEt","puppiMet_rawPt","puppiMet_rawPhi","puppiMet_rawSumEt",
     "Flag_*","HLT_*",

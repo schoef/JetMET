@@ -31,7 +31,7 @@ argParser.add_argument('--era',                action='store',      default='Run
 argParser.add_argument('--phEF',               action='store',      default= -1,             type=float, help="max phEF in probe jet" )
 argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?')#, default = True)
 argParser.add_argument('--cleaned',                                 action='store_true',     help='Apply jet cleaning in data')#, default = True)
-argParser.add_argument('--skipResponsePlots',                       action='store_true',     help='Skip A/B plots?', default = True)
+argParser.add_argument('--skipResponsePlots',                       action='store_true',     help='Skip A/B plots?')#, default = True)
 argParser.add_argument('--overwrite',                               action='store_true',     help='Overwrite results.pkl?')
 argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v4',  help="subdirectory for plots")
 args = argParser.parse_args()
@@ -64,7 +64,7 @@ tex.SetTextAlign(11) # align right
 def drawObjects( dataMCScale, lumi ):
     lines = [
       #(0.15, 0.95, args.era), 
-      (0.45, 0.95, 'L=%3.1f fb{}^{-1} (13 TeV) Scale %3.2f'% ( lumi, dataMCScale ) )
+      (0.15, 0.95, '%s (13 TeV)'% ( args.era ) )
     ]
     return [tex.DrawLatex(*l) for l in lines] 
 
@@ -280,13 +280,23 @@ for var in [ "A", "B" ]:
                 for eta_flav in ['neg_eta', 'pos_eta', 'abs_eta']:
                     histos = []
                     for i_pt_avg_bin, pt_avg_bin in enumerate(pt_avg_bins):
-                        histos.append( projections[var][s.name][eta_flav][eta_bin][pt_avg_bin])
+                        histos.append( projections[var][s.name][eta_flav][eta_bin][pt_avg_bin].Clone())
                         histos[-1].style = styles.lineStyle( colors[ i_pt_avg_bin ] ) 
                         histos[-1].legendText = "%i #leq %s < %i" % ( pt_avg_bin[0], pt_binning_legendText, pt_avg_bin[1] )
 
+                    if eta_flav    == 'pos_eta':
+                        eta_tex_string       = "%4.3f #leq #eta < %4.3f" % ( eta_bin ) 
+                    elif eta_flav  == 'abs_eta':
+                        eta_tex_string       = "%4.3f #leq |#eta| < %4.3f" % ( eta_bin ) 
+                    elif eta_flav  == 'neg_eta':
+                        eta_tex_string       = "%4.3f #leq #eta < %4.3f" % ( -eta_bin[1], -eta_bin[0] ) 
+
                     name = "%s_%s_%s_%i_%i" % ( s.name.replace('_'+args.era, ''), var, eta_flav, 1000*eta_bin[0], 1000*eta_bin[1] )
                     plot = Plot.fromHisto( name, [ [histo] for histo in histos], texX = var, texY = "Number of Events" )    
+                    plot.drawObjects  = [ (0.2, 0.65, eta_tex_string ) ]
+                    plot.drawObjects += [ (0.75, 0.95, '%s-symmetry' % var ) ]
                     draw1DPlots( [plot], 1.)
+
 
 relative_corrections = {} # results
 for var in [ "A", "B" ]:
@@ -310,13 +320,16 @@ for var in [ "A", "B" ]:
                   
                     mean_response = (1 + mean_asymmetry)/(1 - mean_asymmetry)
                     mean_response_error = 2.*mean_asymmetry_error/(1 - mean_asymmetry)**2 # f(x) = (1+x)/(1-x) -> f'(x) = 2/(x-1)**2
- 
-                    h.SetBinContent( h.FindBin( 0.5*sum(pt_avg_bin) ), mean_response ) 
-                    h.SetBinError  ( h.FindBin( 0.5*sum(pt_avg_bin) ), mean_response_error ) 
+
+                    if mean_response_error/mean_response<0.1:
+                    
+                        h.SetBinContent( h.FindBin( 0.5*sum(pt_avg_bin) ), mean_response ) 
+                        h.SetBinError  ( h.FindBin( 0.5*sum(pt_avg_bin) ), mean_response_error ) 
 
                 relative_corrections[var][s.name][eta_bin][sign].style = styles.lineStyle( 
                     color = ROOT.kBlack if s.name == data.name else ROOT.kRed,
-                    dashed = (var == 'A')
+                    dashed = (var == 'A'),
+                    errors = True
                     )
                 relative_corrections[var][s.name][eta_bin][sign].legendText = s.name + "( %s )" % ("Bal." if var=='A' else "MPF") 
 

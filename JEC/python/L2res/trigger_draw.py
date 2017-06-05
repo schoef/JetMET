@@ -26,7 +26,7 @@ argParser.add_argument('--logLevel',           action='store',      default='INF
 argParser.add_argument('--triggers',           action='store',      default='DiPFJetAve',    nargs='?', choices=['DiPFJetAve', 'DiPFJetAve_HFJEC', 'PFJet'], help="trigger suite" )
 argParser.add_argument('--era',                action='store',      default='Run2016',       nargs='?', choices=['Run2016', 'Run2016BCD', 'Run2016EFearly', 'Run2016FlateG', 'Run2016H'], help="era" )
 argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?')#, default = True)
-argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res',     help="subdirectory for plots")
+argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_trigger',     help="subdirectory for plots")
 args = argParser.parse_args()
 
 if args.small:

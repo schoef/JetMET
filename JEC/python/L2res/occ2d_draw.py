@@ -190,7 +190,7 @@ plot = Plot2D.fromHisto( name = '2D_%s_pt_%i_%i' % ( eta_string, tag_jet_bin[0],
 plot.drawObjects = circles
 plot.drawObjects += [ 
     (0.17, 0.86, args.era + ' ' + eta_tex_string),
-    (0.17, 0.81, '%i #leq < p_{T,tag} < %i'% tag_jet_bin ),
+    (0.17, 0.81, '%i #leq p_{T,tag} < %i'% tag_jet_bin ),
     (0.59, 0.41, '|#eta| = 3' ),
     (0.65, 0.35, '|#eta| = 2.5' ),
 ]
