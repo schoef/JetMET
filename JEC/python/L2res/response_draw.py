@@ -6,9 +6,11 @@
 #
 import ROOT
 ROOT.gROOT.SetBatch(True)
+
+# RooFit
 ROOT.gSystem.Load("libRooFit.so")
 ROOT.gSystem.Load("libRooFitCore.so")
-ROOT.gROOT.SetStyle("Plain")
+ROOT.gROOT.SetStyle("Plain") # Not sure this is needed
 ROOT.gSystem.SetIncludePath( "-I$ROOFITSYS/include/" )
 
 import itertools
@@ -82,13 +84,8 @@ def draw1DPlots(plots, dataMCScale):
       #if not max(l[0].GetMaximum() for l in plot.histos): continue # Empty plot
       p_drawObjects = map( lambda l:tex.DrawLatex(*l), getattr(plot, "drawObjects", [] ) )
 
-      if hasattr( plot, "subdir"):
-        plot_directory__ = os.path.join( plot_directory_, plot.subdir)
-      else:
-        plot_directory__ = plot_directory_
-
       plotting.draw(plot,
-        plot_directory = plot_directory__,
+        plot_directory = plot_directory_,
         #ratio          = {'yRange':(0.6,1.4)} if len(plot.stack)>=2 else None,
         logX = False, logY = log, sorting = False,
         yRange         = (0.0003, "auto") if log else (0.001, "auto"),
@@ -105,13 +102,8 @@ def drawPtResponse(plots, dataMCScale):
       #if not max(l[0].GetMaximum() for l in plot.histos): continue # Empty plot
       p_drawObjects = map( lambda l:tex.DrawLatex(*l), getattr(plot, "drawObjects", [] ) )
 
-      if hasattr( plot, "subdir"):
-        plot_directory__ = os.path.join( plot_directory_, plot.subdir)
-      else:
-        plot_directory__ = plot_directory_
-
       plotting.draw(plot,
-        plot_directory = plot_directory__,
+        plot_directory = plot_directory_,
         ratio          = {'yRange':(0.9,1.1)} ,
         logX = True, logY = False, sorting = False,
         yRange         = (0.5, 1.5),
@@ -278,11 +270,6 @@ for var in [ "A", "B" ]:
                 projections[var][s.name]['neg_eta'][eta_bin][pt_avg_bin] = h[var][s.name].ProjectionX("neg_%s_%s_%i_%i" % ( s.name, var, neg_bin_y, bin_z ) , neg_bin_y, neg_bin_y, bin_z, bin_z)
                 projections[var][s.name]['abs_eta'][eta_bin][pt_avg_bin].Add(  projections[var][s.name]['neg_eta'][eta_bin][pt_avg_bin] ) 
 
-                # Normalize to 1
-                for eta_flav in ['neg_eta', 'pos_eta', 'abs_eta']:
-                    integral = projections[var][s.name][eta_flav][eta_bin][pt_avg_bin].Integral()
-                    # if using the fit, normalized data error goes balistics, therefore do not normalize
-                    if (integral>0 and not args.useFit): projections[var][s.name][eta_flav][eta_bin][pt_avg_bin].Scale(1./integral)
 
             if not args.skipResponsePlots:
                 for eta_flav in ['neg_eta', 'pos_eta', 'abs_eta']:
@@ -291,6 +278,10 @@ for var in [ "A", "B" ]:
                         histos.append( projections[var][s.name][eta_flav][eta_bin][pt_avg_bin].Clone())
                         histos[-1].style = styles.lineStyle( colors[ i_pt_avg_bin ] ) 
                         histos[-1].legendText = "%i #leq %s < %i" % ( pt_avg_bin[0], pt_binning_legendText, pt_avg_bin[1] )
+
+                        # Normalize to 1
+                        integral = histos[-1].Integral()
+                        if integral>0: histos[-1].Scale(1./integral)
 
                     if eta_flav    == 'pos_eta':
                         eta_tex_string       = "%4.3f #leq #eta < %4.3f" % ( eta_bin ) 
@@ -319,9 +310,10 @@ for var in [ "A", "B" ]:
 
             for sign in [ 'neg_eta', 'pos_eta', 'abs_eta' ]:
                 for i_pt_avg_bin, pt_avg_bin in enumerate(pt_avg_bins):
+
                     # make life easy
                     shape = projections[var][s.name][sign][eta_bin][pt_avg_bin]
-                    h = relative_corrections[var][s.name][eta_bin][sign]
+                    h     = relative_corrections[var][s.name][eta_bin][sign]
 
                     if (args.useFit):
                         logger.info( "Performing a gaussian fit to get the mean" )
@@ -332,10 +324,10 @@ for var in [ "A", "B" ]:
                         # plot the data hist with error from sum of weighted events
                         frame       = asymmetry.frame(ROOT.RooFit.Title('%s-symmetry' % (var)))
                         if s.name == data.name:
-                            logger.info ("Settings for data with Poisson error bars")
+                            logger.debug( "Settings for data with Poisson error bars" )
                             dh.plotOn(frame,ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson))
                         else:
-                            logger.info ("Settings for mc with SumW2 error bars")
+                            logger.debug( "Settings for mc with SumW2 error bars" )
                             dh.plotOn(frame,ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2)) ;
 
                         # create a simple gaussian pdf
@@ -348,6 +340,7 @@ for var in [ "A", "B" ]:
                             gauss.fitTo(dh,ROOT.RooFit.Save(),ROOT.RooFit.Range(dh.mean(asymmetry)-2*dh.sigma(asymmetry),dh.mean(asymmetry)+2*dh.sigma(asymmetry)))
                         else:
                             gauss.fitTo(dh,ROOT.RooFit.Save(),ROOT.RooFit.SumW2Error(True),ROOT.RooFit.Range(dh.mean(asymmetry)-2*dh.sigma(asymmetry),dh.mean(asymmetry)+2*dh.sigma(asymmetry)))
+
                         gauss.plotOn(frame)
 
                         argset_fit = ROOT.RooArgSet(gauss_mean,gauss_sigma)
@@ -375,7 +368,7 @@ for var in [ "A", "B" ]:
                         mean_asymmetry        = gauss_mean.getVal()
                         mean_asymmetry_error  = gauss_mean.getError()
 
-                        logger.debug ( "The asymmetric mean is %4.3f and the error is %4.3f" % (mean_asymmetry,mean_asymmetry_error))
+                        logger.info ( "The asymmetric mean is %4.3f and the error is %4.3f" % (mean_asymmetry,mean_asymmetry_error))
 
                     else:
                         mean_asymmetry        = shape.GetMean()           
