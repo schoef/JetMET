@@ -89,7 +89,7 @@ python jef_draw.py --observable=HFHMult   --ptBin 200 1000 --etaSign=-1 --etaBin
 python jef_draw.py --observable=HFEMMult  --ptBin 200 1000 --etaSign=-1 --etaBin 3.139 3.489 &
 python jef_draw.py --observable=chHMult   --ptBin 200 1000 --etaSign=-1 --etaBin 3.139 3.489 &
 python jef_draw.py --observable=neHMult   --ptBin 200 1000 --etaSign=-1 --etaBin 3.139 3.489 &
-python jef_draw.py --observable=phi     --ptBin 200 1000 --etaSign=+1 --etaBin 3.139 3.489         &
+python jef_draw.py --observable=phi     --ptBin 200 1000 --etaSign=+1 --etaBin 3.139 3.489 &
 python jef_draw.py --observable=phEF    --ptBin 200 1000 --etaSign=+1 --etaBin 3.139 3.489 &
 python jef_draw.py --observable=eEF     --ptBin 200 1000 --etaSign=+1 --etaBin 3.139 3.489 &
 python jef_draw.py --observable=muEF    --ptBin 200 1000 --etaSign=+1 --etaBin 3.139 3.489 &
