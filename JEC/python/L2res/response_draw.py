@@ -368,6 +368,7 @@ for var in [ "A", "B" ]:
                         c = ROOT.TCanvas()
                         frame.Draw()
                         fitname = "fitresult_%s_%i_%i_pt_%i_%i_%s_%s" % (  eta_flav, 1000*eta_bin[0], 1000*eta_bin[1], pt_avg_bin[0], pt_avg_bin[1], s.name, var )
+                        if not os.path.exists(plot_directory+"/fit/"): os.makedirs(plot_directory+"/fit/")
                         c.SaveAs(plot_directory+"/fit/"+fitname+".pdf")
                         c.SaveAs(plot_directory+"/fit/"+fitname+".png")
 
