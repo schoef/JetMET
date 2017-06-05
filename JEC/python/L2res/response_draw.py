@@ -72,7 +72,7 @@ tex.SetTextAlign(11) # align right
 def drawObjects( dataMCScale, lumi ):
     lines = [
       #(0.15, 0.95, args.era), 
-      (0.15, 0.95, '%s (13 TeV)'% ( args.era ) )
+      (0.15, 0.95, '%s (13 TeV)'% ( args.era ) ),
     ]
     return [tex.DrawLatex(*l) for l in lines] 
 
@@ -101,6 +101,7 @@ def drawPtResponse(plots, dataMCScale):
     for plot in plots:
       #if not max(l[0].GetMaximum() for l in plot.histos): continue # Empty plot
       p_drawObjects = map( lambda l:tex.DrawLatex(*l), getattr(plot, "drawObjects", [] ) )
+      p_drawObjects.append( tex.DrawLatex( 0.20, 0.75, "using Gaussian fit" if args.useFit else "using mean of histogram" ) )
 
       plotting.draw(plot,
         plot_directory = plot_directory_,
