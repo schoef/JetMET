@@ -395,8 +395,8 @@ for i_aeta in range(len(abs_eta_thresholds)-1):
     eta_bin = tuple(abs_eta_thresholds[i_aeta:i_aeta+2])
 
     for sign in [ 'neg_eta', 'pos_eta', 'abs_eta' ]:
-
-        name = "response_%s_%i_%i" % (  eta_flav, 1000*eta_bin[0], 1000*eta_bin[1] )
+        
+        name = "response_%s_%s_%i_%i" % ( "fit" if args.useFit else "mean", eta_flav, 1000*eta_bin[0], 1000*eta_bin[1] )
         plot = Plot.fromHisto( name, 
             [ 
               [relative_corrections['B'][mc.name][eta_bin][sign]] , 
