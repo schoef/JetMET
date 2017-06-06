@@ -40,7 +40,8 @@ argParser.add_argument('--small',                                   action='stor
 argParser.add_argument('--cleaned',                                 action='store_true',     help='Apply jet cleaning in data')#, default = True)
 argParser.add_argument('--skipResponsePlots',                       action='store_true',     help='Skip A/B plots?')#, default = True)
 argParser.add_argument('--overwrite',                               action='store_true',     help='Overwrite results.pkl?')
-argParser.add_argument('--useFit',                                  action='store_true',     help='Use a fit to determine the mean')#, default= True
+argParser.add_argument('--useFit',                                  action='store_true',     help='Use a fit to determine the response')#, default= True
+argParser.add_argument('--metOverSumET',                            action='store_true',     help='add MET/sumET<0.2 cut')#, default= True
 argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v4',  help="subdirectory for plots")
 args = argParser.parse_args()
 
@@ -57,6 +58,8 @@ if args.phEF>0:
 
 if args.cleaned:
     args.plot_directory += '_cleaned'
+if args.metOverSumET:
+    args.plot_directory += '_metOverSumET'
 if args.small:
     args.plot_directory += '_small'
 
@@ -184,6 +187,8 @@ selection = [
 
 if args.phEF>0:
     selection.append( ("phEFprobe", "abs(Jet_phEF[probe_jet_index])<%f" % args.phEF ) )
+if args.metOverSumET:
+    selection.append( ("MOSET", "met_chsPt/chsSumPt<0.2" ) )
 
 for s in samples:   
     s.addSelectionString( "&&".join(c[1] for c in selection))
