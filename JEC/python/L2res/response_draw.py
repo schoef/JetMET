@@ -24,7 +24,7 @@ from JetMET.tools.user                   import plot_directory as user_plot_dire
 from JetMET.tools.helpers                import deltaPhi, deltaR
 
 # Gaussian (Roo-)Fit
-from JetMET.JEC.L2res.helpers            import gaussianFit
+from JetMET.JEC.L2res.GaussianFit        import GaussianFit
 
 # Object selection
 from JetMET.tools.objectSelection        import getFilterCut, getJets, jetVars

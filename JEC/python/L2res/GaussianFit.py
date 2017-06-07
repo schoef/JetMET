@@ -13,7 +13,7 @@ ROOT.gSystem.SetIncludePath( "-I$ROOFITSYS/include/" )
 import logging
 logger = logging.getLogger(__name__)
 
-def gaussianFit( shape, isData, var_name, fit_plot_directory, fit_filename):
+def GaussianFit( shape, isData, var_name, fit_plot_directory, fit_filename):
     ''' Gaussian fit from Zeynep
     '''
 
