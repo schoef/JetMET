@@ -26,7 +26,7 @@ argParser.add_argument('--logLevel',           action='store',      default='INF
 argParser.add_argument('--triggers',           action='store',      default='PFJet',         nargs='?', choices=['DiPFJetAve', 'DiPFJetAve_HFJEC', 'PFJet'], help="trigger suite" )
 argParser.add_argument('--ptBin',              action='store',      default=(163, 230),      type = int,    nargs=2,  help="tag jet pt bin" )
 argParser.add_argument('--etaSign',            action='store',      default=0             ,  type = int,    choices = [-1,0,+1], help="sign of probe jet eta." )
-argParser.add_argument('--era',                action='store',      default='Run2016H',      nargs='?', choices=['Run2016', 'Run2016BCD', 'Run2016EFearly', 'Run2016FlateG', 'Run2016H'], help="era" )
+argParser.add_argument('--era',                action='store',      default='Run2016H',      nargs='?', choices=['Run2016', 'Run2016BCD', 'Run2016EFearly', 'Run2016FlateG', 'Run2016H', 'Run2016_18Apr', 'Run2016BCD_18Apr', 'Run2016EFearly_18Apr', 'Run2016FlateG_18Apr', 'Run2016H_18Apr'], help="era" )
 argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?')#, default = True)
 argParser.add_argument('--cleaned',                                 action='store_true',     help='Apply jet cleaning in data')#, default = True)
 argParser.add_argument('--bad',                                     action='store_true',     help='Cut on phEF*pT>300')#, default = True)
@@ -95,6 +95,16 @@ elif args.era == 'Run2016FlateG':
     data = JetHT_Run2016FlateG
 elif args.era == 'Run2016H':
     data = JetHT_Run2016H
+elif args.era == 'Run2016_18Apr':
+    data = JetHT_Run2016_18Apr
+elif args.era == 'Run2016BCD_18Apr':
+    data = JetHT_Run2016BCD_18Apr
+elif args.era == 'Run2016EFearly_18Apr':
+    data = JetHT_Run2016EFearly_18Apr
+elif args.era == 'Run2016FlateG_18Apr':
+    data = JetHT_Run2016FlateG_18Apr
+elif args.era == 'Run2016H_18Apr':
+    data = JetHT_Run2016H_18Apr
 
 if args.triggers=='DiPFJetAve':
     triggers = [ 
@@ -172,7 +182,7 @@ if args.small:
 
 #colors = [ j+1 for j in range(0,9) ] + [ j+31 for j in range(9,18) ]
 
-variableString = "1/sinh(%s)*cos(Jet_phi[probe_jet_index]):1/sinh(%s)*sin(Jet_phi[probe_jet_index])" % ( probe_jet_eta_string, probe_jet_eta_string )
+variableString = "1/sinh(%s)*sin(Jet_phi[probe_jet_index]):1/sinh(%s)*cos(Jet_phi[probe_jet_index])" % ( probe_jet_eta_string, probe_jet_eta_string )
 weightString   = "met_chsPt*weight*(%s>0)"%probe_jet_eta_string
 
 logger.info( "Get plot with %s, and weight %s", variableString, weightString )

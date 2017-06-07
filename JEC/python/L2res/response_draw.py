@@ -23,6 +23,9 @@ from RootTools.core.standard             import *
 from JetMET.tools.user                   import plot_directory as user_plot_directory
 from JetMET.tools.helpers                import deltaPhi, deltaR
 
+# Gaussian (Roo-)Fit
+from JetMET.JEC.L2res.helpers            import gaussianFit
+
 # Object selection
 from JetMET.tools.objectSelection        import getFilterCut, getJets, jetVars
 
@@ -274,14 +277,14 @@ for var in [ "A", "B" ]:
                 projections[var][s.name]['abs_eta'][eta_bin][pt_avg_bin] = h[var][s.name].ProjectionX("abs_%s_%s_%i_%i" % ( s.name, var, bin_y, bin_z ) , bin_y, bin_y, bin_z, bin_z)
                 projections[var][s.name]['pos_eta'][eta_bin][pt_avg_bin] = h[var][s.name].ProjectionX("pos_%s_%s_%i_%i" % ( s.name, var, bin_y, bin_z ) , bin_y, bin_y, bin_z, bin_z)
                 projections[var][s.name]['neg_eta'][eta_bin][pt_avg_bin] = h[var][s.name].ProjectionX("neg_%s_%s_%i_%i" % ( s.name, var, neg_bin_y, bin_z ) , neg_bin_y, neg_bin_y, bin_z, bin_z)
-                projections[var][s.name]['abs_eta'][eta_bin][pt_avg_bin].Add(  projections[var][s.name]['neg_eta'][eta_bin][pt_avg_bin] ) 
+                projections[var][s.name]['abs_eta'][eta_bin][pt_avg_bin].Add( projections[var][s.name]['neg_eta'][eta_bin][pt_avg_bin] ) 
 
 
             if not args.skipResponsePlots:
-                for eta_flav in ['neg_eta', 'pos_eta', 'abs_eta']:
+                for sign in ['neg_eta', 'pos_eta', 'abs_eta']:
                     histos = []
                     for i_pt_avg_bin, pt_avg_bin in enumerate(pt_avg_bins):
-                        histos.append( projections[var][s.name][eta_flav][eta_bin][pt_avg_bin].Clone())
+                        histos.append( projections[var][s.name][sign][eta_bin][pt_avg_bin].Clone())
                         histos[-1].style = styles.lineStyle( colors[ i_pt_avg_bin ] ) 
                         histos[-1].legendText = "%i #leq %s < %i" % ( pt_avg_bin[0], pt_binning_legendText, pt_avg_bin[1] )
 
@@ -289,29 +292,29 @@ for var in [ "A", "B" ]:
                         integral = histos[-1].Integral()
                         if integral>0: histos[-1].Scale(1./integral)
 
-                    if eta_flav    == 'pos_eta':
+                    if sign    == 'pos_eta':
                         eta_tex_string       = "%4.3f #leq #eta < %4.3f" % ( eta_bin ) 
-                    elif eta_flav  == 'abs_eta':
+                    elif sign  == 'abs_eta':
                         eta_tex_string       = "%4.3f #leq |#eta| < %4.3f" % ( eta_bin ) 
-                    elif eta_flav  == 'neg_eta':
+                    elif sign  == 'neg_eta':
                         eta_tex_string       = "%4.3f #leq #eta < %4.3f" % ( -eta_bin[1], -eta_bin[0] ) 
 
-                    name = "%s_%s_%s_%i_%i" % ( s.name.replace('_'+args.era, ''), var, eta_flav, 1000*eta_bin[0], 1000*eta_bin[1] )
+                    name = "%s_%s_%s_%i_%i" % ( s.name.replace('_'+args.era, ''), var, sign, 1000*eta_bin[0], 1000*eta_bin[1] )
                     plot = Plot.fromHisto( name, [ [histo] for histo in histos], texX = var, texY = "Number of Events" )    
                     plot.drawObjects  = [ (0.2, 0.65, eta_tex_string ) ]
                     plot.drawObjects += [ (0.75, 0.95, '%s-symmetry' % var ) ]
                     draw1DPlots( [plot], 1.)
 
 
-relative_corrections = {} # results
+response = {} # results
 for var in [ "A", "B" ]:
-    relative_corrections[var] = {}
+    response[var] = {}
     for s in samples:
-        relative_corrections[var][s.name] = {}
+        response[var][s.name] = {}
         for i_aeta in range(len(abs_eta_thresholds)-1):
 
             eta_bin = tuple(abs_eta_thresholds[i_aeta:i_aeta+2])
-            relative_corrections[var][s.name][eta_bin] \
+            response[var][s.name][eta_bin] \
                     = {k:ROOT.TH1D('rel_corr_'+k, 'rel_corr_'+k, len(pt_avg_thresholds) - 1, array.array('d', pt_avg_thresholds)) for k in ['neg_eta', 'pos_eta', 'abs_eta']}
 
             for sign in [ 'neg_eta', 'pos_eta', 'abs_eta' ]:
@@ -319,62 +322,15 @@ for var in [ "A", "B" ]:
 
                     # make life easy
                     shape = projections[var][s.name][sign][eta_bin][pt_avg_bin]
-                    h     = relative_corrections[var][s.name][eta_bin][sign]
+                    h     = response[var][s.name][eta_bin][sign]
 
                     if (args.useFit):
-                        logger.info( "Performing a gaussian fit to get the mean" )
-                        # declare the observable mean, and import the histogram to a RooDataHist
-                        asymmetry   = ROOT.RooRealVar(var+"-symmetry",var+"-symmetry",-10,10) ;
-                        dh          = ROOT.RooDataHist("datahistshape","datahistshape",ROOT.RooArgList(asymmetry),ROOT.RooFit.Import(shape)) ;
-                        
-                        # plot the data hist with error from sum of weighted events
-                        frame       = asymmetry.frame(ROOT.RooFit.Title('%s-symmetry' % (var)))
-                        if s.name == data.name:
-                            logger.debug( "Settings for data with Poisson error bars" )
-                            dh.plotOn(frame,ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson))
-                        else:
-                            logger.debug( "Settings for mc with SumW2 error bars" )
-                            dh.plotOn(frame,ROOT.RooFit.DataError(ROOT.RooAbsData.SumW2)) ;
-
-                        # create a simple gaussian pdf
-                        gauss_mean  = ROOT.RooRealVar("mean","mean",0,-1.2,1.2)
-                        gauss_sigma = ROOT.RooRealVar("sigma","sigma",0.1,0,2)
-                        gauss       = ROOT.RooGaussian("gauss","gauss",asymmetry,gauss_mean,gauss_sigma) 
-                        
-                        # now do the fit and extract the parameters with the correct error
-                        if s.name == data.name:                            
-                            gauss.fitTo(dh,ROOT.RooFit.Save(),ROOT.RooFit.Range(dh.mean(asymmetry)-2*dh.sigma(asymmetry),dh.mean(asymmetry)+2*dh.sigma(asymmetry)))
-                        else:
-                            gauss.fitTo(dh,ROOT.RooFit.Save(),ROOT.RooFit.SumW2Error(True),ROOT.RooFit.Range(dh.mean(asymmetry)-2*dh.sigma(asymmetry),dh.mean(asymmetry)+2*dh.sigma(asymmetry)))
-
-                        gauss.plotOn(frame)
-
-                        argset_fit = ROOT.RooArgSet(gauss_mean,gauss_sigma)
-                        gauss.paramOn(frame,ROOT.RooFit.Format("NELU",ROOT.RooFit.AutoPrecision(1)),ROOT.RooFit.Layout(0.55)) 
-                        frame.SetMaximum(frame.GetMaximum()*1.2)
-
-                        # add chi2 info
-                        chi2_text = ROOT.TPaveText(0.3,0.8,0.4,0.9,"BRNDC")
-                        chi2_text.AddText("#chi^{2} fit = %s" %round(frame.chiSquare(6),2))
-                        chi2_text.SetTextSize(0.04)
-                        chi2_text.SetTextColor(2)
-                        chi2_text.SetShadowColor(0)
-                        chi2_text.SetFillColor(0)
-                        chi2_text.SetLineColor(0)
-                        frame.addObject(chi2_text)
-
-                        ## Dummy I don't know how to save them without hacking / butchering the code.
-                        c = ROOT.TCanvas()
-                        frame.Draw()
-                        fitname = "fitresult_%s_%i_%i_pt_%i_%i_%s_%s" % (  eta_flav, 1000*eta_bin[0], 1000*eta_bin[1], pt_avg_bin[0], pt_avg_bin[1], s.name, var )
-                        if not os.path.exists(plot_directory+"/fit/"): os.makedirs(plot_directory+"/fit/")
-                        c.SaveAs(plot_directory+"/fit/"+fitname+".pdf")
-                        c.SaveAs(plot_directory+"/fit/"+fitname+".png")
-
-                        mean_asymmetry        = gauss_mean.getVal()
-                        mean_asymmetry_error  = gauss_mean.getError()
-
-                        logger.info ( "The asymmetric mean is %4.3f and the error is %4.3f" % (mean_asymmetry,mean_asymmetry_error))
+                        mean_asymmetry, mean_asymmetry_error = gaussianFit( 
+                            shape               = shape,
+                            var_name            = "%s-symmetry" % var, 
+                            fit_plot_directory  = os.path.join( plot_directory, 'fit'), 
+                            fit_filename        = "fitresult_%s_%s_%i_%i_pt_%i_%i_%s" % ( var, sign, 1000*eta_bin[0], 1000*eta_bin[1], pt_avg_bin[0], pt_avg_bin[1], s.name ) 
+                            )
 
                     else:
                         mean_asymmetry        = shape.GetMean()           
@@ -388,12 +344,12 @@ for var in [ "A", "B" ]:
                         h.SetBinContent( h.FindBin( 0.5*sum(pt_avg_bin) ), mean_response ) 
                         h.SetBinError  ( h.FindBin( 0.5*sum(pt_avg_bin) ), mean_response_error ) 
 
-                relative_corrections[var][s.name][eta_bin][sign].style = styles.lineStyle( 
+                response[var][s.name][eta_bin][sign].style = styles.lineStyle( 
                     color = ROOT.kBlack if s.name == data.name else ROOT.kRed,
                     dashed = (var == 'A'),
                     errors = True
                     )
-                relative_corrections[var][s.name][eta_bin][sign].legendText = s.name + "( %s )" % ("Bal." if var=='A' else "MPF") 
+                response[var][s.name][eta_bin][sign].legendText = s.name + "( %s )" % ("Bal." if var=='A' else "MPF") 
 
 for i_aeta in range(len(abs_eta_thresholds)-1):
 
@@ -401,13 +357,13 @@ for i_aeta in range(len(abs_eta_thresholds)-1):
 
     for sign in [ 'neg_eta', 'pos_eta', 'abs_eta' ]:
         
-        name = "response_%s_%s_%i_%i" % ( "fit" if args.useFit else "mean", eta_flav, 1000*eta_bin[0], 1000*eta_bin[1] )
+        name = "response_%s_%s_%i_%i" % ( "fit" if args.useFit else "mean", sign, 1000*eta_bin[0], 1000*eta_bin[1] )
         plot = Plot.fromHisto( name, 
             [ 
-              [relative_corrections['B'][mc.name][eta_bin][sign]] , 
-              [relative_corrections['B'][data.name][eta_bin][sign]], 
-              [relative_corrections['A'][mc.name][eta_bin][sign]] , 
-              [relative_corrections['A'][data.name][eta_bin][sign]] 
+              [response['B'][mc.name][eta_bin][sign]] , 
+              [response['B'][data.name][eta_bin][sign]], 
+              [response['A'][mc.name][eta_bin][sign]] , 
+              [response['A'][data.name][eta_bin][sign]] 
             ], 
             texX = pt_binning_legendText, texY = "response" ) 
         drawPtResponse( [plot], 1.)
