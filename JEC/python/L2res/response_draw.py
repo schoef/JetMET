@@ -327,6 +327,7 @@ for var in [ "A", "B" ]:
                     if (args.useFit):
                         mean_asymmetry, mean_asymmetry_error = gaussianFit( 
                             shape               = shape,
+                            isData              = s.name == data.name,
                             var_name            = "%s-symmetry" % var, 
                             fit_plot_directory  = os.path.join( plot_directory, 'fit'), 
                             fit_filename        = "fitresult_%s_%s_%i_%i_pt_%i_%i_%s" % ( var, sign, 1000*eta_bin[0], 1000*eta_bin[1], pt_avg_bin[0], pt_avg_bin[1], s.name ) 

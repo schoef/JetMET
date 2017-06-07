@@ -13,7 +13,7 @@ ROOT.gSystem.SetIncludePath( "-I$ROOFITSYS/include/" )
 import logging
 logger = logging.getLogger(__name__)
 
-def gaussianFit( shape, var_name, fit_plot_directory, fit_filename):
+def gaussianFit( shape, isData, var_name, fit_plot_directory, fit_filename):
     ''' Gaussian fit from Zeynep
     '''
 
@@ -24,7 +24,7 @@ def gaussianFit( shape, var_name, fit_plot_directory, fit_filename):
     
     # plot the data hist with error from sum of weighted events
     frame       = asymmetry.frame(ROOT.RooFit.Title(var_name))
-    if s.name == data.name:
+    if isData:
         logger.debug( "Settings for data with Poisson error bars" )
         dh.plotOn(frame,ROOT.RooFit.DataError(ROOT.RooAbsData.Poisson))
     else:
@@ -37,7 +37,7 @@ def gaussianFit( shape, var_name, fit_plot_directory, fit_filename):
     gauss       = ROOT.RooGaussian("gauss","gauss",asymmetry,gauss_mean,gauss_sigma) 
     
     # now do the fit and extract the parameters with the correct error
-    if s.name == data.name:                            
+    if isData: 
         gauss.fitTo(dh,ROOT.RooFit.Save(),ROOT.RooFit.Range(dh.mean(asymmetry)-2*dh.sigma(asymmetry),dh.mean(asymmetry)+2*dh.sigma(asymmetry)))
     else:
         gauss.fitTo(dh,ROOT.RooFit.Save(),ROOT.RooFit.SumW2Error(True),ROOT.RooFit.Range(dh.mean(asymmetry)-2*dh.sigma(asymmetry),dh.mean(asymmetry)+2*dh.sigma(asymmetry)))
@@ -68,4 +68,4 @@ def gaussianFit( shape, var_name, fit_plot_directory, fit_filename):
     mean_asymmetry        = gauss_mean.getVal()
     mean_asymmetry_error  = shape.GetMeanError()
 
-    return mean_asymmetry, mean_asymmetry_error 
+    return mean_asymmetry, mean_asymmetry_error
