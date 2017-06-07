@@ -215,7 +215,7 @@ thresholds = [-1.2+x*2.4/96. for x in range(97)]
 
 weightString  = "weight"
 
-results_file = os.path.join( plot_directory, 'results.pkl' )
+results_file        = os.path.join( plot_directory, 'results.pkl' )
 
 h = {}
 p = {}
@@ -306,51 +306,59 @@ for var in [ "A", "B" ]:
                     draw1DPlots( [plot], 1.)
 
 
-response = {} # results
-for var in [ "A", "B" ]:
-    response[var] = {}
-    for s in samples:
-        response[var][s.name] = {}
-        for i_aeta in range(len(abs_eta_thresholds)-1):
+response_results_file    = os.path.join( plot_directory, 'response_results.pkl' )
+if os.path.exists( response_results_file ):
+    response = pickle.load( response_results_file )
+    logger.info( 'Loaded response results from %s', response_results_file )
+else:
+    response = {} # results
+    for var in [ "A", "B" ]:
+        response[var] = {}
+        for s in samples:
+            response[var][s.name] = {}
+            for i_aeta in range(len(abs_eta_thresholds)-1):
 
-            eta_bin = tuple(abs_eta_thresholds[i_aeta:i_aeta+2])
-            response[var][s.name][eta_bin] \
-                    = {k:ROOT.TH1D('rel_corr_'+k, 'rel_corr_'+k, len(pt_avg_thresholds) - 1, array.array('d', pt_avg_thresholds)) for k in ['neg_eta', 'pos_eta', 'abs_eta']}
+                eta_bin = tuple(abs_eta_thresholds[i_aeta:i_aeta+2])
+                response[var][s.name][eta_bin] \
+                        = {k:ROOT.TH1D('rel_corr_'+k, 'rel_corr_'+k, len(pt_avg_thresholds) - 1, array.array('d', pt_avg_thresholds)) for k in ['neg_eta', 'pos_eta', 'abs_eta']}
 
-            for sign in [ 'neg_eta', 'pos_eta', 'abs_eta' ]:
-                for i_pt_avg_bin, pt_avg_bin in enumerate(pt_avg_bins):
+                for sign in [ 'neg_eta', 'pos_eta', 'abs_eta' ]:
+                    for i_pt_avg_bin, pt_avg_bin in enumerate(pt_avg_bins):
 
-                    # make life easy
-                    shape = projections[var][s.name][sign][eta_bin][pt_avg_bin]
-                    h     = response[var][s.name][eta_bin][sign]
+                        # make life easy
+                        shape = projections[var][s.name][sign][eta_bin][pt_avg_bin]
+                        h     = response[var][s.name][eta_bin][sign]
 
-                    if (args.useFit):
-                        mean_asymmetry, mean_asymmetry_error = gaussianFit( 
-                            shape               = shape,
-                            isData              = s.name == data.name,
-                            var_name            = "%s-symmetry" % var, 
-                            fit_plot_directory  = os.path.join( plot_directory, 'fit'), 
-                            fit_filename        = "fitresult_%s_%s_%i_%i_pt_%i_%i_%s" % ( var, sign, 1000*eta_bin[0], 1000*eta_bin[1], pt_avg_bin[0], pt_avg_bin[1], s.name ) 
-                            )
+                        if (args.useFit):
+                            mean_asymmetry, mean_asymmetry_error = gaussianFit( 
+                                shape               = shape,
+                                isData              = s.name == data.name,
+                                var_name            = "%s-symmetry" % var, 
+                                fit_plot_directory  = os.path.join( plot_directory, 'fit'), 
+                                fit_filename        = "fitresult_%s_%s_%i_%i_pt_%i_%i_%s" % ( var, sign, 1000*eta_bin[0], 1000*eta_bin[1], pt_avg_bin[0], pt_avg_bin[1], s.name ) 
+                                )
 
-                    else:
-                        mean_asymmetry        = shape.GetMean()           
-                        mean_asymmetry_error  = shape.GetMeanError() 
+                        else:
+                            mean_asymmetry        = shape.GetMean()           
+                            mean_asymmetry_error  = shape.GetMeanError() 
 
-                    mean_response = (1 + mean_asymmetry)/(1 - mean_asymmetry)
-                    mean_response_error = 2.*mean_asymmetry_error/(1 - mean_asymmetry)**2 # f(x) = (1+x)/(1-x) -> f'(x) = 2/(x-1)**2
+                        mean_response = (1 + mean_asymmetry)/(1 - mean_asymmetry)
+                        mean_response_error = 2.*mean_asymmetry_error/(1 - mean_asymmetry)**2 # f(x) = (1+x)/(1-x) -> f'(x) = 2/(x-1)**2
 
-                    if mean_response_error/mean_response<0.1:
-                    
-                        h.SetBinContent( h.FindBin( 0.5*sum(pt_avg_bin) ), mean_response ) 
-                        h.SetBinError  ( h.FindBin( 0.5*sum(pt_avg_bin) ), mean_response_error ) 
+                        if mean_response_error/mean_response<0.1:
+                        
+                            h.SetBinContent( h.FindBin( 0.5*sum(pt_avg_bin) ), mean_response ) 
+                            h.SetBinError  ( h.FindBin( 0.5*sum(pt_avg_bin) ), mean_response_error ) 
 
-                response[var][s.name][eta_bin][sign].style = styles.lineStyle( 
-                    color = ROOT.kBlack if s.name == data.name else ROOT.kRed,
-                    dashed = (var == 'A'),
-                    errors = True
-                    )
-                response[var][s.name][eta_bin][sign].legendText = s.name + "( %s )" % ("Bal." if var=='A' else "MPF") 
+                    response[var][s.name][eta_bin][sign].style = styles.lineStyle( 
+                        color = ROOT.kBlack if s.name == data.name else ROOT.kRed,
+                        dashed = (var == 'A'),
+                        errors = True
+                        )
+                    response[var][s.name][eta_bin][sign].legendText = s.name + "( %s )" % ("Bal." if var=='A' else "MPF")
+
+    pickle.dump( response, file(response_results_file, 'w') ) 
+    logger.info( 'Written response results to %s', response_results_file )
 
 for i_aeta in range(len(abs_eta_thresholds)-1):
 

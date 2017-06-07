@@ -66,6 +66,6 @@ def gaussianFit( shape, isData, var_name, fit_plot_directory, fit_filename):
     c.SaveAs(os.path.join( fit_plot_directory, fit_filename+".png"))
 
     mean_asymmetry        = gauss_mean.getVal()
-    mean_asymmetry_error  = shape.GetMeanError()
+    mean_asymmetry_error  = gauss_mean.getError()
 
     return mean_asymmetry, mean_asymmetry_error
