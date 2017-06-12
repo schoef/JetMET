@@ -1,17 +1,11 @@
 #!/usr/bin/env python
-''' Analysis script for L3 residuals (Z balancing) 
+''' Analysis script for L2 residual response measurement 
 '''
 #
-# Standard imports and bateh mode
+# Standard imports and batch mode
 #
 import ROOT
 ROOT.gROOT.SetBatch(True)
-
-# RooFit
-ROOT.gSystem.Load("libRooFit.so")
-ROOT.gSystem.Load("libRooFitCore.so")
-ROOT.gROOT.SetStyle("Plain") # Not sure this is needed
-ROOT.gSystem.SetIncludePath( "-I$ROOFITSYS/include/" )
 
 import itertools
 import os
@@ -39,13 +33,14 @@ argParser.add_argument('--triggers',           action='store',      default='DiP
 argParser.add_argument('--ptBinningVar',       action='store',      default='ave',           nargs='?', choices=['ave', 'tag'], help="jet pT binning variable (pT avg or pT tag)" )
 argParser.add_argument('--era',                action='store',      default='Run2016',       nargs='?', choices=['Run2016', 'Run2016BCD', 'Run2016EFearly', 'Run2016FlateG', 'Run2016H'], help="era" )
 argParser.add_argument('--phEF',               action='store',      default= -1,             type=float, help="max phEF in probe jet" )
+argParser.add_argument('--alpha',              action='store',      default= 0.3,            type=float, help="alpha requirement" )
 argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?')#, default = True)
 argParser.add_argument('--cleaned',                                 action='store_true',     help='Apply jet cleaning in data')#, default = True)
 argParser.add_argument('--skipResponsePlots',                       action='store_true',     help='Skip A/B plots?')#, default = True)
 argParser.add_argument('--overwrite',                               action='store_true',     help='Overwrite results.pkl?')
 argParser.add_argument('--useFit',                                  action='store_true',     help='Use a fit to determine the response')#, default= True
 argParser.add_argument('--metOverSumET',                            action='store_true',     help='add MET/sumET<0.2 cut')#, default= True
-argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v4',  help="subdirectory for plots")
+argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v7',  help="subdirectory for plots")
 args = argParser.parse_args()
 
 if args.ptBinningVar == 'tag':
@@ -66,7 +61,7 @@ if args.metOverSumET:
 if args.small:
     args.plot_directory += '_small'
 
-plot_directory = os.path.join( user_plot_directory, args.plot_directory, args.era, args.triggers )
+plot_directory = os.path.join( user_plot_directory, args.plot_directory, args.triggers, args.era, 'a%i'%(100*args.alpha) )
 
 # Lumi for MC
 lumi = 35.9
@@ -141,7 +136,6 @@ elif args.era == 'Run2016FlateG':
 elif args.era == 'Run2016H':
     data = JetHT_Run2016H
 
-
 if args.triggers=='DiPFJetAve':
     triggers = [ 
         "HLT_DiPFJetAve40",
@@ -183,9 +177,10 @@ mc = QCD_Pt
 samples = [ mc, data ]
 
 selection = [
-   ("tgb", "abs(Jet_eta[tag_jet_index])<1.3"),
-   ("btb", "cos(Jet_phi[tag_jet_index] - Jet_phi[probe_jet_index]) < cos(2.7)"),
-   ("a30", "alpha<0.3"), 
+   ("tgb",                      "abs(Jet_eta[tag_jet_index])<1.3"),
+   ("btb",                      "cos(Jet_phi[tag_jet_index] - Jet_phi[probe_jet_index]) < cos(2.7)"),
+   ("a%i"% ( 100*args.alpha ),  "alpha<%f"%args.alpha), 
+   ("failIdVeto",               "Sum$(JetFailId_pt*(JetFailId_pt>30))<30"), 
 ]
 
 if args.phEF>0:
@@ -206,7 +201,6 @@ if args.cleaned:
     mc.addSelectionString( jet_cleaning )
 
 
-#colors = [ ROOT.kRed, ROOT.kBlue, ROOT.kGreen, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet,  ROOT.kCyan, ROOT.kOrange - 1, ROOT.kViolet - 1, ROOT.kCyan + 3]
 colors = [ j+1 for j in range(0,9) ] + [ j+31 for j in range(9,18) ]
 
 from JetMET.JEC.L2res.thresholds import pt_avg_thresholds, pt_avg_bins, eta_thresholds, abs_eta_thresholds
@@ -240,13 +234,6 @@ else:
 
             logger.info("Using %s %s", varString_, weight_ ) 
             s.chain.Draw( varString_, weight_, 'goff')
-            
-            #logger.info( "Make TProfile2D for sample %s and variable %s", s.name, var )
-            #p[var][s.name] = ROOT.TProfile2D( "p_%s_%s"%( var, s.name ), "p_%s_%s"%( var, s.name ),\
-            #        len(eta_thresholds)-1, array.array('d', eta_thresholds), 
-            #        len(pt_avg_thresholds) - 1, array.array('d', pt_avg_thresholds)  
-            #    )
-            #s.chain.Draw(pt_binning_variable+":Jet_eta[probe_jet_index]:%s>>p_%s,%s"%( var, var, s.name ),  "("+s.selectionString+")*("+s.combineWithSampleWeight(weightString)+")", 'goff')
 
     if not os.path.exists(os.path.dirname( results_file )): os.makedirs( os.path.dirname( results_file ) ) 
     pickle.dump( ( h, p ), file( results_file, 'w' ) )
@@ -330,7 +317,7 @@ else:
                         h     = response[var][s.name][eta_bin][sign]
 
                         if (args.useFit):
-                            mean_asymmetry, mean_asymmetry_error = gaussianFit( 
+                            mean_asymmetry, mean_asymmetry_error = GaussianFit( 
                                 shape               = shape,
                                 isData              = s.name == data.name,
                                 var_name            = "%s-symmetry" % var, 

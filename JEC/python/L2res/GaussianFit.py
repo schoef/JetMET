@@ -58,11 +58,10 @@ def GaussianFit( shape, isData, var_name, fit_plot_directory, fit_filename):
     chi2_text.SetLineColor(0)
     frame.addObject(chi2_text)
 
-    ## Dummy I don't know how to save them without hacking / butchering the code.
     c = ROOT.TCanvas()
     frame.Draw()
     if not os.path.exists(fit_plot_directory): os.makedirs(fit_plot_directory)
-    c.SaveAs(os.path.join( fit_plot_directory, fit_filename+".pdf"))
+    # c.SaveAs(os.path.join( fit_plot_directory, fit_filename+".pdf"))
     c.SaveAs(os.path.join( fit_plot_directory, fit_filename+".png"))
 
     mean_asymmetry        = gauss_mean.getVal()
