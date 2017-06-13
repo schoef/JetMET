@@ -157,7 +157,7 @@ else:
     lumiScaleFactor = targetLumi/float(sample.normalization) 
     branchKeepStrings = branchKeepStrings_DATAMC + branchKeepStrings_MC
 
-skimConds.append( getFilterCut( isData = False, badMuonFilters = "Moriond2017" ) ) # always apply MC version. Data version has 'weight>0' which isnot for master ntuples
+skimConds.append( getFilterCut( positiveWeight = False, badMuonFilters = "Moriond2017" ) ) # always apply MC version. Data version has 'weight>0' which isnot for master ntuples
 
 jetVars = ['pt/F', 'rawPt/F', 'eta/F', 'phi/F', 'id/I', 'btagCSV/F', 'area/F'] + jetMCInfo
 jetVarNames = [x.split('/')[0] for x in jetVars]

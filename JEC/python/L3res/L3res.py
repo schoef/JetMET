@@ -437,7 +437,7 @@ yields     = {}
 allPlots   = {}
 yields[args.mode] = {}
 
-data_selection = [getFilterCut(isData=True), getLeptonSelection(args.mode)]
+data_selection = [getFilterCut(positiveWeight=True), getLeptonSelection(args.mode)]
 if runrange is not None:
     data_selection.append( runrange )
 
@@ -478,7 +478,7 @@ for sample in all_mc_samples + [all_mc_combined]: #+[other_mc]
     sample.scale          = lumi_scale
     sample.read_variables = ['reweightDilepTriggerBackup/F','reweightLeptonSF/F','reweightPU36fb/F', 'nTrueInt/F', "JetGood[pt/F,eta/F,phi/F,area/F,btagCSV/F,rawPt/F,mcPt/F]"]
     sample.weight         = weight_mc 
-    sample.setSelectionString([getFilterCut(isData=False),  getLeptonSelection(args.mode)])
+    sample.setSelectionString([getFilterCut(positiveWeight=False),  getLeptonSelection(args.mode)])
 
 mc = [DY_sample, TTJets_sample] #, other_mc]
 stack             = Stack( mc,  data )

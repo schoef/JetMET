@@ -27,8 +27,8 @@ import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',           action='store',      default='INFO',          nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging" )
 argParser.add_argument('--era',                action='store',      default='Run2016',       nargs='?', choices=['Run2016', 'Run2016BCD', 'Run2016EFearly', 'Run2016FlateG', 'Run2016H'], help="era" )
-argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?')#, default = True)
-argParser.add_argument('--overwrite',                               action='store_true',     help='Overwrite results.pkl?')
+argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?', default = True)
+#argParser.add_argument('--overwrite',                               action='store_true',     help='Overwrite?')
 argParser.add_argument('--plot_directory',     action='store',      default='JEC/L1res',     help="subdirectory for plots")
 args = argParser.parse_args()
 
@@ -60,23 +60,22 @@ def drawObjects( dataMCScale, lumi ):
     return [tex.DrawLatex(*l) for l in lines] 
 
 ## Formatting for 1D plots
-#def draw1DPlots(plots, dataMCScale):
-#  for log in [ True]:
-#    plot_directory_ = os.path.join(plot_directory, ("log" if log else "") )
-#    for plot in plots:
-#      #if not max(l[0].GetMaximum() for l in plot.histos): continue # Empty plot
-#      p_drawObjects = map( lambda l:tex.DrawLatex(*l), getattr(plot, "drawObjects", [] ) )
-#
-#      plotting.draw(plot,
-#        plot_directory = plot_directory_,
-#        #ratio          = {'yRange':(0.6,1.4)} if len(plot.stack)>=2 else None,
-#        logX = False, logY = log, sorting = False,
-#        yRange         = (0.0003, "auto") if log else (0.001, "auto"),
-#        #scaling        = {0:1} if len(plot.stack)==2 else {},
-#        legend         = [ (0.15,0.91-0.035*5,0.95,0.91), 2 ],
-#        drawObjects    = drawObjects( dataMCScale , lumi ) + p_drawObjects
-#      )
-#
+def draw1DPlots(plots, dataMCScale):
+  for log in [ False, True ]:
+    plot_directory_ = os.path.join(plot_directory, ("log" if log else "lin") )
+    for plot in plots:
+      #if not max(l[0].GetMaximum() for l in plot.histos): continue # Empty plot
+      p_drawObjects = map( lambda l:tex.DrawLatex(*l), getattr(plot, "drawObjects", [] ) )
+      plotting.draw(plot,
+        plot_directory = plot_directory_,
+        #ratio          = {'yRange':(0.6,1.4)} if len(plot.stack)>=2 else None,
+        logX = False, logY = log, sorting = False,
+        yRange         = (0.0003, "auto") if log else (0, "auto"),
+        #scaling        = {0:1} if len(plot.stack)==2 else {},
+        legend         = [ (0.15,0.91-0.035*5,0.95,0.91), 2 ],
+        drawObjects    = drawObjects( dataMCScale , lumi ) + p_drawObjects
+      )
+
 ## Formatting for 1D plots
 #def drawPtResponse(plots, dataMCScale):
 #  for log in [ True]:
@@ -114,6 +113,7 @@ mc = SingleNeutrino
 samples = [ mc, data ]
 
 selection = [
+    ( "filter",  getFilterCut( positiveWeight = False, badMuonFilters = "Moriond2017" ) ),  
 ]
 
 for s in samples:   
@@ -121,20 +121,133 @@ for s in samples:
     if args.small:
         s.reduceFiles( to = 1 )
 
-# Add trigger selection to data
-data.addSelectionString( getFilterCut( isData = False, badMuonFilters = "Moriond2017" ) ) # always apply MC version. Data version has 'weight>0' which is not for master ntuples
+## relevant branches:
+#nOffset nOffset/I
+#Offset_e_lost   Component e_lost for offset density
+#Offset_e_all    Component e_all for offset density
+#Offset_e_unm    Component e_unm for offset density
+#Offset_e_ch Component e_ch for offset density
+#Offset_e_nh Component e_nh for offset density
+#Offset_e_ph Component e_ph for offset density
+#Offset_e_ele    Component e_ele for offset density
+#Offset_e_mu Component e_mu for offset density
+#Offset_e_hhf    Component e_hhf for offset density
+#Offset_e_ehf    Component e_ehf for offset density
+#Offset_et_all   Component et_all for offset density
+#Offset_e_rms    Component e_rms for offset density
 
 colors = [ j+1 for j in range(0,9) ] + [ j+31 for j in range(9,18) ]
+texNames = {
+    'Offset_e_ch':"charged", 
+    'Offset_e_nh':"neutrals", 
+    'Offset_e_ph':"photons"
+}
 
-#h[var][s.name] = ROOT.TH3D( "h_%s_%s"%( var, s.name), "h_%s_%s"%(var, s.name),\
-#        len(thresholds) - 1, array.array('d', thresholds), 
-#        len(eta_thresholds)-1, array.array('d', eta_thresholds), 
-#        len(pt_avg_thresholds) - 1, array.array('d', pt_avg_thresholds)  
-#    )
+# Eta thresholds (need to be aligned with ntuple production step)
+from JetMET.JEC.L1res.thresholds import offset_eta_thresholds 
+
+# rather awkward way to use TTree Draw
+
+binning_int = [ len(offset_eta_thresholds) - 1, 0, len(offset_eta_thresholds) - 1 ]
+histos = []
+for i_offset, offset in enumerate(["Offset_e_ch", "Offset_e_nh", "Offset_e_ph"]):
+
+    logger.info( "Draw: Obtain offset histo %s for sample %s", offset, mc.name )
+
+    # make histo with x-axis being the fixed-size vector index Iteration$ that counts from 0 to size-1
+    h       = mc.get1DHistoFromDraw("Iteration$", binning = binning_int, weightString = offset)
+
+    # make new histogram with same number of bins but proper eta thresholds
+    h_eta   = ROOT.TH1D(h.GetName()+'_eta', h.GetTitle(), len(offset_eta_thresholds)-1, array.array('d', offset_eta_thresholds) )
+    for i in range( h.GetNbinsX() + 1 ):
+        h_eta.SetBinContent(i, h.GetBinContent( i ) )
+        h_eta.SetBinError(i,   h.GetBinError( i ) )
+
+    # divide by nEvents
+    h_eta.Scale(1./h.GetEntries())
+    h_eta.legendText = texNames[offset] if texNames.has_key(offset) else offset 
+    h_eta.style  = styles.lineStyle(colors[i_offset], errors = True )
+    histos.append( [h_eta] )
+
+plot = Plot.fromHisto(name = "Offsets_energy_draw", histos = histos, texX = "#eta", texY = "Offset energy" )
+draw1DPlots( [plot], 1. )
+
+
+# using event loop
+
 #
-#weight_ = "("+s.selectionString+")*("+s.combineWithSampleWeight(weightString)+")"
-#varString_ = pt_binning_variable+":Jet_eta[probe_jet_index]:%s>>h_%s_%s"%( var, var, s.name )
+# Read variables
 #
-#logger.info("Using %s %s", varString_, weight_ ) 
-#s.chain.Draw( varString_, weight_, 'goff')
+variables = [
+        "evt/l", "run/I", "lumi/I", 
+        "nOffset/I", "Offset[e_lost/F,e_all/F,e_unm/F,e_ch/F,e_nh/F,e_ph/F,e_ele/F,e_mu/F,e_hhf/F,e_ehf/F,et_all/F,e_rms/F]"
+    ]
+
 #
+# Execution sequence
+#
+
+sequence = []
+
+def offsetStuff( event, sample ):
+    # Add here any calculations you might want to do in the loop
+
+    #print event.evt, event.nOffset
+
+    # dummy
+    event.dummy = event.nOffset
+
+    return
+
+sequence.append( offsetStuff )
+
+max_events = 500 if args.small else None
+
+histos = {}
+
+offsets = ["Offset_e_ch", "Offset_e_nh", "Offset_e_ph"]
+
+# to speed up filling enumerate eta bins
+eta_bins = [ (i, 0.5*(offset_eta_thresholds[i]+offset_eta_thresholds[i+1])) for i in xrange( len(offset_eta_thresholds)-1) ]
+
+for sample in samples:
+
+    # Make ROOT histos
+    histos[sample.name] = { offset:  
+        ROOT.TH1D( '%s_%s_eta' % (sample.name, offset), '%s_%s_eta' % (sample.name, offset), 
+                   len(offset_eta_thresholds)-1, array.array('d', offset_eta_thresholds) )  for offset in offsets }
+
+    # TreeReader for sample
+    reader = sample.treeReader( 
+        variables = map( TreeVariable.fromString, variables ) , 
+        selectionString = "1"
+        )
+    logger.info( "Loop: Obtain offset histos %s for sample %s", ','.join(offsets), sample.name )
+
+    reader.start()
+
+    
+    count = 0
+    while reader.run():
+
+        for bin_i, bin_eta in eta_bins: 
+            for offset in offsets:
+                # Fill histogram with the Offset energy in the bin bin_i/bin_eta
+                histos[sample.name][offset].Fill( bin_eta, getattr( reader.event, offset )[bin_i] )
+
+        count+=1
+        if max_events is not None and max_events>0 and count>=max_events:break
+
+
+    # divide by nEvents
+    for i_offset, offset in enumerate( offsets ):
+        h = histos[sample.name][offset] 
+        h.Scale(1./count)
+        h.legendText = texNames[offset] if texNames.has_key(offset) else offset 
+        h.style  = styles.lineStyle(colors[i_offset], errors = True )
+
+plot = Plot.fromHisto(name = "Offsets_energy_loop", 
+    histos = [ [ histos[mc.name][offset] ] for offset in offsets ], 
+    texX = "#eta", texY = "Offset energy" )
+
+draw1DPlots( [ plot ], 1. )

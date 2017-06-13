@@ -217,7 +217,7 @@ for index, mode in enumerate(allModes):
   if   mode=="mumu": data.texName = "data (2 #mu)"
   elif mode=="ee":   data.texName = "data (2 e)"
 
-  data.setSelectionString([getFilterCut(isData=True), getLeptonSelection(mode)])
+  data.setSelectionString([getFilterCut(positiveWeight=True), getLeptonSelection(mode)])
   data.name           = "data"
   data.style          = styles.errorStyle(ROOT.kBlack)
   data.weight         = weight_data 
@@ -242,7 +242,7 @@ for index, mode in enumerate(allModes):
     sample.read_variables +=["JetGood[%s]"%( ",".join( jetMCBranches ) )]
    #sample.weight         = lambda event, sample: event.reweightLeptonSF*event.reweightLeptonHIPSF*event.reweightDilepTriggerBackup*nTrueInt27fb_puRW(event.nTrueInt)*event.reweightBTag_SF
     sample.weight         = weight_mc 
-    sample.setSelectionString([getFilterCut(isData=False),  getLeptonSelection(mode)])
+    sample.setSelectionString([getFilterCut(positiveWeight=False),  getLeptonSelection(mode)])
 
   stack          = Stack(mc,  data )
 
