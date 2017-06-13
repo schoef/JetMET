@@ -22,6 +22,10 @@ import JetMET.tools.user as user
 import JetMET.tools.helpers as helpers
 from JetMET.tools.objectSelection        import getFilterCut, getJets, jetVars
 
+# Hot jet veto
+from JetMET.tools.hotJetVeto import hotJetVeto
+default_hotJetVeto = hotJetVeto()
+
 # JEC on the fly, tarball configuration
 from JetMET.JetCorrector.JetCorrector import JetCorrector
 
@@ -102,7 +106,7 @@ if isMC:
     puRWDown    = getReweightingFunction(data="PU_Run2016_36000_XSecDown",    mc='Summer16')
     puRWUp      = getReweightingFunction(data="PU_Run2016_36000_XSecUp",      mc='Summer16')
 
-if options.small: options.targetDir+='_small'
+if options.small: options.targetDir = os.path.join( options.targetDir, 'small' )
 output_directory = os.path.join( options.targetDir, options.processingEra, options.skim, sample.name )
 
 if os.path.exists(output_directory) and options.overwrite:
@@ -176,7 +180,7 @@ if isMC:
     read_variables+= map( TreeVariable.fromString, [ 'nTrueInt/F', 'xsec/F', 'genWeight/F'] )
 
 new_variables += [\
-    "B/F", "A/F", "pt_avg/F", "chs_MEx_corr/F", "chs_MEy_corr/F", "chs_MEt_corr/F", "chs_MEphi_corr/F", "alpha/F", "tag_jet_index/I", "probe_jet_index/I", "third_jet_index/I", 'Jet[pt_corr/F]'
+    "B/F", "A/F", "pt_avg/F", "chs_MEx_corr/F", "chs_MEy_corr/F", "chs_MEt_corr/F", "chs_MEphi_corr/F", "alpha/F", "tag_jet_index/I", "probe_jet_index/I", "third_jet_index/I", 'Jet[pt_corr/F,isHot/I]'
 ]
 
 if isData: new_variables.extend( ['jsonPassed/I'] )
@@ -216,7 +220,7 @@ def filler( event ):
 
     jets = getJets( r, jetColl="Jet", jetVars = jetVarNames)
 
-    event.nJetGood = len(jets) #FIXME
+    event.nJetGood = len(jets) 
     for iJet, j in enumerate(jets):
         # 'Corr' correction level: L1L2L3 L2res
         if sample.isData:
@@ -228,7 +232,8 @@ def filler( event ):
         
         # corrected jet
         j['pt_corr']    =  jet_corr_factor * j['rawPt'] 
-        event.Jet_pt_corr[iJet] = j['pt_corr'] #FIXME
+        event.Jet_pt_corr[iJet] = j['pt_corr'] 
+        event.Jet_isHot[iJet]   = not default_hotJetVeto.passVeto(eta = j['eta'], phi = j['phi'])
         # L1RC 
         j['pt_corr_RC'] =  jet_corr_factor_RC * j['rawPt'] 
 

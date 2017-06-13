@@ -27,7 +27,7 @@ import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',           action='store',      default='INFO',          nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging" )
 argParser.add_argument('--era',                action='store',      default='Run2016',       nargs='?', choices=['Run2016', 'Run2016BCD', 'Run2016EFearly', 'Run2016FlateG', 'Run2016H'], help="era" )
-argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?', default = True)
+argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?')#, default = True)
 #argParser.add_argument('--overwrite',                               action='store_true',     help='Overwrite?')
 argParser.add_argument('--plot_directory',     action='store',      default='JEC/L1res',     help="subdirectory for plots")
 args = argParser.parse_args()
