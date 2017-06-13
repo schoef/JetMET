@@ -13,7 +13,7 @@ ROOT.gSystem.SetIncludePath( "-I$ROOFITSYS/include/" )
 import logging
 logger = logging.getLogger(__name__)
 
-def GaussianFit( shape, isData, var_name, fit_plot_directory, fit_filename):
+def GaussianFit( shape, isData, var_name, fit_plot_directory, fit_filename = None):
     ''' Gaussian fit from Zeynep
     '''
 
@@ -58,11 +58,13 @@ def GaussianFit( shape, isData, var_name, fit_plot_directory, fit_filename):
     chi2_text.SetLineColor(0)
     frame.addObject(chi2_text)
 
-    c = ROOT.TCanvas()
-    frame.Draw()
-    if not os.path.exists(fit_plot_directory): os.makedirs(fit_plot_directory)
-    # c.SaveAs(os.path.join( fit_plot_directory, fit_filename+".pdf"))
-    c.SaveAs(os.path.join( fit_plot_directory, fit_filename+".png"))
+    if fit_filename is not None:
+        c = ROOT.TCanvas()
+        frame.Draw()
+        if not os.path.exists(fit_plot_directory): os.makedirs(fit_plot_directory)
+        # c.SaveAs(os.path.join( fit_plot_directory, fit_filename+".pdf"))
+        c.SaveAs(os.path.join( fit_plot_directory, fit_filename+".png"))
+        del c
 
     mean_asymmetry        = gauss_mean.getVal()
     mean_asymmetry_error  = gauss_mean.getError()

@@ -267,31 +267,6 @@ for var in [ "A", "B" ]:
                 projections[var][s.name]['abs_eta'][eta_bin][pt_avg_bin].Add( projections[var][s.name]['neg_eta'][eta_bin][pt_avg_bin] ) 
 
 
-            if not args.skipResponsePlots:
-                for sign in ['neg_eta', 'pos_eta', 'abs_eta']:
-                    histos = []
-                    for i_pt_avg_bin, pt_avg_bin in enumerate(pt_avg_bins):
-                        histos.append( projections[var][s.name][sign][eta_bin][pt_avg_bin].Clone())
-                        histos[-1].style = styles.lineStyle( colors[ i_pt_avg_bin ] ) 
-                        histos[-1].legendText = "%i #leq %s < %i" % ( pt_avg_bin[0], pt_binning_legendText, pt_avg_bin[1] )
-
-                        # Normalize to 1
-                        integral = histos[-1].Integral()
-                        if integral>0: histos[-1].Scale(1./integral)
-
-                    if sign    == 'pos_eta':
-                        eta_tex_string       = "%4.3f #leq #eta < %4.3f" % ( eta_bin ) 
-                    elif sign  == 'abs_eta':
-                        eta_tex_string       = "%4.3f #leq |#eta| < %4.3f" % ( eta_bin ) 
-                    elif sign  == 'neg_eta':
-                        eta_tex_string       = "%4.3f #leq #eta < %4.3f" % ( -eta_bin[1], -eta_bin[0] ) 
-
-                    name = "%s_%s_%s_%i_%i" % ( s.name.replace('_'+args.era, ''), var, sign, 1000*eta_bin[0], 1000*eta_bin[1] )
-                    plot = Plot.fromHisto( name, [ [histo] for histo in histos], texX = var, texY = "Number of Events" )    
-                    plot.drawObjects  = [ (0.2, 0.65, eta_tex_string ) ]
-                    plot.drawObjects += [ (0.75, 0.95, '%s-symmetry' % var ) ]
-                    draw1DPlots( [plot], 1.)
-
 
 response_results_file    = os.path.join( plot_directory, 'response_results.pkl' )
 if os.path.exists( response_results_file ):
