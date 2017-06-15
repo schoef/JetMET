@@ -137,34 +137,36 @@ def makeProjection( h, pt_avg_bin, eta_bin ):
                 result = h.ProjectionX(str(uuid.uuid1()) , bin_y, bin_y, bin_z, bin_z)
             else:
                 result.Add( h.ProjectionX(str(uuid.uuid1()) , bin_y, bin_y, bin_z, bin_z))
-            #logger.info( "Added %r %r for %r %r", eta_bin_, pt_avg_bin_, eta_bin, pt_avg_bin )
+            logger.info( "Added %r %r for %r %r", eta_bin_, pt_avg_bin_, eta_bin, pt_avg_bin )
 
     return result
 
 sample_names        = ['QCD_Pt', 'JetHT_Run2016H']
 
-pt_avg_bin = (51,1000)
+#pt_avg_bin = (299,365)
+pt_avg_bin = (230, 299)
 #eta_bin    = (-0.261,0.261)
 #eta_bin    = (2.5,3.139)
 #eta_bin    = (3.839, 5.191)
 
-alpha_thresholds = [0] + [alpha_values[0]-0.025] + [0.5*(alpha_values[i]+alpha_values[i+1]) for i in range( len(alpha_values)-1) ] + [ alpha_values[-1] + 0.025 ]
+alpha_thresholds = [0] + [alpha_values[0]-0.025] + [0.5*(alpha_values[i]+alpha_values[i+1]) for i in range( len(alpha_values)-1) ] + [ alpha_values[-1] + 0.025 ] #FIXME
 
 for eta_bin in [ 
-    (-5.191, -3.489),
-    (-3.489, -2.964),
-    (-2.964, -2.5),
-    (-2.5,   -2.172),
-    (-2.172, -1.305),
-    (-1.305, -0.783),
-    (-0.783,  0.0),
-    (0.0,     0.783),
-    (0.783,   1.305),
-    (1.305,   2.172),
-    (2.172,   2.5),
-    (2.5,     2.964),
-    (2.964,   3.489),
-    (3.489,   5.191),
+#    (-5.191, -3.489),
+#    (-3.489, -2.964),
+#    (-2.964, -2.5),
+#    (-2.5,   -2.172),
+#    (-2.172, -1.305),
+#    (-1.305, -0.783),
+#    (-0.783,  0.0),
+#    (0.0,     0.783),
+#    (0.783,   1.305),
+#    (1.305,   2.172),
+#    (2.172,   2.5),
+#    (2.5,     2.964),
+#    (2.964,   3.489),
+    (3.139,   3.489),
+#    (3.489,   5.191),
     ]:
     response       = {}
     response_ratio = {}
@@ -188,7 +190,7 @@ for eta_bin in [
                         isData              = isData,
                         var_name            = "%s-symmetry" % var, 
                         fit_plot_directory  = os.path.join( plot_directory, 'fit'), 
-                        fit_filename        = None #"fitresult_%s_a%i_%i_%i_pt_%i_%i_%s" % ( var, 100*alpha, 1000*eta_bin[0], 1000*eta_bin[1], pt_avg_bin[0], pt_avg_bin[1], sample_name ) 
+                        fit_filename        = "fitresult_%s_a%i_%i_%i_pt_%i_%i_%s" % ( var, 100*alpha, 1000*eta_bin[0], 1000*eta_bin[1], pt_avg_bin[0], pt_avg_bin[1], sample_name ) 
                         )
 
                 else:
@@ -198,7 +200,7 @@ for eta_bin in [
                 mean_response = (1 + mean_asymmetry)/(1 - mean_asymmetry)
                 mean_response_error = 2.*mean_asymmetry_error/(1 - mean_asymmetry)**2 # f(x) = (1+x)/(1-x) -> f'(x) = 2/(x-1)**2
 
-                logger.info( "sample %s var %s alpha %3.2f: mean = %5.4f +/- %5.4f", sample_name, var, alpha, mean_response, mean_response_error ) 
+                logger.info( "sample %s var %s alpha %3.2f: mean response %5.4f +/- %5.4f asymmetry %5.4f +/- %5.4f", sample_name, var, alpha, mean_response, mean_response_error, mean_asymmetry, mean_asymmetry_error) 
 
                 b = response[var][sample_name].FindBin( alpha )
                 response[var][sample_name].SetBinContent( b, mean_response )

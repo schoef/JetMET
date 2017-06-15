@@ -40,7 +40,7 @@ argParser.add_argument('--skipResponsePlots',                       action='stor
 argParser.add_argument('--overwrite',                               action='store_true',     help='Overwrite results.pkl?')
 argParser.add_argument('--useFit',                                  action='store_true',     help='Use a fit to determine the response')#, default= True
 argParser.add_argument('--metOverSumET',                            action='store_true',     help='add MET/sumET<0.2 cut')#, default= True
-argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v7',  help="subdirectory for plots")
+argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v6',  help="subdirectory for plots")
 args = argParser.parse_args()
 
 if args.ptBinningVar == 'tag':
@@ -183,6 +183,9 @@ selection = [
    ("failIdVeto",               "Sum$(JetFailId_pt*(JetFailId_pt>30))<30"), 
 ]
 
+if args.cleaned:
+    from JetMET.JEC.L2res.jet_cleaning import jet_cleaning
+    selection.append( ("jet_cleaning", jet_cleaning ) )
 if args.phEF>0:
     selection.append( ("phEFprobe", "abs(Jet_phEF[probe_jet_index])<%f" % args.phEF ) )
 if args.metOverSumET:
@@ -195,12 +198,6 @@ for s in samples:
 
 # Add trigger selection to data
 data.addSelectionString( "("+"||".join(triggers)+")")
-if args.cleaned:
-    from JetMET.JEC.L2res.jet_cleaning import jet_cleaning
-    data.addSelectionString( jet_cleaning )
-    mc.addSelectionString( jet_cleaning )
-
-
 colors = [ j+1 for j in range(0,9) ] + [ j+31 for j in range(9,18) ]
 
 from JetMET.JEC.L2res.thresholds import pt_avg_thresholds, pt_avg_bins, eta_thresholds, abs_eta_thresholds
@@ -265,7 +262,6 @@ for var in [ "A", "B" ]:
                 projections[var][s.name]['pos_eta'][eta_bin][pt_avg_bin] = h[var][s.name].ProjectionX("pos_%s_%s_%i_%i" % ( s.name, var, bin_y, bin_z ) , bin_y, bin_y, bin_z, bin_z)
                 projections[var][s.name]['neg_eta'][eta_bin][pt_avg_bin] = h[var][s.name].ProjectionX("neg_%s_%s_%i_%i" % ( s.name, var, neg_bin_y, bin_z ) , neg_bin_y, neg_bin_y, bin_z, bin_z)
                 projections[var][s.name]['abs_eta'][eta_bin][pt_avg_bin].Add( projections[var][s.name]['neg_eta'][eta_bin][pt_avg_bin] ) 
-
 
 
 response_results_file    = os.path.join( plot_directory, 'response_results.pkl' )
