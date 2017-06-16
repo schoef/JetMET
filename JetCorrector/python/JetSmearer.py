@@ -17,7 +17,7 @@ from JetMET.tools.helpers import wget
 
 class JetSmearer:
 
-    data_directory   = "$CMSSW_BASE/src/JetMET/JetSmearer/data/jer"
+    data_directory   = "$CMSSW_BASE/src/JetMET/JetCorrector/data/jer"
     downloadurl      = "https://raw.githubusercontent.com/cms-jet/JRDatabase/master/textFiles"
 
     parametrization = "{1 JetEta 0 None ScaleFactor}"
@@ -52,7 +52,12 @@ class JetSmearer:
         self.make_resolution_object( res_txtfile )
     
     def make_resolution_object( self, txtfile ):
-        self.resolution_object = ROOT.JME.JetResolutionObject( txtfile )
+        try:
+            self.resolution_object = ROOT.JME.JetResolutionObject( txtfile )
+        except TypeError:
+            logger.warning( "Problem with %s", txtfile )
+            raise TypeError
+
         self.p                 = ROOT.JME.JetParameters()
 
     def get_jet_resolution( self, pt, eta, rho ):
@@ -88,49 +93,53 @@ class JetSmearer:
         n = bisect.bisect_left( self.eta_thresholds, eta )
         return self.sf_data[n][2:]
 
-    def scaling_pt( self, pt, mcPt, eta, rho):
+    def scaling_correction( self, pt, mcPt, eta, rho):
         ''' Get JER varied pt values according to the scaling recipe
         '''
         jer = self.get_jet_resolution( pt, eta, rho )
         sf  = self.get_SF( eta )
         if jer is not None and abs(pt-mcPt) < 3*pt*jer:
-            return self.__scaling_pt( pt, mcPt, sf )
+            return self.__scaling_correction( pt, mcPt, sf )
         else:
-            return [ pt for s in sf ]
+            return [ 1 for s in sf ]
 
     @staticmethod
-    def __scaling_pt( pt, mcPt, sf) :
-        return [ max(0, pt + (s - 1)*(pt - mcPt)) for s in sf ]
+    def __scaling_correction( pt, mcPt, sf) :
+        return [ max(0, 1 + (s - 1)*(1 - mcPt/(1.0*pt))) for s in sf ]
 
-    def stochastic_pt( self, pt, eta, rho ):
+    def stochastic_correction( self, pt, eta, rho ):
         ''' Get JER varied pt values according to the stochastic recipe
         '''
         jer  = self.get_jet_resolution( pt, eta, rho )
         sf   = self.get_SF( eta )
-        return self.__stochastic_pt( pt, jer, sf )
+        return self.__stochastic_correction( pt, jer, sf )
 
     @staticmethod
-    def __stochastic_pt( pt, jer, sf ):
+    def __stochastic_correction( pt, jer, sf ):
         if jer is not None: 
             rand = random.gauss(0, jer)
-            return [ pt*(1 + rand*sqrt(max(0, s**2 - 1))) for s in sf ] 
+            return [ (1 + rand*sqrt(max(0, s**2 - 1))) for s in sf ] 
         else:
-            return [ pt for s in sf ]
+            return [ 1 for s in sf ]
 
-    def hybrid_pt( self, pt, mcPt, eta, rho ):
+    def hybrid_correction( self, pt, mcPt, eta, rho ):
         ''' Get JER varied pt values according to the hybrid recipe
         '''
         jer  = self.get_jet_resolution( pt, eta, rho )
         sf   = self.get_SF( eta )
+
+        #logger.debug( "Jet pt %3.2f mcPt %3.2f, eta %3.2f rho %3.2f. JER %4.3f SF %r", pt, mcPt, eta, rho, jer, sf )
         if jer is not None:
             if abs(pt-mcPt) < 3*pt*jer:
-                return self.__scaling_pt( pt, mcPt, sf )
+                #logger.debug( "Doing scaling")
+                return self.__scaling_correction( pt, mcPt, sf )
             else:
-                return self.__stochastic_pt( pt, jer, sf )
+                #logger.debug( "Doing stochastic")
+                return self.__stochastic_correction( pt, jer, sf )
         else:
-            return [ pt for s in sf ]
+            return [ 1 for s in sf ]
 
-    def del( self ):
+    def delete( self ):
         ''' I don't know why this is needed and why it needs to be called before exit.
             Destructur segfaults on exit. Doing nothing segfaults on exit.
         '''
