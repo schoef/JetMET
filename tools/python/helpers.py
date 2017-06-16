@@ -3,6 +3,8 @@ import ROOT
 from math import pi, sqrt, cos, sin, sinh, log, cosh
 from array import array
 import itertools
+import urllib
+import os
 
 # Logging
 import logging
@@ -12,6 +14,15 @@ logger = logging.getLogger(__name__)
 ROOT.gROOT.LoadMacro("$CMSSW_BASE/src/JetMET/tools/scripts/tdrstyle.C")
 ROOT.setTDRStyle()
 mZ=91.1876
+
+def wget( source, target ):
+    ''' Download source to target and make directories
+    '''
+    if not os.path.exists( os.path.dirname( target ) ):
+        os.makedirs( os.path.dirname( target ) )
+
+    urllib.urlretrieve( source, target )
+
 
 def deltaPhi(phi1, phi2):
     dphi = phi2-phi1

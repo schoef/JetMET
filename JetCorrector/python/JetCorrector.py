@@ -2,7 +2,6 @@
 '''
 # Standard imports
 import os
-import urllib
 import tarfile
 import ROOT
 
@@ -11,13 +10,7 @@ import ROOT
 import logging
 logger = logging.getLogger(__name__)
 
-def wget( source, target ):
-    ''' Download source to target and make directories
-    '''
-    if not os.path.exists( os.path.dirname( target ) ):
-        os.makedirs( os.path.dirname( target ) )
-
-    urllib.urlretrieve( source, target )
+from JetMET.tools.helpers import wget
 
 correction_levels_data  = [ 'L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual' ]
 correction_levels_mc    = [ 'L1FastJet', 'L2Relative', 'L3Absolute' ]
@@ -26,7 +19,6 @@ class JetCorrector:
 
     data_directory   = "$CMSSW_BASE/src/JetMET/JetCorrector/data/"
     extension        = "tar.gz"
-
 
     def __init__( self, iovs ):
 

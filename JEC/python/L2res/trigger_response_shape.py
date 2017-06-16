@@ -61,7 +61,6 @@ def draw1DPlots(plots, dataMCScale):
         yRange         = (0.0003, "auto") if log else (0.001, "auto"),
         legend         = [ (0.15,0.91-0.04*len(plot.histos),0.95,0.91), 2],
         drawObjects    = drawObjects( dataMCScale , lumi ) + p_drawObjects  )
-
 #
 # Logger
 #
