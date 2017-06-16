@@ -10,6 +10,6 @@ eta_thresholds_neg = [-x for x in abs_eta_thresholds[1:]]
 eta_thresholds_neg.reverse()
 eta_thresholds = eta_thresholds_neg + abs_eta_thresholds 
 
-#pt_avg_thresholds = [51,73,129,163,230,299,365,435,566,1000]
-pt_avg_thresholds = [50,80,130,170,230,300,370,440,550,1000]
+pt_avg_thresholds = [51,73,129,163,230,299,365,435,566,1000]
+#pt_avg_thresholds = [50,80,130,170,230,300,370,440,550,1000]
 pt_avg_bins       = [(pt_avg_thresholds[i], pt_avg_thresholds[i+1]) for i in range( len( pt_avg_thresholds ) -1 ) ]

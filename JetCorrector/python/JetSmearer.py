@@ -141,6 +141,28 @@ class JetSmearer:
 
     def delete( self ):
         ''' I don't know why this is needed and why it needs to be called before exit.
-            Destructur segfaults on exit. Doing nothing segfaults on exit.
+            Destructur segfaults on exit. Doing nothing segfaults on exit
+            in call of JME::JetResolutionObject::Definition::~Definition()
         '''
         if self.resolution_object: self.resolution_object.__destruct__()
+
+#5  0x0000000009f7dcc0 in ?? ()
+#6  0x00007fbaf3913c9c in std::__shared_count<(__gnu_cxx::_Lock_policy)2>::~__shared_count() () from /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_26/lib/slc6_amd64_gcc530/libDataFormatsProvena
+#7  0x00007fbaf314b9c5 in JME::JetResolutionObject::Definition::~Definition() () from /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_26/lib/slc6_amd64_gcc530/libCondFormatsJetMETObjects.so
+#8  0x00007fbaf314a85f in ROOT::delete_JMEcLcLJetResolutionObject(void*) () from /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw/CMSSW_8_0_26/lib/slc6_amd64_gcc530/libCondFormatsJetMETObjects.so
+#9  0x00007fbafef12891 in TClass::Destructor(void*, bool) () from /cvmfs/cms.cern.ch/slc6_amd64_gcc530/cms/cmssw-patch/CMSSW_8_0_26_patch1/external/slc6_amd64_gcc530/lib/libCore.so
+#10 0x00007fbaff6d57af in PyROOT::op_dealloc_nofree(PyROOT::ObjectProxy*) () from /cvmfs/cms.cern.ch/slc6_amd64_gcc530/lcg/root/6.06.00-ikhhed6/lib/libPyROOT.so
+#11 0x00007fbaff6d5869 in PyROOT::(anonymous namespace)::op_dealloc(PyROOT::ObjectProxy*) () from /cvmfs/cms.cern.ch/slc6_amd64_gcc530/lcg/root/6.06.00-ikhhed6/lib/libPyROOT.so
+#12 0x00007fbb0591b802 in subtype_dealloc (self=0x7fbaf2f262f0) at Objects/typeobject.c:1030
+#13 0x00007fbb058fadcb in dict_dealloc (mp=0x7fbaf32aac58) at Objects/dictobject.c:1010
+#14 0x00007fbb058c7a4a in instance_dealloc (inst=0x7fbaf2f1e2d8) at Objects/classobject.c:681
+#15 0x00007fbb058fb7b7 in insertdict_by_entry (value=0x7fbb05a31a80 <_Py_NoneStruct>, ep=0x9a0ec30, hash=-4239209804666570030, key=0x7fbaff74e1b0, mp=0x7fbb057cf168) at Objects/dictobject.c:519
+#16 insertdict (mp=0x7fbb057cf168, key=0x7fbaff74e1b0, hash=-4239209804666570030, value=0x7fbb05a31a80 <_Py_NoneStruct>) at Objects/dictobject.c:556
+#17 0x00007fbb058fd147 in dict_set_item_by_hash_or_entry (ep=0x0, value=0x7fbb05a31a80 <_Py_NoneStruct>, hash=<optimized out>, key=<optimized out>, op=0x7fbb057cf168) at Objects/dictobject.c:765
+#18 PyDict_SetItem (op=opentry=0x7fbb057cf168, key=<optimized out>, value=valueentry=0x7fbb05a31a80 <_Py_NoneStruct>) at Objects/dictobject.c:818
+#19 0x00007fbb05901324 in _PyModule_Clear (m=<optimized out>) at Objects/moduleobject.c:139
+#20 0x00007fbb05982263 in PyImport_Cleanup () at Python/import.c:477
+#21 0x00007fbb05993bfe in Py_Finalize () at Python/pythonrun.c:458
+#22 0x00007fbb059aa01f in Py_Main (argc=<optimized out>, argv=<optimized out>) at Modules/main.c:665
+#23 0x00000036f181ed1d in __libc_start_main () from /lib64/libc.so.6
+#24 0x00000000004006b1 in _start ()

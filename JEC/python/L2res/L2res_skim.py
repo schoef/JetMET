@@ -28,6 +28,7 @@ default_hotJetVeto = hotJetVeto()
 
 # JEC on the fly, tarball configuration
 from JetMET.JetCorrector.JetCorrector import JetCorrector
+from JetMET.JetCorrector.JetSmearer   import JetSmearer
 
 #from StopsDilepton.tools.objectSelection import getMuons, getElectrons, muonSelector, eleSelector, getGoodLeptons, getGoodAndOtherLeptons,  getGoodBJets, getGoodJets, isBJet, jetId, isBJet, getGoodPhotons, getGenPartsAll, multiIsoWPInt
 
@@ -49,7 +50,7 @@ def get_parser():
     argParser.add_argument('--minNJobs', action='store', nargs='?', type=int, default=1, help="Minimum number of simultaneous jobs." )
     argParser.add_argument('--targetDir', action='store', nargs='?', type=str, default=user.skim_ntuple_directory, help="Name of the directory the post-processed files will be saved" ) #user.data_output_directory
     #argParser.add_argument('--version', action='store', nargs='?', type=str, default='V1', help="JEC version" )
-    argParser.add_argument('--processingEra', action='store', nargs='?', type=str, default='v6', help="Name of the processing era" )
+    argParser.add_argument('--processingEra', action='store', nargs='?', type=str, default='v7', help="Name of the processing era" )
     argParser.add_argument('--skim', action='store', nargs='?', type=str, default='default', help="Skim conditions to be applied for post-processing" )
     argParser.add_argument('--small', action='store_true', help="Run the file on a small sample (for test purpose), bool flag set to True if used", default = False)
     return argParser
@@ -100,6 +101,9 @@ logger.debug("Reading from CMG tuple %s which are %i files.", options.sample, le
 isData = 'Run2016' in sample.name 
 isMC   =  not isData 
 
+# JER smearing (don't forget to call delete() )
+smearer_mc = JetSmearer("Spring16_25nsV10_MC", "AK4PFchs") if isMC else None
+
 if isMC:
     from JetMET.tools.puReweighting import getReweightingFunction
     puRW        = getReweightingFunction(data="PU_Run2016_36000_XSecCentral", mc='Summer16')
@@ -129,19 +133,20 @@ branchKeepStrings_DATAMC = [\
 #        "metNoHF_pt", "metNoHF_phi",
 #        "puppiMet_pt","puppiMet_phi","puppiMet_sumEt","puppiMet_rawPt","puppiMet_rawPhi","puppiMet_rawSumEt",
     "Flag_*","HLT_*",
-#        "nDiscJet", "DiscJet_*",
-#        "nJetFailId", "JetFailId_*",
-#    "nLepGood", "LepGood_*",
-#    "nLepOther", "LepOther_*",
     "Jet_*",
     "JetFailId_*",
+    "Jet_pt", "Jet_eta", "Jet_phi", "Jet_area", "Jet_id", "Jet_btagCSV", "Jet_rawPt", "Jet_chHEF", "Jet_neHEF", "Jet_phEF", "Jet_eEF", "Jet_muEF", "Jet_HFHEF", "Jet_HFEMEF", "Jet_chHMult", "Jet_neHMult", "Jet_phMult", "Jet_eMult", "Jet_muMult", "Jet_HFHMult", "Jet_HFEMMult", 
+    "JetFailId_pt", "JetFailId_eta", "JetFailId_phi", "JetFailId_area", "JetFailId_id", "JetFailId_btagCSV", "JetFailId_rawPt", "JetFailId_chHEF", "JetFailId_neHEF", "JetFailId_phEF", "JetFailId_eEF", "JetFailId_muEF", "JetFailId_HFHEF", "JetFailId_HFEMEF", "JetFailId_chHMult", "JetFailId_neHMult", "JetFailId_phMult", "JetFailId_eMult", "JetFailId_muMult", "JetFailId_HFHMult", "JetFailId_HFEMMult", 
 ]
+
+
 #branches to be kept for data samples only
 branchKeepStrings_DATA = []
 #branches to be kept for MC samples only
 branchKeepStrings_MC = [\
     "nTrueInt", "genWeight", "xsec",  "lheHTIncoming",
-#        "ngenPartAll","genPartAll_*","ngenLep","genLep_*"
+    "Jet_mcPt", "Jet_mcPhi",
+    "JetFailId_mcPt", "JetFailId_mcPhi",
 ]
 
 if isMC:
@@ -178,10 +183,13 @@ read_variables += [\
 new_variables = [ 'weight/F']
 if isMC:
     read_variables+= map( TreeVariable.fromString, [ 'nTrueInt/F', 'xsec/F', 'genWeight/F'] )
+new_variables += [ "tag_jet_index/I", "probe_jet_index/I", "third_jet_index/I", 'Jet[pt_corr/F,pt_corr_jer/F,pt_jer_up/F,pt_corr_jer_down/F,isHot/I]' ]
 
-new_variables += [\
-    "B/F", "A/F", "pt_avg/F", "chs_MEx_corr/F", "chs_MEy_corr/F", "chs_MEt_corr/F", "chs_MEphi_corr/F", "alpha/F", "tag_jet_index/I", "probe_jet_index/I", "third_jet_index/I", 'Jet[pt_corr/F,isHot/I]'
-]
+for jer in ['', 'jer', 'jer_up', 'jer_down']:
+    postfix = '' if jer == '' else '_'+jer
+    new_variables += [\
+        "B%s/F"%postfix, "A%s/F"%postfix, "pt_avg%s/F"%postfix, "chs_MEx_corr%s/F"%postfix, "chs_MEy_corr%s/F"%postfix, "chs_MEt_corr%s/F"%postfix, "chs_MEphi_corr%s/F"%postfix, "alpha%s/F"%postfix
+    ]
 
 if isData: new_variables.extend( ['jsonPassed/I'] )
 
@@ -196,6 +204,9 @@ null_jet = {key:float('nan') for key in jetVars}
 null_jet['pt']         = 0
 null_jet['pt_corr']    = 0
 null_jet['pt_corr_RC'] = 0
+null_jet['pt_corr_jer']     = 0
+null_jet['pt_corr_jer_up']  = 0
+null_jet['pt_corr_jer_down']= 0
 null_jet['index'] = -1
 
 def filler( event ):
@@ -223,19 +234,35 @@ def filler( event ):
     event.nJetGood = len(jets) 
     for iJet, j in enumerate(jets):
         # 'Corr' correction level: L1L2L3 L2res
-        if sample.isData:
+        if isData:
             jet_corr_factor    =  jetCorrector_data.   correction( j['rawPt'], j['eta'], j['area'], r.rho, r.run )
             jet_corr_factor_RC =  jetCorrector_RC_data.correction( j['rawPt'], j['eta'], j['area'], r.rho, r.run )
         else:
             jet_corr_factor    =  jetCorrector_mc.     correction( j['rawPt'], j['eta'], j['area'], r.rho, r.run )  
             jet_corr_factor_RC =  jetCorrector_RC_mc.  correction( j['rawPt'], j['eta'], j['area'], r.rho, r.run )  
-        
+
         # corrected jet
         j['pt_corr']    =  jet_corr_factor * j['rawPt'] 
         event.Jet_pt_corr[iJet] = j['pt_corr'] 
         event.Jet_isHot[iJet]   = not default_hotJetVeto.passVeto(eta = j['eta'], phi = j['phi'])
+
         # L1RC 
         j['pt_corr_RC'] =  jet_corr_factor_RC * j['rawPt'] 
+
+        # JER
+        if isData:
+            jet_corr_factor_jer, jet_corr_factor_jer_up, jet_corr_factor_jer_down = (1., 1., 1.)
+        else:
+            jet_corr_factor_jer, jet_corr_factor_jer_up, jet_corr_factor_jer_down = smearer_mc.hybrid_correction( pt = j['pt_corr'], mcPt = j['mcPt'], eta = j['eta'], rho = r.rho ) 
+
+        j['pt_corr_jer']        =  jet_corr_factor_jer      * j['pt_corr'] 
+        j['pt_corr_jer_up']     =  jet_corr_factor_jer_up   * j['pt_corr'] 
+        j['pt_corr_jer_down']   =  jet_corr_factor_jer_down * j['pt_corr'] 
+
+        # keep correction factors for type-1 MET shifts below
+        j['corr_jer']        =  jet_corr_factor_jer       
+        j['corr_jer_up']     =  jet_corr_factor_jer_up    
+        j['corr_jer_down']   =  jet_corr_factor_jer_down  
 
     tag_jet, probe_jet = jets[:2]
 
@@ -253,27 +280,42 @@ def filler( event ):
     event.probe_jet_index   = probe_jet['index']
     event.third_jet_index   = third_jet['index']
 
-    event.pt_avg      = 0.5*( tag_jet['pt'] + probe_jet['pt'] )
-    event.alpha       = third_jet['pt']/event.pt_avg
-    event.A           = (probe_jet['pt'] - tag_jet['pt']) / (probe_jet['pt'] + tag_jet['pt'])
+    for jer in ['', 'jer', 'jer_up', 'jer_down']:
+        postfix = '' if jer == '' else '_'+jer
+        pt_corr = 'pt_corr' + postfix
 
-    # MET corrections
-    good_jets = filter( lambda j:j['pt_corr'] > 15, jets)
+        # PT avg
+        pt_avg      = 0.5*( tag_jet[pt_corr] + probe_jet[pt_corr] )
+        setattr( event, "pt_avg"+postfix, pt_avg )
 
-    # compute type-1 MET shifts for chs met L1L2L3 - L1RC (if 'noL1', then L1FastJets is divided out and L1RC is not applied )
-    type1_met_shifts = \
-                {'px' :sum( ( j['pt_corr_RC'] - j['pt_corr'] )*cos(j['phi']) for j in good_jets), 
-                 'py' :sum( ( j['pt_corr_RC'] - j['pt_corr'] )*sin(j['phi']) for j in good_jets) } 
+        setattr( event, 'alpha'+postfix,  third_jet[pt_corr]/pt_avg )
+        setattr( event, 'A'+postfix,     (probe_jet[pt_corr] - tag_jet[pt_corr]) / (probe_jet[pt_corr] + tag_jet[pt_corr]) )
 
-    # chs MET 
-    event.chs_MEx_corr = r.met_chsPt*cos(r.met_chsPhi) + type1_met_shifts['px']
-    event.chs_MEy_corr = r.met_chsPt*sin(r.met_chsPhi) + type1_met_shifts['py']
+        # MET corrections
+        good_jets = filter( lambda j:j[pt_corr] > 15, jets)
 
-    event.chs_MEt_corr    = sqrt(  event.chs_MEx_corr**2 + event.chs_MEy_corr**2 )
-    event.chs_MEphi_corr  = atan2( event.chs_MEy_corr, event.chs_MEx_corr )
+        # compute type-1 MET shifts for chs met L1L2L3 - L1RC 
+        jer_corr = 1 if jer=='' else j['corr' + postfix]
+        type1_met_shifts = \
+                    {'px' : jer_corr*sum( ( j['pt_corr_RC'] - j['pt_corr'] )*cos(j['phi']) for j in good_jets), 
+                     'py' : jer_corr*sum( ( j['pt_corr_RC'] - j['pt_corr'] )*sin(j['phi']) for j in good_jets) } 
 
-    # R(MPF)
-    event.B = ( event.chs_MEx_corr*tag_jet['pt']*cos(tag_jet['phi'])  + event.chs_MEy_corr*tag_jet['pt']*sin(tag_jet['phi']) ) / tag_jet['pt'] / (tag_jet['pt'] + probe_jet['pt'])
+        # chs MET 
+        chs_MEx_corr = r.met_chsPt*cos(r.met_chsPhi) + type1_met_shifts['px']
+        chs_MEy_corr = r.met_chsPt*sin(r.met_chsPhi) + type1_met_shifts['py']
+        setattr( event, "chs_MEx_corr"+postfix, chs_MEx_corr )
+        setattr( event, "chs_MEy_corr"+postfix, chs_MEy_corr )
+
+        chs_MEt_corr    = sqrt(  chs_MEx_corr**2 + chs_MEy_corr**2 )
+        chs_MEphi_corr  = atan2( chs_MEy_corr, chs_MEx_corr )
+        setattr( event, "chs_MEt_corr"+postfix, chs_MEt_corr )
+        setattr( event, "chs_MEphi_corr"+postfix, chs_MEphi_corr )
+
+        # R(MPF)
+        setattr( event, 
+                 'B'+postfix,  
+                 ( chs_MEx_corr*tag_jet[pt_corr]*cos(tag_jet['phi'])  + chs_MEy_corr*tag_jet[pt_corr]*sin(tag_jet['phi']) ) / tag_jet[pt_corr] / (tag_jet[pt_corr] + probe_jet[pt_corr])
+            )
 
 # Create a maker. Maker class will be compiled. This instance will be used as a parent in the loop
 treeMaker_parent = TreeMaker(
@@ -356,6 +398,9 @@ for ievtRange, eventRange in enumerate( eventRanges ):
     maker.clear()
 
 logger.info( "Converted %i events of %i, cloned %i",  convertedEvents, reader.nEvents , clonedEvents )
+
+# Avoid segfault
+if not isData: smearer_mc.delete()
 
 # Storing JSON file of processed events
 if isData:

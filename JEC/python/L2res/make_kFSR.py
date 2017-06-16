@@ -79,7 +79,7 @@ logger_rt = logger_rt.get_logger(args.logLevel, logFile = None)
 
 from JetMET.JEC.L2res.thresholds import pt_avg_thresholds, pt_avg_bins, eta_thresholds
 #temporary, rerunning atm:
-pt_avg_thresholds = [51,73,129,163,230,299,365,435,566,1000]
+#pt_avg_thresholds = [51,73,129,163,230,299,365,435,566,1000]
 pt_avg_bins       = [(pt_avg_thresholds[i], pt_avg_thresholds[i+1]) for i in range( len( pt_avg_thresholds ) -1 ) ]
 
 alpha_values = [0.1, 0.15, 0.25, 0.3, 0.35, 0.4, 0.45]
