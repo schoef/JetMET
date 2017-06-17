@@ -35,12 +35,12 @@ argParser.add_argument('--era',                action='store',      default='Run
 argParser.add_argument('--phEF',               action='store',      default= -1,             type=float, help="max phEF in probe jet" )
 argParser.add_argument('--alpha',              action='store',      default= 0.3,            type=float, help="alpha requirement" )
 argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?')#, default = True)
-argParser.add_argument('--cleaned',                                 action='store_true',     help='Apply jet cleaning in data')#, default = True)
+argParser.add_argument('--cleaned',                                 action='store_true',     help='Apply jet cleaning in data', default = True)
 argParser.add_argument('--skipResponsePlots',                       action='store_true',     help='Skip A/B plots?')#, default = True)
 argParser.add_argument('--overwrite',                               action='store_true',     help='Overwrite results.pkl?')
 argParser.add_argument('--useFit',                                  action='store_true',     help='Use a fit to determine the response')#, default= True
 argParser.add_argument('--metOverSumET',                            action='store_true',     help='add MET/sumET<0.2 cut')#, default= True
-argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v6',  help="subdirectory for plots")
+argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v8',  help="subdirectory for plots")
 args = argParser.parse_args()
 
 if args.ptBinningVar == 'tag':

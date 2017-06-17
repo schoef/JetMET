@@ -50,7 +50,7 @@ def get_parser():
     argParser.add_argument('--minNJobs', action='store', nargs='?', type=int, default=1, help="Minimum number of simultaneous jobs." )
     argParser.add_argument('--targetDir', action='store', nargs='?', type=str, default=user.skim_ntuple_directory, help="Name of the directory the post-processed files will be saved" ) #user.data_output_directory
     #argParser.add_argument('--version', action='store', nargs='?', type=str, default='V1', help="JEC version" )
-    argParser.add_argument('--processingEra', action='store', nargs='?', type=str, default='v7', help="Name of the processing era" )
+    argParser.add_argument('--processingEra', action='store', nargs='?', type=str, default='v8', help="Name of the processing era" )
     argParser.add_argument('--skim', action='store', nargs='?', type=str, default='default', help="Skim conditions to be applied for post-processing" )
     argParser.add_argument('--small', action='store_true', help="Run the file on a small sample (for test purpose), bool flag set to True if used", default = False)
     return argParser
@@ -90,7 +90,7 @@ defSkim = options.skim.lower().startswith('default')
 skimConds = []
 if defSkim:
     skimConds.append( "nJet>=2&&0.5*(Jet_pt[0]+Jet_pt[1])>50" )
-    skimConds.append( "Sum$(LepGood_pt>20&&abs(LepGood_eta)<2.5&&LepGood_relIso03<0.4)==0" )
+    skimConds.append( "Sum$(LepGood_pt>100&&abs(LepGood_relIso03<0.5))==0" )
 
 #Samples: Load samples
 maxN = 1 if options.small else None
@@ -133,20 +133,19 @@ branchKeepStrings_DATAMC = [\
 #        "metNoHF_pt", "metNoHF_phi",
 #        "puppiMet_pt","puppiMet_phi","puppiMet_sumEt","puppiMet_rawPt","puppiMet_rawPhi","puppiMet_rawSumEt",
     "Flag_*","HLT_*",
-    "Jet_*",
-    "JetFailId_*",
     "Jet_pt", "Jet_eta", "Jet_phi", "Jet_area", "Jet_id", "Jet_btagCSV", "Jet_rawPt", "Jet_chHEF", "Jet_neHEF", "Jet_phEF", "Jet_eEF", "Jet_muEF", "Jet_HFHEF", "Jet_HFEMEF", "Jet_chHMult", "Jet_neHMult", "Jet_phMult", "Jet_eMult", "Jet_muMult", "Jet_HFHMult", "Jet_HFEMMult", 
     "JetFailId_pt", "JetFailId_eta", "JetFailId_phi", "JetFailId_area", "JetFailId_id", "JetFailId_btagCSV", "JetFailId_rawPt", "JetFailId_chHEF", "JetFailId_neHEF", "JetFailId_phEF", "JetFailId_eEF", "JetFailId_muEF", "JetFailId_HFHEF", "JetFailId_HFEMEF", "JetFailId_chHMult", "JetFailId_neHMult", "JetFailId_phMult", "JetFailId_eMult", "JetFailId_muMult", "JetFailId_HFHMult", "JetFailId_HFEMMult", 
+    "DiscJet_pt", "DiscJet_eta", "DiscJet_phi", "DiscJet_area", "DiscJet_id", "DiscJet_btagCSV", "DiscJet_rawPt", "DiscJet_chHEF", "DiscJet_neHEF", "DiscJet_phEF", "DiscJet_eEF", "DiscJet_muEF", "DiscJet_HFHEF", "DiscJet_HFEMEF", "DiscJet_chHMult", "DiscJet_neHMult", "DiscJet_phMult", "DiscJet_eMult", "DiscJet_muMult", "DiscJet_HFHMult", "DiscJet_HFEMMult",
+    "LepGood_pt", "LepGood_eta", "LepGood_phi", "LepGood_pdgId", "LepGood_relIso03", "LepGood_dxy", "LepGood_dz",
 ]
-
 
 #branches to be kept for data samples only
 branchKeepStrings_DATA = []
 #branches to be kept for MC samples only
 branchKeepStrings_MC = [\
     "nTrueInt", "genWeight", "xsec",  "lheHTIncoming",
-    "Jet_mcPt", "Jet_mcPhi",
-    "JetFailId_mcPt", "JetFailId_mcPhi",
+    "Jet_mcPt", "Jet_mcPhi", "Jet_mcEta",
+    "JetFailId_mcPt", "JetFailId_mcPhi", "JetFailId_mcEta",
 ]
 
 if isMC:
@@ -317,7 +316,7 @@ def filler( event ):
                  ( chs_MEx_corr*tag_jet[pt_corr]*cos(tag_jet['phi'])  + chs_MEy_corr*tag_jet[pt_corr]*sin(tag_jet['phi']) ) / tag_jet[pt_corr] / (tag_jet[pt_corr] + probe_jet[pt_corr])
             )
 
-# Create a maker. Maker class will be compiled. This instance will be used as a parent in the loop
+# Create a maker. Maker class will be compiled. 
 treeMaker_parent = TreeMaker(
     sequence  = [ filler ],
     variables = [ TreeVariable.fromString(x) for x in new_variables ],
