@@ -1,8 +1,4 @@
 #!/bin/sh
-python response_draw.py --era=Run2016H --triggers=PFJet --phEF=0.5 &
-python response_draw.py --era=Run2016H --triggers=PFJet --phEF=0.6 &
-python response_draw.py --era=Run2016H --triggers=PFJet --phEF=0.7 &
-python response_draw.py --era=Run2016H --triggers=PFJet --phEF=0.8 &
-python response_draw.py --era=Run2016H --triggers=PFJet --phEF=0.9 &
-python response_draw.py --era=Run2016H --triggers=PFJet --phEF=0.99 &
 
+python make_L2res_results.py --alpha=0.30 --useFit --cleaned --era=Run2016H --triggers=DiPFJetAve & 
+python make_L2res_results.py --alpha=0.30 --useFit --jer jer --cleaned --era=Run2016H --triggers=DiPFJetAve &

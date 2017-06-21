@@ -40,4 +40,6 @@ L2res_master = {
                      master_ntuple_directory+"/L2res/QCD_Pt_2400to3200_TuneCUETP8M1_13TeV_pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1"],
 "QCD_Pt_3200toInf": [master_ntuple_directory+"/L2res/QCD_Pt_3200toInf_TuneCUETP8M1_13TeV_pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v3"],
 
+"JetHT_Run2016_sync": [master_ntuple_directory+"/L2res/JetHT_Run2016_sync/"],
+
 }

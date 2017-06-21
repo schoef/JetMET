@@ -30,7 +30,7 @@ argParser.add_argument('--etaBin',             action='store',      default=(0.,
 argParser.add_argument('--etaSign',            action='store',      default=0             ,  type = int,    choices = [-1,0,+1], help="sign of probe jet eta." )
 argParser.add_argument('--era',                action='store',      default='Run2016H',      nargs='?', choices=['Run2016', 'Run2016BCD', 'Run2016EFearly', 'Run2016FlateG', 'Run2016H'], help="era" )
 argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?')#, default = True)
-argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_trigger_v6',     help="subdirectory for plots")
+argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_trigger_v8',     help="subdirectory for plots")
 args = argParser.parse_args()
 
 if args.small:

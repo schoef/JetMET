@@ -27,7 +27,7 @@ argParser.add_argument('--sample',             action='store',      default='Run
 argParser.add_argument('--pt',                 action='store',      default='low',           nargs='?', choices=['low', 'high'], help="pt bin" )
 argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?', default = True)
 argParser.add_argument('--uncleaned',                               action='store_true',     help='Dont apply jet cleaning in data')#, default = True)
-argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_sanity_v6',     help="subdirectory for plots")
+argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_sanity_v8',     help="subdirectory for plots")
 args = argParser.parse_args()
 
 if not args.uncleaned:

@@ -36,6 +36,7 @@ argParser.add_argument('--phEF',               action='store',      default= -1,
 argParser.add_argument('--alpha',              action='store',      default= 0.3,            type=float, help="alpha requirement" )
 argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?')#, default = True)
 argParser.add_argument('--cleaned',                                 action='store_true',     help='Apply jet cleaning in data', default = True)
+argParser.add_argument('--jer',                action='store',      default='',              nargs='?', choices=['', 'jer', 'jer_up', 'jer_down'], help="JER variation" )
 argParser.add_argument('--skipResponsePlots',                       action='store_true',     help='Skip A/B plots?')#, default = True)
 argParser.add_argument('--overwrite',                               action='store_true',     help='Overwrite results.pkl?')
 argParser.add_argument('--useFit',                                  action='store_true',     help='Use a fit to determine the response')#, default= True
@@ -43,13 +44,19 @@ argParser.add_argument('--metOverSumET',                            action='stor
 argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v8',  help="subdirectory for plots")
 args = argParser.parse_args()
 
+if args.jer == '':
+    jer_postfix = ''
+else:
+    jer_postfix = '_'+args.jer    
+    args.plot_directory += jer_postfix
+
 if args.ptBinningVar == 'tag':
     args.plot_directory += '_tagJetPtBin'
     pt_binning_variable = 'Jet_pt[tag_jet_index]'
     pt_binning_legendText = 'p_{T,tag} '
 else:
     pt_binning_legendText = 'p_{T,avg} '
-    pt_binning_variable = "pt_avg"
+    pt_binning_variable = "pt_avg" + jer_postfix
 
 if args.phEF>0:
     args.plot_directory += '_phEF%i' % ( 100*args.phEF )
@@ -179,7 +186,7 @@ samples = [ mc, data ]
 selection = [
    ("tgb",                      "abs(Jet_eta[tag_jet_index])<1.3"),
    ("btb",                      "cos(Jet_phi[tag_jet_index] - Jet_phi[probe_jet_index]) < cos(2.7)"),
-   ("a%i"% ( 100*args.alpha ),  "alpha<%f"%args.alpha), 
+   ("a%i"% ( 100*args.alpha ),  "alpha%s<%f" % ( jer_postfix, args.alpha) ), 
    ("failIdVeto",               "Sum$(JetFailId_pt*(JetFailId_pt>30))<30"), 
 ]
 
@@ -227,7 +234,7 @@ else:
                 )
 
             weight_ = "("+s.selectionString+")*("+s.combineWithSampleWeight(weightString)+")"
-            varString_ = pt_binning_variable+":Jet_eta[probe_jet_index]:%s>>h_%s_%s"%( var, var, s.name )
+            varString_ = pt_binning_variable+":Jet_eta[probe_jet_index]:%s>>h_%s_%s"%( var+jer_postfix, var, s.name )
 
             logger.info("Using %s %s", varString_, weight_ ) 
             s.chain.Draw( varString_, weight_, 'goff')
@@ -266,7 +273,7 @@ for var in [ "A", "B" ]:
 
 response_results_file    = os.path.join( plot_directory, 'response_results.pkl' )
 if os.path.exists( response_results_file ):
-    response = pickle.load( response_results_file )
+    response = pickle.load(file( response_results_file ))
     logger.info( 'Loaded response results from %s', response_results_file )
 else:
     response = {} # results

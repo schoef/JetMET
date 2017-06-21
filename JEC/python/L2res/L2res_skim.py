@@ -50,7 +50,7 @@ def get_parser():
     argParser.add_argument('--minNJobs', action='store', nargs='?', type=int, default=1, help="Minimum number of simultaneous jobs." )
     argParser.add_argument('--targetDir', action='store', nargs='?', type=str, default=user.skim_ntuple_directory, help="Name of the directory the post-processed files will be saved" ) #user.data_output_directory
     #argParser.add_argument('--version', action='store', nargs='?', type=str, default='V1', help="JEC version" )
-    argParser.add_argument('--processingEra', action='store', nargs='?', type=str, default='v8', help="Name of the processing era" )
+    argParser.add_argument('--processingEra', action='store', nargs='?', type=str, default='v8_3', help="Name of the processing era" )
     argParser.add_argument('--skim', action='store', nargs='?', type=str, default='default', help="Skim conditions to be applied for post-processing" )
     argParser.add_argument('--small', action='store_true', help="Run the file on a small sample (for test purpose), bool flag set to True if used", default = False)
     return argParser
@@ -71,10 +71,15 @@ Summer16_03Feb2017_DATA = \
  (276831, 'Summer16_03Feb2017EF_V2_DATA' ),
  (278802, 'Summer16_03Feb2017G_V2_DATA' ),
  (280919, 'Summer16_03Feb2017H_V2_DATA')]
+#[(1,      'Summer16_23Sep2016BCDV4_DATA'), #FIXME For Anastasia sync
+# (276831, 'Summer16_23Sep2016EFV4_DATA' ),
+# (278802, 'Summer16_23Sep2016GV4_DATA' ),
+# (280919, 'Summer16_23Sep2016HV4_DATA')]
 
 Summer16_03Feb2017_MC = [(1, 'Summer16_03Feb2017_V1_MC') ]
 
-correction_levels_data  = [ 'L1FastJet', 'L2Relative', 'L3Absolute' ] # No residuals! 
+#correction_levels_data  = [ 'L1FastJet', 'L2Relative', 'L3Absolute', 'L2L3Residual' ] # No residuals! #FIXME for Anastasia sync
+correction_levels_data  = [ 'L1FastJet', 'L2Relative', 'L3Absolute' ]
 correction_levels_mc    = [ 'L1FastJet', 'L2Relative', 'L3Absolute' ]
 
 jetCorrector_data    = JetCorrector.fromTarBalls( Summer16_03Feb2017_DATA, correctionLevels = correction_levels_data )
@@ -137,6 +142,7 @@ branchKeepStrings_DATAMC = [\
     "JetFailId_pt", "JetFailId_eta", "JetFailId_phi", "JetFailId_area", "JetFailId_id", "JetFailId_btagCSV", "JetFailId_rawPt", "JetFailId_chHEF", "JetFailId_neHEF", "JetFailId_phEF", "JetFailId_eEF", "JetFailId_muEF", "JetFailId_HFHEF", "JetFailId_HFEMEF", "JetFailId_chHMult", "JetFailId_neHMult", "JetFailId_phMult", "JetFailId_eMult", "JetFailId_muMult", "JetFailId_HFHMult", "JetFailId_HFEMMult", 
     "DiscJet_pt", "DiscJet_eta", "DiscJet_phi", "DiscJet_area", "DiscJet_id", "DiscJet_btagCSV", "DiscJet_rawPt", "DiscJet_chHEF", "DiscJet_neHEF", "DiscJet_phEF", "DiscJet_eEF", "DiscJet_muEF", "DiscJet_HFHEF", "DiscJet_HFEMEF", "DiscJet_chHMult", "DiscJet_neHMult", "DiscJet_phMult", "DiscJet_eMult", "DiscJet_muMult", "DiscJet_HFHMult", "DiscJet_HFEMMult",
     "LepGood_pt", "LepGood_eta", "LepGood_phi", "LepGood_pdgId", "LepGood_relIso03", "LepGood_dxy", "LepGood_dz",
+#    "LepOther_*", #FIXME
 ]
 
 #branches to be kept for data samples only
@@ -146,6 +152,7 @@ branchKeepStrings_MC = [\
     "nTrueInt", "genWeight", "xsec",  "lheHTIncoming",
     "Jet_mcPt", "Jet_mcPhi", "Jet_mcEta",
     "JetFailId_mcPt", "JetFailId_mcPhi", "JetFailId_mcEta",
+    "genBin",
 ]
 
 if isMC:
@@ -167,7 +174,7 @@ else:
 
 skimConds.append( getFilterCut( positiveWeight = False, badMuonFilters = "Moriond2017" ) ) # always apply MC version. Data version has 'weight>0' which isnot for master ntuples
 
-jetVars = ['pt/F', 'rawPt/F', 'eta/F', 'phi/F', 'id/I', 'btagCSV/F', 'area/F'] + jetMCInfo
+jetVars = ['pt/F', 'rawPt/F', 'eta/F', 'phi/F', 'id/I', 'btagCSV/F', 'area/F', 'eEF/F', 'phEF/F'] + jetMCInfo
 jetVarNames = [x.split('/')[0] for x in jetVars]
 
 read_variables = map(TreeVariable.fromString, ['met_pt/F', 'met_phi/F', 'run/I', 'lumi/I', 'evt/l', 'nVert/I', 'rho/F', 'met_chsPt/F', 'met_chsPhi/F'] )
@@ -291,13 +298,13 @@ def filler( event ):
         setattr( event, 'A'+postfix,     (probe_jet[pt_corr] - tag_jet[pt_corr]) / (probe_jet[pt_corr] + tag_jet[pt_corr]) )
 
         # MET corrections
-        good_jets = filter( lambda j:j[pt_corr] > 15, jets)
+        type1_jets = filter( lambda j:j[pt_corr] > 15 and ( j['eEF'] + j['phEF'] )<0.9, jets) 
 
         # compute type-1 MET shifts for chs met L1L2L3 - L1RC 
         jer_corr = 1 if jer=='' else j['corr' + postfix]
         type1_met_shifts = \
-                    {'px' : jer_corr*sum( ( j['pt_corr_RC'] - j['pt_corr'] )*cos(j['phi']) for j in good_jets), 
-                     'py' : jer_corr*sum( ( j['pt_corr_RC'] - j['pt_corr'] )*sin(j['phi']) for j in good_jets) } 
+                    {'px' : jer_corr*sum( ( j['pt_corr_RC'] - j['pt_corr'] )*cos(j['phi']) for j in type1_jets), 
+                     'py' : jer_corr*sum( ( j['pt_corr_RC'] - j['pt_corr'] )*sin(j['phi']) for j in type1_jets) } 
 
         # chs MET 
         chs_MEx_corr = r.met_chsPt*cos(r.met_chsPhi) + type1_met_shifts['px']

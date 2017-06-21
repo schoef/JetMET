@@ -28,8 +28,8 @@ argParser.add_argument('--logLevel',           action='store',      default='INF
 argParser.add_argument('--triggers',           action='store',      default='PFJet',         nargs='?', choices=['DiPFJetAve', 'DiPFJetAve_HFJEC', 'PFJet'], help="trigger suite" )
 argParser.add_argument('--era',                action='store',      default='Run2016H',      nargs='?', choices=['Run2016', 'Run2016BCD', 'Run2016EFearly', 'Run2016FlateG', 'Run2016H'], help="era" )
 argParser.add_argument('--overwrite',                               action='store_true',     help='Overwrite results.pkl?', default=True)
-argParser.add_argument('--input_directory',    action='store',      default='JEC/L2res_v5_cleaned',  help="subdirectory for results.pkl")
-argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v5_cleaned_kFSR',  help="subdirectory for plots")
+argParser.add_argument('--input_directory',    action='store',      default='JEC/L2res_v8_cleaned',  help="subdirectory for results.pkl")
+argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v8_cleaned_kFSR',  help="subdirectory for plots")
 argParser.add_argument('--useFit',                                  action='store_true',     help='Use a fit to determine the response', default= True )
 args = argParser.parse_args()
 

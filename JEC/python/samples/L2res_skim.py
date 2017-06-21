@@ -63,4 +63,8 @@ QCD_Pt_1800to2400 = Sample.fromDirectory("QCD_Pt_1800to2400", os.path.join( skim
 QCD_Pt_2400to3200 = Sample.fromDirectory("QCD_Pt_2400to3200", os.path.join( skim_ntuple_directory, sub_directory, "QCD_Pt_2400to3200"))
 QCD_Pt_3200toInf  = Sample.fromDirectory("QCD_Pt_3200toInf", os.path.join( skim_ntuple_directory, sub_directory, "QCD_Pt_3200toInf"))
 
-QCD_Pt = Sample.combine( "QCD_Pt", [ QCD_Pt_50to80, QCD_Pt_80to120, QCD_Pt_120to170, QCD_Pt_170to300, QCD_Pt_300to470, QCD_Pt_470to600, QCD_Pt_600to800, QCD_Pt_800to1000, QCD_Pt_1000to1400, QCD_Pt_1400to1800, QCD_Pt_1800to2400, QCD_Pt_2400to3200, QCD_Pt_3200toInf] )
+qcd_samples = [ QCD_Pt_50to80, QCD_Pt_80to120, QCD_Pt_120to170, QCD_Pt_170to300, QCD_Pt_300to470, QCD_Pt_470to600, QCD_Pt_600to800, QCD_Pt_800to1000, QCD_Pt_1000to1400, QCD_Pt_1400to1800, QCD_Pt_1800to2400, QCD_Pt_2400to3200, QCD_Pt_3200toInf] 
+
+QCD_Pt = Sample.combine( "QCD_Pt", qcd_samples )
+
+QCD_Pt_small = Sample.fromFiles( "QCD_Pt_small", files = [s.files[0] for s in qcd_samples] )
