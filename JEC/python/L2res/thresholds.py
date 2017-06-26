@@ -20,4 +20,4 @@ exclDiPFJetAve = "(HLT_DiPFJetAve40&&(pt_avg>=51&&pt_avg<73)||HLT_DiPFJetAve60&&
 
 __exclDiPFJetAveHFJEC = "(HLT_DiPFJetAve60_HFJEC&&(pt_avg>=51&&pt_avg<129)||(HLT_DiPFJetAve80_HFJEC||HLT_DiPFJetAve100_HFJEC)&&(pt_avg>=129&&pt_avg<230)||HLT_DiPFJetAve160_HFJEC&&(pt_avg>=230&&pt_avg<299)||HLT_DiPFJetAve220_HFJEC&&(pt_avg>=299&&pt_avg<365)||HLT_DiPFJetAve300_HFJEC&&(pt_avg>=365))"
 
-exclDiPFJetAveHFJEC = "( abs(Jet_eta[probe_jet_index])<=2.9&&"+exclDiPFJetAve + "||abs(Jet_eta[probe_jet_index])>2.9&&"+__exclDiPFJetAveHFJEC+")"
+exclDiPFJetAveHFJEC = "( abs(Jet_eta[probe_jet_index])<=2.853&&"+exclDiPFJetAve + "||abs(Jet_eta[probe_jet_index])>2.853&&"+__exclDiPFJetAveHFJEC+")"
