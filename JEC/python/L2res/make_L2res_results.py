@@ -29,7 +29,7 @@ from JetMET.tools.objectSelection        import getFilterCut, getJets, jetVars
 import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',           action='store',      default='INFO',          nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging" )
-argParser.add_argument('--triggers',           action='store',      default='DiPFJetAve',    nargs='?', choices=['DiPFJetAve', 'DiPFJetAve_HFJEC', 'PFJet'], help="trigger suite" )
+argParser.add_argument('--triggers',           action='store',      default='DiPFJetAve',    nargs='?', choices=['DiPFJetAve', 'DiPFJetAve_HFJEC', 'PFJet', 'exclPFJet', 'exclDiPFJetAve', 'exclDiPFJetAveHFJEC'], help="trigger suite" )
 argParser.add_argument('--ptBinningVar',       action='store',      default='ave',           nargs='?', choices=['ave', 'tag'], help="jet pT binning variable (pT avg or pT tag)" )
 argParser.add_argument('--era',                action='store',      default='Run2016',       nargs='?', choices=['Run2016', 'Run2016BCD', 'Run2016EFearly', 'Run2016FlateG', 'Run2016H'], help="era" )
 argParser.add_argument('--phEF',               action='store',      default= -1,             type=float, help="max phEF in probe jet" )
@@ -104,7 +104,7 @@ def draw1DPlots(plots, dataMCScale):
 
 # Formatting for 1D plots
 def drawPtResponse(plots, dataMCScale):
-  for log in [ True]:
+  for log in [ False ]:
     plot_directory_ = os.path.join(plot_directory, ("log" if log else "") )
     for plot in plots:
       #if not max(l[0].GetMaximum() for l in plot.histos): continue # Empty plot
@@ -115,6 +115,23 @@ def drawPtResponse(plots, dataMCScale):
         plot_directory = plot_directory_,
         ratio          = {'yRange':(0.9,1.1)} ,
         logX = True, logY = False, sorting = False,
+        yRange         = (0.5, 1.5),
+        #scaling        = {0:1} if len(plot.stack)==2 else {},
+        legend         = [ (0.15,0.91-0.035*2,0.95,0.91), 2 ],
+        drawObjects    = drawObjects( dataMCScale , lumi ) + p_drawObjects
+      )
+def drawEtaResponse(plots, dataMCScale):
+  for log in [ False ]:
+    plot_directory_ = os.path.join(plot_directory, ("log" if log else "") )
+    for plot in plots:
+      #if not max(l[0].GetMaximum() for l in plot.histos): continue # Empty plot
+      p_drawObjects = map( lambda l:tex.DrawLatex(*l), getattr(plot, "drawObjects", [] ) )
+      p_drawObjects.append( tex.DrawLatex( 0.20, 0.75, "using Gaussian fit" if args.useFit else "using mean of histogram" ) )
+
+      plotting.draw(plot,
+        plot_directory = plot_directory_,
+        ratio          = {'yRange':(0.9,1.1)} ,
+        logX = False, logY = False, sorting = False,
         yRange         = (0.5, 1.5),
         #scaling        = {0:1} if len(plot.stack)==2 else {},
         legend         = [ (0.15,0.91-0.035*2,0.95,0.91), 2 ],
@@ -177,6 +194,15 @@ elif args.triggers == 'DiPFJetAve_HFJEC':
         "HLT_DiPFJetAve220_HFJEC",
         "HLT_DiPFJetAve300_HFJEC",
     ]
+elif args.triggers == 'exclPFJet':
+    from JetMET.JEC.L2res.thresholds import exclPFJets
+    triggers = [ exclPFJets ]
+elif args.triggers == 'exclDiPFJetAve':
+    from JetMET.JEC.L2res.thresholds import exclDiPFJetAve
+    triggers = [ exclDiPFJetAve ]
+elif args.triggers == 'exclDiPFJetAveHFJEC':
+    from JetMET.JEC.L2res.thresholds import exclDiPFJetAveHFJEC
+    triggers = [ exclDiPFJetAveHFJEC ]
 else:
     triggers = [ args.triggers ]
 
@@ -213,7 +239,7 @@ thresholds = [-1.2+x*2.4/96. for x in range(97)]
 
 weightString  = "weight"
 
-results_file        = os.path.join( plot_directory, 'results.pkl' )
+results_file  = os.path.join( plot_directory, 'results.pkl' )
 
 h = {}
 p = {}
@@ -271,28 +297,54 @@ for var in [ "A", "B" ]:
                 projections[var][s.name]['abs_eta'][eta_bin][pt_avg_bin].Add( projections[var][s.name]['neg_eta'][eta_bin][pt_avg_bin] ) 
 
 
-response_results_file    = os.path.join( plot_directory, 'response_results.pkl' )
+response_results_file    = os.path.join( plot_directory, 'response_%s_results.pkl'%( 'fit' if args.useFit else 'mean' ) )
 if os.path.exists( response_results_file ):
-    response = pickle.load(file( response_results_file ))
+    response, response_plots_pt, response_plots_eta = pickle.load(file( response_results_file ))
     logger.info( 'Loaded response results from %s', response_results_file )
 else:
-    response = {} # results
+
+    response = {} # result dictionary
+    response_plots_pt = {} # plots vs. pt
+    response_plots_eta = {} # plots vs eta
+
     for var in [ "A", "B" ]:
-        response[var] = {}
+
+        response[var]           = {}
+        response_plots_pt[var]  = {}
+        response_plots_eta[var] = {}
+
         for s in samples:
-            response[var][s.name] = {}
-            for i_aeta in range(len(abs_eta_thresholds)-1):
+            response[var][s.name]           = {}
+            response_plots_pt[var][s.name]  = {}
+            response_plots_eta[var][s.name] = {}
 
-                eta_bin = tuple(abs_eta_thresholds[i_aeta:i_aeta+2])
-                response[var][s.name][eta_bin] \
-                        = {k:ROOT.TH1D('rel_corr_'+k, 'rel_corr_'+k, len(pt_avg_thresholds) - 1, array.array('d', pt_avg_thresholds)) for k in ['neg_eta', 'pos_eta', 'abs_eta']}
 
-                for sign in [ 'neg_eta', 'pos_eta', 'abs_eta' ]:
+            # response histograms vs. eta (no 'sign' key)
+            for i_pt_avg_bin, pt_avg_bin in enumerate(pt_avg_bins):
+                response_plots_eta[var][s.name][pt_avg_bin]\
+                        = ROOT.TH1D('rel_corr_eta_pt_%i_%i'%pt_avg_bin, 'rel_corr_eta_pt_%i_%i'%pt_avg_bin, len(eta_thresholds) - 1, array.array('d', eta_thresholds))
+
+            for sign in [ 'neg_eta', 'pos_eta', 'abs_eta' ]:
+                response[var][s.name][sign]           = {}
+                response_plots_pt[var][s.name][sign]  = {}
+
+                for i_aeta in range(len(abs_eta_thresholds)-1):
+
+                    eta_bin = tuple(abs_eta_thresholds[i_aeta:i_aeta+2])
+                    k = "%s_%i_%i"%( sign, eta_bin[0], eta_bin[1] )
+
+                    # response histograms vs. pt
+                    response_plots_pt[var][s.name][sign][eta_bin]\
+                            = ROOT.TH1D('rel_corr_pt_'+k, 'rel_corr_pt'+k, len(pt_avg_thresholds) - 1, array.array('d', pt_avg_thresholds))
+
+                    response[var][s.name][sign][eta_bin] = {}
+
                     for i_pt_avg_bin, pt_avg_bin in enumerate(pt_avg_bins):
 
                         # make life easy
                         shape = projections[var][s.name][sign][eta_bin][pt_avg_bin]
-                        h     = response[var][s.name][eta_bin][sign]
+                        h_pt  = response_plots_pt[var][s.name][sign][eta_bin]
+                        h_eta = response_plots_eta[var][s.name][pt_avg_bin]
 
                         if (args.useFit):
                             mean_asymmetry, mean_asymmetry_error = GaussianFit( 
@@ -302,7 +354,6 @@ else:
                                 fit_plot_directory  = os.path.join( plot_directory, 'fit'), 
                                 fit_filename        = "fitresult_%s_%s_%i_%i_pt_%i_%i_%s" % ( var, sign, 1000*eta_bin[0], 1000*eta_bin[1], pt_avg_bin[0], pt_avg_bin[1], s.name ) 
                                 )
-
                         else:
                             mean_asymmetry        = shape.GetMean()           
                             mean_asymmetry_error  = shape.GetMeanError() 
@@ -311,18 +362,22 @@ else:
                         mean_response_error = 2.*mean_asymmetry_error/(1 - mean_asymmetry)**2 # f(x) = (1+x)/(1-x) -> f'(x) = 2/(x-1)**2
 
                         if mean_response_error/mean_response<0.1:
-                        
-                            h.SetBinContent( h.FindBin( 0.5*sum(pt_avg_bin) ), mean_response ) 
-                            h.SetBinError  ( h.FindBin( 0.5*sum(pt_avg_bin) ), mean_response_error ) 
 
-                    response[var][s.name][eta_bin][sign].style = styles.lineStyle( 
-                        color = ROOT.kBlack if s.name == data.name else ROOT.kRed,
-                        dashed = (var == 'A'),
-                        errors = True
-                        )
-                    response[var][s.name][eta_bin][sign].legendText = s.name + "( %s )" % ("Bal." if var=='A' else "MPF")
+                            # Fill dict
+                            response[var][s.name][sign][eta_bin][pt_avg_bin] = (mean_response, mean_response_error)
 
-    pickle.dump( response, file(response_results_file, 'w') ) 
+                            # Fill response histo vs. pt 
+                            h_pt.SetBinContent( h_pt.FindBin( 0.5*sum(pt_avg_bin) ), mean_response ) 
+                            h_pt.SetBinError  ( h_pt.FindBin( 0.5*sum(pt_avg_bin) ), mean_response_error )
+
+                            # Fill response histo vs. eta 
+                            if sign in [ 'neg_eta', 'pos_eta' ]:
+                                sign_ = +1 if sign=='pos_eta' else -1
+                                #print sign, sign_, sign_*0.5*sum(eta_bin), mean_response, mean_response_error
+                                h_eta.SetBinContent( h_eta.FindBin( sign_*0.5*sum(eta_bin) ), mean_response ) 
+                                h_eta.SetBinError  ( h_eta.FindBin( sign_*0.5*sum(eta_bin) ), mean_response_error )
+
+    pickle.dump( ( response, response_plots_pt, response_plots_eta ), file(response_results_file, 'w') ) 
     logger.info( 'Written response results to %s', response_results_file )
 
 for i_aeta in range(len(abs_eta_thresholds)-1):
@@ -330,15 +385,44 @@ for i_aeta in range(len(abs_eta_thresholds)-1):
     eta_bin = tuple(abs_eta_thresholds[i_aeta:i_aeta+2])
 
     for sign in [ 'neg_eta', 'pos_eta', 'abs_eta' ]:
+        for s in samples:
+            for var in ['A', 'B']: 
+                response_plots_pt[var][s.name][sign][eta_bin].style = styles.lineStyle( 
+                    color = ROOT.kBlack if s.name == data.name else ROOT.kRed,
+                    dashed = (var == 'A'),
+                    errors = True
+                    )
+                response_plots_pt[var][s.name][sign][eta_bin].legendText = s.name + "( %s )" % ("Bal." if var=='A' else "MPF")
         
-        name = "response_%s_%s_%i_%i" % ( "fit" if args.useFit else "mean", sign, 1000*eta_bin[0], 1000*eta_bin[1] )
+        name = "response_pt_%s_%s_eta_%i_%i" % ( "fit" if args.useFit else "mean", sign, 1000*eta_bin[0], 1000*eta_bin[1] )
         plot = Plot.fromHisto( name, 
             [ 
-              [response['B'][mc.name][eta_bin][sign]] , 
-              [response['B'][data.name][eta_bin][sign]], 
-              [response['A'][mc.name][eta_bin][sign]] , 
-              [response['A'][data.name][eta_bin][sign]] 
+              [response_plots_pt['B'][mc.name][sign][eta_bin]] , 
+              [response_plots_pt['B'][data.name][sign][eta_bin]], 
+              [response_plots_pt['A'][mc.name][sign][eta_bin]] , 
+              [response_plots_pt['A'][data.name][sign][eta_bin]] 
             ], 
             texX = pt_binning_legendText, texY = "response" ) 
         drawPtResponse( [plot], 1.)
 
+
+for i_pt_avg_bin, pt_avg_bin in enumerate(pt_avg_bins):
+        for s in samples:
+            for var in ['A', 'B']: 
+                response_plots_eta[var][s.name][pt_avg_bin].style = styles.lineStyle( 
+                    color = ROOT.kBlack if s.name == data.name else ROOT.kRed,
+                    dashed = (var == 'A'),
+                    errors = True
+                    )
+                response_plots_eta[var][s.name][pt_avg_bin].legendText = s.name + "( %s )" % ("Bal." if var=='A' else "MPF")
+
+        name = "response_eta_%s_pt_%i_%i" % ( "fit" if args.useFit else "mean",  pt_avg_bin[0], pt_avg_bin[1] )
+        plot = Plot.fromHisto( name, 
+            [ 
+              [response_plots_eta['B'][mc.name][pt_avg_bin]] , 
+              [response_plots_eta['B'][data.name][pt_avg_bin]], 
+              [response_plots_eta['A'][mc.name][pt_avg_bin]] , 
+              [response_plots_eta['A'][data.name][pt_avg_bin]] 
+            ], 
+            texX = "#eta", texY = "response" ) 
+        drawEtaResponse( [plot], 1.)
