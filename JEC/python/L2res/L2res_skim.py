@@ -189,7 +189,7 @@ read_variables += [\
 new_variables = [ 'weight/F']
 if isMC:
     read_variables+= map( TreeVariable.fromString, [ 'nTrueInt/F', 'xsec/F', 'genWeight/F'] )
-new_variables += [ "tag_jet_index/I", "probe_jet_index/I", "third_jet_index/I", 'Jet[pt_corr/F,pt_corr_jer/F,pt_jer_up/F,pt_corr_jer_down/F,isHot/I]' ]
+new_variables += [ "tag_jet_index/I", "probe_jet_index/I", "third_jet_index/I", 'Jet[pt_corr/F,pt_corr_jer/F,pt_corr_jer_up/F,pt_corr_jer_down/F,isHot/I]' ]
 
 for jer in ['', 'jer', 'jer_up', 'jer_down']:
     postfix = '' if jer == '' else '_'+jer
@@ -249,8 +249,7 @@ def filler( event ):
 
         # corrected jet
         j['pt_corr']    =  jet_corr_factor * j['rawPt'] 
-        event.Jet_pt_corr[iJet] = j['pt_corr'] 
-        event.Jet_isHot[iJet]   = not default_hotJetVeto.passVeto(eta = j['eta'], phi = j['phi'])
+
 
         # L1RC 
         j['pt_corr_RC'] =  jet_corr_factor_RC * j['rawPt'] 
@@ -264,6 +263,13 @@ def filler( event ):
         j['pt_corr_jer']        =  jet_corr_factor_jer      * j['pt_corr'] 
         j['pt_corr_jer_up']     =  jet_corr_factor_jer_up   * j['pt_corr'] 
         j['pt_corr_jer_down']   =  jet_corr_factor_jer_down * j['pt_corr'] 
+
+        # write new ntuple information
+        event.Jet_pt_corr[iJet]         = j['pt_corr'] 
+        event.Jet_pt_corr_jer[iJet]     = j['pt_corr_jer'] 
+        event.Jet_pt_corr_jer_up[iJet]  = j['pt_corr_jer'] 
+        event.Jet_pt_corr_jer_down[iJet]= j['pt_corr_jer'] 
+        event.Jet_isHot[iJet]   = not default_hotJetVeto.passVeto(eta = j['eta'], phi = j['phi'])
 
         # keep correction factors for type-1 MET shifts below
         j['corr_jer']        =  jet_corr_factor_jer       
