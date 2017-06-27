@@ -98,7 +98,7 @@ class JetSmearer:
         '''
         jer = self.get_jet_resolution( pt, eta, rho )
         sf  = self.get_SF( eta )
-        if jer is not None and abs(pt-mcPt) < 3*pt*jer:
+        if jer is not None and mcPt>0 and abs(pt-mcPt) < 3*pt*jer:
             return self.__scaling_correction( pt, mcPt, sf )
         else:
             return [ 1 for s in sf ]
@@ -130,7 +130,7 @@ class JetSmearer:
 
         #logger.debug( "Jet pt %3.2f mcPt %3.2f, eta %3.2f rho %3.2f. JER %4.3f SF %r", pt, mcPt, eta, rho, jer, sf )
         if jer is not None:
-            if abs(pt-mcPt) < 3*pt*jer:
+            if mcPt>0 and abs(pt-mcPt) < 3*pt*jer:
                 #logger.debug( "Doing scaling")
                 return self.__scaling_correction( pt, mcPt, sf )
             else:
