@@ -118,7 +118,7 @@ class JetSmearer:
     def __stochastic_correction( pt, jer, sf ):
         if jer is not None: 
             rand = random.gauss(0, jer)
-            return [ (1 + rand*sqrt(max(0, s**2 - 1))) for s in sf ] 
+            return [ (1 + rand*sqrt(max(0, s**2 - 1))) for s in sf ] #FIXME No protection against negative numbers 
         else:
             return [ 1 for s in sf ]
 
