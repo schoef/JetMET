@@ -13,7 +13,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class hotJetVeto:
-    def __init__( self, filename = "$CMSSW_BASE/src/JetMET/tools/data/hotJets/hotJets.root", hot_jet_map = "h2jet", threshold = 0):
+    def __init__( self, filename = "$CMSSW_BASE/src/JetMET/tools/data/hotJets/hotjets-runBCDEFGH.root", hot_jet_map = "h2jet", threshold = 0):
 
         self.hotmap = getObjFromFile( os.path.expandvars( filename ), hot_jet_map ) 
         self.threshold = 5
