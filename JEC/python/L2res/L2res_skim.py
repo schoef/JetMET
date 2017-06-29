@@ -50,7 +50,7 @@ def get_parser():
     argParser.add_argument('--minNJobs', action='store', nargs='?', type=int, default=1, help="Minimum number of simultaneous jobs." )
     argParser.add_argument('--targetDir', action='store', nargs='?', type=str, default=user.skim_ntuple_directory, help="Name of the directory the post-processed files will be saved" ) #user.data_output_directory
     #argParser.add_argument('--version', action='store', nargs='?', type=str, default='V1', help="JEC version" )
-    argParser.add_argument('--processingEra', action='store', nargs='?', type=str, default='v8_3', help="Name of the processing era" )
+    argParser.add_argument('--processingEra', action='store', nargs='?', type=str, default='v8_4', help="Name of the processing era" )
     argParser.add_argument('--skim', action='store', nargs='?', type=str, default='default', help="Skim conditions to be applied for post-processing" )
     argParser.add_argument('--small', action='store_true', help="Run the file on a small sample (for test purpose), bool flag set to True if used", default = False)
     return argParser
@@ -309,8 +309,8 @@ def filler( event ):
         # compute type-1 MET shifts for chs met L1L2L3 - L1RC 
         jer_corr = 1 if jer=='' else j['corr' + postfix]
         type1_met_shifts = \
-                    {'px' : jer_corr*sum( ( j['pt_corr_RC'] - j['pt_corr'] )*cos(j['phi']) for j in type1_jets), 
-                     'py' : jer_corr*sum( ( j['pt_corr_RC'] - j['pt_corr'] )*sin(j['phi']) for j in type1_jets) } 
+                    {'px' : sum( ( j['pt_corr_RC'] - jer_corr*j['pt_corr'] )*cos(j['phi']) for j in type1_jets), 
+                     'py' : sum( ( j['pt_corr_RC'] - jer_corr*j['pt_corr'] )*sin(j['phi']) for j in type1_jets) } 
 
         # chs MET 
         chs_MEx_corr = r.met_chsPt*cos(r.met_chsPhi) + type1_met_shifts['px']
