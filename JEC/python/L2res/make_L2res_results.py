@@ -41,7 +41,7 @@ argParser.add_argument('--skipResponsePlots',                       action='stor
 argParser.add_argument('--overwrite',                               action='store_true',     help='Overwrite results.pkl?')
 argParser.add_argument('--useFit',                                  action='store_true',     help='Use a fit to determine the response')#, default= True
 argParser.add_argument('--metOverSumET',                            action='store_true',     help='add MET/sumET<0.2 cut')#, default= True
-argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v8',  help="subdirectory for plots")
+argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v9',  help="subdirectory for plots")
 args = argParser.parse_args()
 
 if args.jer == '':
@@ -377,8 +377,34 @@ else:
                                 h_eta.SetBinContent( h_eta.FindBin( sign_*0.5*sum(eta_bin) ), mean_response ) 
                                 h_eta.SetBinError  ( h_eta.FindBin( sign_*0.5*sum(eta_bin) ), mean_response_error )
 
+
     pickle.dump( ( response, response_plots_pt, response_plots_eta ), file(response_results_file, 'w') ) 
     logger.info( 'Written response results to %s', response_results_file )
+
+# response shapes
+if not args.skipResponsePlots:
+    for var in [ "A", "B" ]:
+        for s in samples:
+            for i_pt_avg_bin, pt_avg_bin in enumerate(pt_avg_bins):
+                for sign in ['neg_eta', 'pos_eta', 'abs_eta']:
+                    histos = []
+                    for i_pt_avg_bin, pt_avg_bin in enumerate(pt_avg_bins):
+                        histos.append( projections[var][s.name][sign][eta_bin][pt_avg_bin].Clone())
+                        histos[-1].style = styles.lineStyle( colors[ i_pt_avg_bin ] ) 
+                        histos[-1].legendText = "%i #leq %s < %i" % ( pt_avg_bin[0], pt_binning_legendText, pt_avg_bin[1] )
+
+                    if sign    == 'pos_eta':
+                        eta_tex_string       = "%4.3f #leq #eta < %4.3f" % ( eta_bin ) 
+                    elif sign  == 'abs_eta':
+                        eta_tex_string       = "%4.3f #leq |#eta| < %4.3f" % ( eta_bin ) 
+                    elif sign  == 'neg_eta':
+                        eta_tex_string       = "%4.3f #leq #eta < %4.3f" % ( -eta_bin[1], -eta_bin[0] ) 
+
+                    name = "%s_%s_%s_%i_%i" % ( s.name.replace('_'+args.era, ''), var, sign, 1000*eta_bin[0], 1000*eta_bin[1] )
+                    plot = Plot.fromHisto( name, [ [histo] for histo in histos], texX = var, texY = "Number of Events" )    
+                    plot.drawObjects  = [ (0.2, 0.65, eta_tex_string ) ]
+                    plot.drawObjects += [ (0.75, 0.95, '%s-symmetry' % var ) ]
+                    draw1DPlots( [plot], 1.)
 
 for i_aeta in range(len(abs_eta_thresholds)-1):
 

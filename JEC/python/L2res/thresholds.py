@@ -9,15 +9,16 @@ abs_eta_bins       = [(abs_eta_thresholds[i], abs_eta_thresholds[i+1]) for i in 
 eta_thresholds_neg = [-x for x in abs_eta_thresholds[1:]]
 eta_thresholds_neg.reverse()
 eta_thresholds = eta_thresholds_neg + abs_eta_thresholds 
+eta_bins       = [(eta_thresholds[i], eta_thresholds[i+1]) for i in range( len( eta_thresholds ) -1 ) ]
 
-pt_avg_thresholds = [51,73,129,163,230,299,365,435,566,1000]
+pt_avg_thresholds = [51,73,95,163,230,299,365,435,566,1000]
 #pt_avg_thresholds = [50,80,130,170,230,300,370,440,550,1000]
 pt_avg_bins       = [(pt_avg_thresholds[i], pt_avg_thresholds[i+1]) for i in range( len( pt_avg_thresholds ) -1 ) ]
 
-exclPFJets     = "(HLT_PFJet40&&(pt_avg>=51&&pt_avg<73)||HLT_PFJet60&&(pt_avg>=73&&pt_avg<129)||HLT_PFJet80&&(pt_avg>=129&&pt_avg<163)||HLT_PFJet140&&(pt_avg>=163&&pt_avg<230)||HLT_PFJet200&&(pt_avg>=230&&pt_avg<299)||HLT_PFJet260&&(pt_avg>=299&&pt_avg<365)||HLT_PFJet320&&(pt_avg>=365&&pt_avg<435)||HLT_PFJet400&&(pt_avg>=435&&pt_avg<566)||(HLT_PFJet450||HLT_PFJet500)&&pt_avg>=566)"
+exclPFJets     = "(HLT_PFJet40&&(pt_avg>=51&&pt_avg<73)||HLT_PFJet60&&(pt_avg>=73&&pt_avg<95)||HLT_PFJet80&&(pt_avg>=95&&pt_avg<163)||HLT_PFJet140&&(pt_avg>=163&&pt_avg<230)||HLT_PFJet200&&(pt_avg>=230&&pt_avg<299)||HLT_PFJet260&&(pt_avg>=299&&pt_avg<365)||HLT_PFJet320&&(pt_avg>=365&&pt_avg<435)||HLT_PFJet400&&(pt_avg>=435&&pt_avg<566)||HLT_PFJet500&&pt_avg>=566)"
 
-exclDiPFJetAve = "(HLT_DiPFJetAve40&&(pt_avg>=51&&pt_avg<73)||HLT_DiPFJetAve60&&(pt_avg>=73&&pt_avg<129)||HLT_DiPFJetAve80&&(pt_avg>=129&&pt_avg<163)||HLT_DiPFJetAve140&&(pt_avg>=163&&pt_avg<230)||HLT_DiPFJetAve200&&(pt_avg>=230&&pt_avg<299)||HLT_DiPFJetAve260&&(pt_avg>=299&&pt_avg<365)||HLT_DiPFJetAve320&&(pt_avg>=365&&pt_avg<435)||HLT_DiPFJetAve400&&(pt_avg>=435&&pt_avg<566)||HLT_DiPFJetAve500&&pt_avg>=566)"
+exclDiPFJetAve = "(HLT_DiPFJetAve40&&(pt_avg>=51&&pt_avg<73)||HLT_DiPFJetAve60&&(pt_avg>=73&&pt_avg<95)||HLT_DiPFJetAve80&&(pt_avg>=95&&pt_avg<163)||HLT_DiPFJetAve140&&(pt_avg>=163&&pt_avg<230)||HLT_DiPFJetAve200&&(pt_avg>=230&&pt_avg<299)||HLT_DiPFJetAve260&&(pt_avg>=299&&pt_avg<365)||HLT_DiPFJetAve320&&(pt_avg>=365&&pt_avg<435)||HLT_DiPFJetAve400&&(pt_avg>=435&&pt_avg<566)||HLT_DiPFJetAve500&&pt_avg>=566)"
 
-__exclDiPFJetAveHFJEC = "(HLT_DiPFJetAve60_HFJEC&&(pt_avg>=51&&pt_avg<129)||(HLT_DiPFJetAve80_HFJEC||HLT_DiPFJetAve100_HFJEC)&&(pt_avg>=129&&pt_avg<230)||HLT_DiPFJetAve160_HFJEC&&(pt_avg>=230&&pt_avg<299)||HLT_DiPFJetAve220_HFJEC&&(pt_avg>=299&&pt_avg<365)||HLT_DiPFJetAve300_HFJEC&&(pt_avg>=365))"
+__exclDiPFJetAveHFJEC = "(HLT_DiPFJetAve60_HFJEC&&(pt_avg>=95&&pt_avg<163)||HLT_DiPFJetAve100_HFJEC&&(pt_avg>=163&&pt_avg<299)||HLT_DiPFJetAve160_HFJEC&&(pt_avg>=299&&pt_avg<365)||HLT_DiPFJetAve220_HFJEC&&(pt_avg>=365&&pt_avg<435)||HLT_DiPFJetAve300_HFJEC&&(pt_avg>=435))"
 
-exclDiPFJetAveHFJEC = "( abs(Jet_eta[probe_jet_index])<=2.853&&"+exclDiPFJetAve + "||abs(Jet_eta[probe_jet_index])>2.853&&"+__exclDiPFJetAveHFJEC+")"
+exclDiPFJetAveHFJEC = "( ( abs(Jet_eta[probe_jet_index])<=2.853||pt_avg<95)&&"+exclDiPFJetAve + "||abs(Jet_eta[probe_jet_index])>2.853&&"+__exclDiPFJetAveHFJEC+")"

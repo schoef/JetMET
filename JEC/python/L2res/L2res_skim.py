@@ -106,8 +106,11 @@ logger.debug("Reading from CMG tuple %s which are %i files.", options.sample, le
 isData = 'Run2016' in sample.name 
 isMC   =  not isData 
 
-# JER smearing (don't forget to call delete() )
-smearer_mc = JetSmearer("Spring16_25nsV10_MC", "AK4PFchs") if isMC else None
+## JER smearing (don't forget to call delete() )
+## https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution
+
+#smearer_mc = JetSmearer("Spring16_25nsV10_MC", "AK4PFchs") if isMC else None # Run-II biased by EcalEE
+smearer_mc = JetSmearer("Spring16_25nsV6_MC", "AK4PFchs") if isMC else None # ICHEP version
 
 if isMC:
     from JetMET.tools.puReweighting import getReweightingFunction
