@@ -41,7 +41,7 @@ argParser.add_argument('--skipResponsePlots',                       action='stor
 argParser.add_argument('--overwrite',                               action='store_true',     help='Overwrite results.pkl?')
 argParser.add_argument('--useFit',                                  action='store_true',     help='Use a fit to determine the response')#, default= True
 argParser.add_argument('--metOverSumET',                            action='store_true',     help='add MET/sumET<0.2 cut')#, default= True
-argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v9',  help="subdirectory for plots")
+argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v10', help="subdirectory for plots")
 args = argParser.parse_args()
 
 if args.jer == '':
@@ -52,7 +52,7 @@ else:
 
 if args.ptBinningVar == 'tag':
     args.plot_directory += '_tagJetPtBin'
-    pt_binning_variable = 'Jet_pt[tag_jet_index]'
+    pt_binning_variable = 'Jet_pt[tag_jet_index%s]'%jer_postfix
     pt_binning_legendText = 'p_{T,tag} '
 else:
     pt_binning_legendText = 'p_{T,avg} '
@@ -210,8 +210,8 @@ mc = QCD_Pt
 samples = [ mc, data ]
 
 selection = [
-   ("tgb",                      "abs(Jet_eta[tag_jet_index])<1.3"),
-   ("btb",                      "cos(Jet_phi[tag_jet_index] - Jet_phi[probe_jet_index]) < cos(2.7)"),
+   ("tgb",                      "abs(Jet_eta[tag_jet_index%s])<1.3"%jer_postfix),
+   ("btb",                      "cos(Jet_phi[tag_jet_index%s] - Jet_phi[probe_jet_index%s]) < cos(2.7)"%(jer_postfix,jer_postfix)),
    ("a%i"% ( 100*args.alpha ),  "alpha%s<%f" % ( jer_postfix, args.alpha) ), 
    ("failIdVeto",               "Sum$(JetFailId_pt*(JetFailId_pt>30))<30"), 
 ]
@@ -220,7 +220,7 @@ if args.cleaned:
     from JetMET.JEC.L2res.jet_cleaning import jet_cleaning
     selection.append( ("jet_cleaning", jet_cleaning ) )
 if args.phEF>0:
-    selection.append( ("phEFprobe", "abs(Jet_phEF[probe_jet_index])<%f" % args.phEF ) )
+    selection.append( ("phEFprobe", "abs(Jet_phEF[probe_jet_index%s])<%f" % (jer_postfix, args.phEF )) )
 if args.metOverSumET:
     selection.append( ("MOSET", "met_chsPt/chsSumPt<0.2" ) )
 
@@ -230,7 +230,7 @@ for s in samples:
         s.reduceFiles( to = 1 )
 
 # Add trigger selection to data
-data.addSelectionString( "("+"||".join(triggers)+")")
+data.addSelectionString( ("("+"||".join(triggers)+")").replace("pt_avg", "pt_avg%s"%jer_postfix ) )
 colors = [ j+1 for j in range(0,9) ] + [ j+31 for j in range(9,18) ]
 
 from JetMET.JEC.L2res.thresholds import pt_avg_thresholds, pt_avg_bins, eta_thresholds, abs_eta_thresholds
@@ -260,7 +260,7 @@ else:
                 )
 
             weight_ = "("+s.selectionString+")*("+s.combineWithSampleWeight(weightString)+")"
-            varString_ = pt_binning_variable+":Jet_eta[probe_jet_index]:%s>>h_%s_%s"%( var+jer_postfix, var, s.name )
+            varString_ = pt_binning_variable+":Jet_eta[probe_jet_index%s]:%s>>h_%s_%s"%( jer_postfix, var+jer_postfix, var, s.name )
 
             logger.info("Using %s %s", varString_, weight_ ) 
             s.chain.Draw( varString_, weight_, 'goff')

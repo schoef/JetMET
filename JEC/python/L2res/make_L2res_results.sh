@@ -6,11 +6,11 @@
 #python make_L2res_results.py --alpha=0.1 --useFit --era=Run2016FlateG --triggers=PFJet 
 #python make_L2res_results.py --alpha=0.1 --useFit --era=Run2016H --triggers=PFJet 
 
-python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016 --triggers=PFJet 
-python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016BCD --triggers=PFJet 
-python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016EFearly --triggers=PFJet 
-python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016FlateG --triggers=PFJet 
-python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016H --triggers=PFJet 
+#python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016 --triggers=PFJet 
+#python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016BCD --triggers=PFJet 
+#python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016EFearly --triggers=PFJet 
+#python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016FlateG --triggers=PFJet 
+#python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016H --triggers=PFJet 
 
 #python make_L2res_results.py --alpha=0.1 --useFit --era=Run2016 --triggers=DiPFJetAve 
 #python make_L2res_results.py --alpha=0.1 --useFit --era=Run2016BCD --triggers=DiPFJetAve 
@@ -18,11 +18,11 @@ python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016H --tri
 #python make_L2res_results.py --alpha=0.1 --useFit --era=Run2016EFearly --triggers=DiPFJetAve 
 #python make_L2res_results.py --alpha=0.1 --useFit --era=Run2016H --triggers=DiPFJetAve 
   
-python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016 --triggers=DiPFJetAve 
-python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016BCD --triggers=DiPFJetAve 
-python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016FlateG --triggers=DiPFJetAve 
-python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016EFearly --triggers=DiPFJetAve 
-python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016H --triggers=DiPFJetAve 
+#python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016 --triggers=DiPFJetAve 
+#python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016BCD --triggers=DiPFJetAve 
+#python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016FlateG --triggers=DiPFJetAve 
+#python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016EFearly --triggers=DiPFJetAve 
+#python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016H --triggers=DiPFJetAve 
   
 #python make_L2res_results.py --alpha=0.1 --useFit --era=Run2016 --triggers=DiPFJetAve_HFJEC 
 #python make_L2res_results.py --alpha=0.1 --useFit --era=Run2016BCD --triggers=DiPFJetAve_HFJEC 
@@ -42,11 +42,11 @@ python make_L2res_results.py --alpha=0.1 --useFit --cleaned --era=Run2016H --tri
 #python make_L2res_results.py --alpha=0.15 --useFit --era=Run2016FlateG --triggers=PFJet 
 #python make_L2res_results.py --alpha=0.15 --useFit --era=Run2016H --triggers=PFJet 
 
-python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016 --triggers=PFJet 
-python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016BCD --triggers=PFJet 
-python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016EFearly --triggers=PFJet 
-python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016FlateG --triggers=PFJet 
-python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016H --triggers=PFJet 
+#python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016 --triggers=PFJet 
+#python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016BCD --triggers=PFJet 
+#python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016EFearly --triggers=PFJet 
+#python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016FlateG --triggers=PFJet 
+#python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016H --triggers=PFJet 
 
 #python make_L2res_results.py --alpha=0.15 --useFit --era=Run2016 --triggers=DiPFJetAve 
 #python make_L2res_results.py --alpha=0.15 --useFit --era=Run2016BCD --triggers=DiPFJetAve 
@@ -54,11 +54,11 @@ python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016H --tr
 #python make_L2res_results.py --alpha=0.15 --useFit --era=Run2016EFearly --triggers=DiPFJetAve 
 #python make_L2res_results.py --alpha=0.15 --useFit --era=Run2016H --triggers=DiPFJetAve 
   
-python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016 --triggers=DiPFJetAve 
-python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016BCD --triggers=DiPFJetAve 
-python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016FlateG --triggers=DiPFJetAve 
-python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016EFearly --triggers=DiPFJetAve 
-python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016H --triggers=DiPFJetAve 
+#python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016 --triggers=DiPFJetAve 
+#python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016BCD --triggers=DiPFJetAve 
+#python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016FlateG --triggers=DiPFJetAve 
+#python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016EFearly --triggers=DiPFJetAve 
+#python make_L2res_results.py --alpha=0.15 --useFit --cleaned --era=Run2016H --triggers=DiPFJetAve 
   
 #python make_L2res_results.py --alpha=0.15 --useFit --era=Run2016 --triggers=DiPFJetAve_HFJEC 
 #python make_L2res_results.py --alpha=0.15 --useFit --era=Run2016BCD --triggers=DiPFJetAve_HFJEC 

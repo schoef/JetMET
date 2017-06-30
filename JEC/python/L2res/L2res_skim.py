@@ -50,7 +50,7 @@ def get_parser():
     argParser.add_argument('--minNJobs', action='store', nargs='?', type=int, default=1, help="Minimum number of simultaneous jobs." )
     argParser.add_argument('--targetDir', action='store', nargs='?', type=str, default=user.skim_ntuple_directory, help="Name of the directory the post-processed files will be saved" ) #user.data_output_directory
     #argParser.add_argument('--version', action='store', nargs='?', type=str, default='V1', help="JEC version" )
-    argParser.add_argument('--processingEra', action='store', nargs='?', type=str, default='v8_4', help="Name of the processing era" )
+    argParser.add_argument('--processingEra', action='store', nargs='?', type=str, default='v10', help="Name of the processing era" )
     argParser.add_argument('--skim', action='store', nargs='?', type=str, default='default', help="Skim conditions to be applied for post-processing" )
     argParser.add_argument('--small', action='store_true', help="Run the file on a small sample (for test purpose), bool flag set to True if used", default = False)
     return argParser
@@ -192,7 +192,13 @@ read_variables += [\
 new_variables = [ 'weight/F']
 if isMC:
     read_variables+= map( TreeVariable.fromString, [ 'nTrueInt/F', 'xsec/F', 'genWeight/F'] )
-new_variables += [ "tag_jet_index/I", "probe_jet_index/I", "third_jet_index/I", 'Jet[pt_corr/F,pt_corr_jer/F,pt_corr_jer_up/F,pt_corr_jer_down/F,isHot/I]' ]
+new_variables += [ 
+    "tag_jet_index/I", "probe_jet_index/I", "third_jet_index/I", 
+    "tag_jet_index_jer/I", "probe_jet_index_jer/I", "third_jet_index_jer/I", 
+    "tag_jet_index_jer_up/I", "probe_jet_index_jer_up/I", "third_jet_index_jer_up/I", 
+    "tag_jet_index_jer_down/I", "probe_jet_index_jer_down/I", "third_jet_index_jer_down/I", 
+    'Jet[pt_corr/F,pt_corr_jer/F,pt_corr_jer_up/F,pt_corr_jer_down/F,isHot/I]' 
+        ]
 
 for jer in ['', 'jer', 'jer_up', 'jer_down']:
     postfix = '' if jer == '' else '_'+jer
@@ -274,30 +280,36 @@ def filler( event ):
         event.Jet_pt_corr_jer_down[iJet]= j['pt_corr_jer'] 
         event.Jet_isHot[iJet]   = not default_hotJetVeto.passVeto(eta = j['eta'], phi = j['phi'])
 
-        # keep correction factors for type-1 MET shifts below
-        j['corr_jer']        =  jet_corr_factor_jer       
-        j['corr_jer_up']     =  jet_corr_factor_jer_up    
-        j['corr_jer_down']   =  jet_corr_factor_jer_down  
+        ## keep correction factors for type-1 MET shifts below
+        #j['corr_jer']        =  jet_corr_factor_jer       
+        #j['corr_jer_up']     =  jet_corr_factor_jer_up    
+        #j['corr_jer_down']   =  jet_corr_factor_jer_down  
 
-    tag_jet, probe_jet = jets[:2]
-
-    # randomize if both are in barrel:
-    if abs(tag_jet['eta'])<1.3 and abs(probe_jet['eta'])<1.3:
-        if random.random()>0.5:
-            tag_jet, probe_jet = probe_jet, tag_jet
-    # tag jet in barrel
-    if abs(tag_jet['eta'])>1.3 and abs(probe_jet['eta'])<1.3:
-        tag_jet, probe_jet = probe_jet, tag_jet
-
-    third_jet = jets[2] if len(jets)>=3 else null_jet    
-
-    event.tag_jet_index     = tag_jet['index']
-    event.probe_jet_index   = probe_jet['index']
-    event.third_jet_index   = third_jet['index']
+    randomSwap = ( random.random()>0.5 )
 
     for jer in ['', 'jer', 'jer_up', 'jer_down']:
+
         postfix = '' if jer == '' else '_'+jer
         pt_corr = 'pt_corr' + postfix
+
+        # sorting after JER
+        jets.sort( key = lambda j: -j[pt_corr] )
+
+        # tag probe jet selection
+        tag_jet, probe_jet = jets[:2]
+        # randomize if both are in barrel:
+        if abs(tag_jet['eta'])<1.3 and abs(probe_jet['eta'])<1.3:
+            if randomSwap:
+                tag_jet, probe_jet = probe_jet, tag_jet
+        # tag jet in barrel
+        if abs(tag_jet['eta'])>1.3 and abs(probe_jet['eta'])<1.3:
+            tag_jet, probe_jet = probe_jet, tag_jet
+
+        third_jet = jets[2] if len(jets)>=3 else null_jet    
+
+        setattr( event, "tag_jet_index"+postfix     , tag_jet['index'] )
+        setattr( event, "probe_jet_index"+postfix   , probe_jet['index'] )
+        setattr( event, "third_jet_index"+postfix   , third_jet['index'] )
 
         # PT avg
         pt_avg      = 0.5*( tag_jet[pt_corr] + probe_jet[pt_corr] )
@@ -310,10 +322,10 @@ def filler( event ):
         type1_jets = filter( lambda j:j[pt_corr] > 15 and ( j['eEF'] + j['phEF'] )<0.9, jets) 
 
         # compute type-1 MET shifts for chs met L1L2L3 - L1RC 
-        jer_corr = 1 if jer=='' else j['corr' + postfix]
+#        jer_corr = 1 if jer=='' else j['corr' + postfix]
         type1_met_shifts = \
-                    {'px' : sum( ( j['pt_corr_RC'] - jer_corr*j['pt_corr'] )*cos(j['phi']) for j in type1_jets), 
-                     'py' : sum( ( j['pt_corr_RC'] - jer_corr*j['pt_corr'] )*sin(j['phi']) for j in type1_jets) } 
+                    {'px' : sum( ( j['pt_corr_RC'] - j['pt_corr'+postfix] )*cos(j['phi']) for j in type1_jets), 
+                     'py' : sum( ( j['pt_corr_RC'] - j['pt_corr'+postfix] )*sin(j['phi']) for j in type1_jets) } 
 
         # chs MET 
         chs_MEx_corr = r.met_chsPt*cos(r.met_chsPhi) + type1_met_shifts['px']
