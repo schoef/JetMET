@@ -1,4 +1,4 @@
-# 1D spike cleaning
+# Roberts spike cleaning
 thr = [
 ( -2.650, -2.500,  -1.35, -1.05 ),
 ( -2.964, -2.650,  -1.10, -0.80 ),
@@ -14,5 +14,8 @@ p = "Jet_phi[probe_jet_index]"
 
 jet_spike_cleaning = '(!('+"||".join( [ "%s>%4.3f&&%s<%4.3f&&%s>%4.3f&&%s<%4.3f" % ( e, th[0], e, th[1], p, th[2], p, th[3] ) for th in thr ] ) + '))'
 
-# Mikko cleaning
-jet_cleaning = "Sum$(Jet_pt*Jet_isHot)<20"
+# Mikkos map based cleaning
+jet_map_cleaning = "Sum$(Jet_pt*Jet_isHot)<20"
+
+# David's rechit filter 
+jet_cleaning     = "ecalBadCalibFilter"

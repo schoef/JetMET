@@ -4,7 +4,7 @@ from RootTools.core.standard import *
 
 from JetMET.tools.user import skim_ntuple_directory
 
-sub_directory = "L2res/v10/default/"
+sub_directory = "L2res/v11/default/"
 
 JetHT_Run2016B    = Sample.fromDirectory("JetHT_Run2016B", os.path.join( skim_ntuple_directory, sub_directory, "JetHT_Run2016B"))
 JetHT_Run2016C    = Sample.fromDirectory("JetHT_Run2016C", os.path.join( skim_ntuple_directory, sub_directory, "JetHT_Run2016C"))

@@ -23,14 +23,14 @@ from JetMET.tools.objectSelection        import getFilterCut, getJets, jetVars
 import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',           action='store',      default='INFO',          nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging" )
-argParser.add_argument('--triggers',           action='store',      default='PFJet',         nargs='?', choices=['DiPFJetAve', 'DiPFJetAve_HFJEC', 'PFJet'], help="trigger suite" )
+argParser.add_argument('--triggers',           action='store',      default='exclDiPFJetAveHFJEC',  nargs='?', choices=['DiPFJetAve', 'DiPFJetAve_HFJEC', 'PFJet', 'exclPFJet', 'exclDiPFJetAve', 'exclDiPFJetAveHFJEC'], help="trigger suite" )
 argParser.add_argument('--ptBin',              action='store',      default=(163, 230),      type = int,    nargs=2,  help="tag jet pt bin" )
 argParser.add_argument('--etaSign',            action='store',      default=0             ,  type = int,    choices = [-1,0,+1], help="sign of probe jet eta." )
 argParser.add_argument('--era',                action='store',      default='Run2016H',      nargs='?', choices=['Run2016', 'Run2016BCD', 'Run2016EFearly', 'Run2016FlateG', 'Run2016H', 'Run2016_18Apr', 'Run2016BCD_18Apr', 'Run2016EFearly_18Apr', 'Run2016FlateG_18Apr', 'Run2016H_18Apr'], help="era" )
 argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?')#, default = True)
 argParser.add_argument('--cleaned',                                 action='store_true',     help='Apply jet cleaning in data')#, default = True)
 argParser.add_argument('--bad',                                     action='store_true',     help='Cut on phEF*pT>300')#, default = True)
-argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_2D_v8',     help="subdirectory for plots")
+argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_2D_v11',     help="subdirectory for plots")
 args = argParser.parse_args()
 
 if args.cleaned:
@@ -140,6 +140,17 @@ elif args.triggers == 'DiPFJetAve_HFJEC':
         "HLT_DiPFJetAve220_HFJEC",
         "HLT_DiPFJetAve300_HFJEC",
     ]
+elif args.triggers == 'exclPFJet':
+    from JetMET.JEC.L2res.thresholds import exclPFJets
+    triggers = [ exclPFJets ]
+elif args.triggers == 'exclDiPFJetAve':
+    from JetMET.JEC.L2res.thresholds import exclDiPFJetAve
+    triggers = [ exclDiPFJetAve ]
+elif args.triggers == 'exclDiPFJetAveHFJEC':
+    from JetMET.JEC.L2res.thresholds import exclDiPFJetAveHFJEC
+    triggers = [ exclDiPFJetAveHFJEC ]
+else:
+    triggers = [ args.triggers ]
 
 samples = data
 

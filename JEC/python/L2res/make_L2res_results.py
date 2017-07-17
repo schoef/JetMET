@@ -37,7 +37,7 @@ argParser.add_argument('--alpha',              action='store',      default= 0.3
 argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?')#, default = True)
 argParser.add_argument('--cleaned',                                 action='store_true',     help='Apply jet cleaning in data', default = True)
 argParser.add_argument('--jer',                action='store',      default='',              nargs='?', choices=['', 'jer', 'jer_up', 'jer_down'], help="JER variation" )
-argParser.add_argument('--skipResponsePlots',                       action='store_true',     help='Skip A/B plots?')#, default = True)
+argParser.add_argument('--makeResponsePlots',                       action='store_true',     help='Make A/B plots?')#, default = True)
 argParser.add_argument('--overwrite',                               action='store_true',     help='Overwrite results.pkl?')
 argParser.add_argument('--useFit',                                  action='store_true',     help='Use a fit to determine the response')#, default= True
 argParser.add_argument('--metOverSumET',                            action='store_true',     help='add MET/sumET<0.2 cut')#, default= True
@@ -109,7 +109,7 @@ def drawPtResponse(plots, dataMCScale):
     for plot in plots:
       #if not max(l[0].GetMaximum() for l in plot.histos): continue # Empty plot
       p_drawObjects = map( lambda l:tex.DrawLatex(*l), getattr(plot, "drawObjects", [] ) )
-      p_drawObjects.append( tex.DrawLatex( 0.20, 0.75, "using Gaussian fit" if args.useFit else "using mean of histogram" ) )
+      p_drawObjects.append( tex.DrawLatex( 0.20, 0.80, "using Gaussian fit" if args.useFit else "using mean of histogram" ) )
 
       plotting.draw(plot,
         plot_directory = plot_directory_,
@@ -126,7 +126,7 @@ def drawEtaResponse(plots, dataMCScale):
     for plot in plots:
       #if not max(l[0].GetMaximum() for l in plot.histos): continue # Empty plot
       p_drawObjects = map( lambda l:tex.DrawLatex(*l), getattr(plot, "drawObjects", [] ) )
-      p_drawObjects.append( tex.DrawLatex( 0.20, 0.75, "using Gaussian fit" if args.useFit else "using mean of histogram" ) )
+      p_drawObjects.append( tex.DrawLatex( 0.20, 0.80, "using Gaussian fit" if args.useFit else "using mean of histogram" ) )
 
       plotting.draw(plot,
         plot_directory = plot_directory_,
@@ -137,6 +137,14 @@ def drawEtaResponse(plots, dataMCScale):
         legend         = [ (0.15,0.91-0.035*2,0.95,0.91), 2 ],
         drawObjects    = drawObjects( dataMCScale , lumi ) + p_drawObjects
       )
+
+def get_eta_tex_string( sign, eta_bin ):
+    if sign    == 'pos_eta':
+        return "%4.3f #leq #eta < %4.3f" % ( eta_bin ) 
+    elif sign  == 'abs_eta':
+        return "%4.3f #leq |#eta| < %4.3f" % ( eta_bin ) 
+    elif sign  == 'neg_eta':
+        return "%4.3f #leq #eta < %4.3f" % ( -eta_bin[1], -eta_bin[0] ) 
 
 #
 # Logger
@@ -382,23 +390,22 @@ else:
     logger.info( 'Written response results to %s', response_results_file )
 
 # response shapes
-if not args.skipResponsePlots:
+if args.makeResponsePlots:
     for var in [ "A", "B" ]:
         for s in samples:
-            for i_pt_avg_bin, pt_avg_bin in enumerate(pt_avg_bins):
-                for sign in ['neg_eta', 'pos_eta', 'abs_eta']:
+            for sign in ['neg_eta', 'pos_eta', 'abs_eta']:
+                for i_aeta in range(len(abs_eta_thresholds)-1):
+                    eta_bin = tuple(abs_eta_thresholds[i_aeta:i_aeta+2])
                     histos = []
                     for i_pt_avg_bin, pt_avg_bin in enumerate(pt_avg_bins):
                         histos.append( projections[var][s.name][sign][eta_bin][pt_avg_bin].Clone())
                         histos[-1].style = styles.lineStyle( colors[ i_pt_avg_bin ] ) 
                         histos[-1].legendText = "%i #leq %s < %i" % ( pt_avg_bin[0], pt_binning_legendText, pt_avg_bin[1] )
+                        integr = histos[-1].Integral()
+                        if integr>0:
+                            histos[-1].Scale(1./integr)
 
-                    if sign    == 'pos_eta':
-                        eta_tex_string       = "%4.3f #leq #eta < %4.3f" % ( eta_bin ) 
-                    elif sign  == 'abs_eta':
-                        eta_tex_string       = "%4.3f #leq |#eta| < %4.3f" % ( eta_bin ) 
-                    elif sign  == 'neg_eta':
-                        eta_tex_string       = "%4.3f #leq #eta < %4.3f" % ( -eta_bin[1], -eta_bin[0] ) 
+                    eta_tex_string = get_eta_tex_string( sign, eta_bin )
 
                     name = "%s_%s_%s_%i_%i" % ( s.name.replace('_'+args.era, ''), var, sign, 1000*eta_bin[0], 1000*eta_bin[1] )
                     plot = Plot.fromHisto( name, [ [histo] for histo in histos], texX = var, texY = "Number of Events" )    
@@ -429,6 +436,7 @@ for i_aeta in range(len(abs_eta_thresholds)-1):
               [response_plots_pt['A'][data.name][sign][eta_bin]] 
             ], 
             texX = pt_binning_legendText, texY = "response" ) 
+        plot.drawObjects = [ ( 0.20, 0.75, get_eta_tex_string( sign, eta_bin ) ) ]
         drawPtResponse( [plot], 1.)
 
 
@@ -451,4 +459,5 @@ for i_pt_avg_bin, pt_avg_bin in enumerate(pt_avg_bins):
               [response_plots_eta['A'][data.name][pt_avg_bin]] 
             ], 
             texX = "#eta", texY = "response" ) 
+        plot.drawObjects = [ ( 0.20, 0.75, "%i #leq p_{T,avg} < %i" % pt_avg_bin ) ]
         drawEtaResponse( [plot], 1.)
