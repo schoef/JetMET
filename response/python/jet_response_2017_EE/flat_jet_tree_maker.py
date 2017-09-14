@@ -24,6 +24,9 @@ import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',           action='store',      default='INFO',          nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging")
 argParser.add_argument('--small',              action='store_true', help='Run only on a small subset of the data?')#, default = True)
+argParser.add_argument('--maxEvents',          action='store',      type=int, default=-1, help='Maximum number of events')
+argParser.add_argument('--maxFiles',           action='store',      type=int, default=-1, help='Maximum number of files')
+argParser.add_argument('--overwrite',          action='store_true', help='overwrite?')#, default = True)
 argParser.add_argument('--targetDir',          action='store',      default='flat_jet_trees/v1')
 argParser.add_argument('--sample',             action='store',      default='/RelValNuGun/CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_Candidate_forECALStudies-v1/MINIAODSIM')
 args = argParser.parse_args()
@@ -40,7 +43,17 @@ if args.small:
     args.targetDir += "_small"
 
 sample_name = args.sample.lstrip('/').replace('/','_')
-sample = FWLiteSample.fromDAS( sample_name, args.sample, maxN = 1 if args.small else -1 ) 
+if args.small:
+    maxN = 1
+elif args.maxFiles>0:
+    maxN = args.maxFiles
+else:
+    maxN = -1 
+
+sample = FWLiteSample.fromDAS( sample_name, args.sample, maxN = maxN ) 
+
+if args.maxFiles > 0:
+    sample.files = sample.files[:args.maxFiles]
 
 output_directory = os.path.join(skim_ntuple_directory, args.targetDir, sample.name) 
 output_filename =  os.path.join(output_directory, sample.name + '.root') 
@@ -61,12 +74,15 @@ reader = sample.fwliteReader( products = products )
 new_variables =  [ "evt/l", "run/I", "lumi/I", "nVert/I" ] 
 new_variables += [ "genPt/F", "rawPt/F", "eta/F", "phi/F", "chHEF/F", "neHEF/F", "phEF/F", "eEF/F", "muEF/F", "HFHEF/F", "HFEMEF/F" ]
 
-# Maker
-tmp_dir     = ROOT.gDirectory
-output_file = ROOT.TFile( output_filename, 'recreate')
-output_file.cd()
-maker =    TreeMaker( sequence = [], variables = map( TreeVariable.fromString, new_variables ), treeName = "jets")
-tmp_dir.cd()
+if not os.path.exists( output_filename ) or args.overwrite:
+    # Maker
+    tmp_dir     = ROOT.gDirectory
+    output_file = ROOT.TFile( output_filename, 'recreate')
+    output_file.cd()
+    maker =    TreeMaker( sequence = [], variables = map( TreeVariable.fromString, new_variables ), treeName = "jets")
+    tmp_dir.cd()
+else:
+    raise IOError( "File %s exists!" % output_filename )
 
 # Filler for data struct of maker
 def jet_filler(struct, jet):
@@ -89,12 +105,15 @@ def jet_filler(struct, jet):
             setattr(struct, name, getattr(jet, func)() )
     return
 
-#Looping over common events
 reader.start()
 maker.start()
-counter = 0 
+
+counter = -1 
+
 while reader.run():
     counter += 1
+    if args.maxEvents>0 and counter>=args.maxEvents: break
+
     if counter%100==0: logger.info("At event %i.", counter)
 
     jets      = filter( jetID, reader.products['jets'] )
