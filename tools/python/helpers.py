@@ -57,6 +57,9 @@ def jetID(j):
     else:
         return j.neutralEmEnergyFraction()<0.9 and j.neutralMultiplicity()>10
 
+def vertexID(v):
+    return (not v.isFake()) and v.ndof() >= 4.0 and abs(v.z()) <= 24.0 and abs(v.position().rho()) <= 2.0
+
 def getFileList(dir, histname='histo', maxN=-1):
     import os
     filelist = os.listdir(os.path.expanduser(dir))
