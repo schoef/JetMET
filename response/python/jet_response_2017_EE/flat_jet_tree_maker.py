@@ -17,9 +17,7 @@ from RootTools.core.standard             import *
 from JetMET.tools.user                   import skim_ntuple_directory
 from JetMET.tools.helpers                import deltaR2, jetID, vertexID
 
-#
 # Arguments
-# 
 import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',           action='store',      default='INFO',          nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging")
@@ -30,7 +28,7 @@ argParser.add_argument('--overwrite',          action='store_true', help='overwr
 argParser.add_argument('--targetDir',          action='store',      default='flat_jet_trees/v1')
 argParser.add_argument('--sample',             action='store',      default='/RelValNuGun/CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_Candidate_forECALStudies-v1/MINIAODSIM')
 args = argParser.parse_args()
-
+ 
 #
 # Logger
 #
