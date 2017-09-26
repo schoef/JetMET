@@ -121,7 +121,7 @@ while reader.run():
         # convinience
         jet_out = maker.event 
         # run, lumi, event
-        jet_out.evt, jet_out.lumi, jet_out.run = reader.evt
+        jet_out.run, jet_out.lumi, jet_out.evt = reader.evt
         # nvert
         jet_out.nVert = len(vertices)
         # jet quantities

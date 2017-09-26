@@ -1,6 +1,8 @@
 import os
 
 if os.environ['USER'] in ['schoef', 'rschoefbeck', 'schoefbeck']:
+    # caches
+    cache_directory = "/afs/hephy.at/data/rschoefbeck01/JetMET/caches/"
     # master ntuple
     master_ntuple_directory = "/afs/hephy.at/data/rschoefbeck01/cmgTuples/"
     # skim ntuple
