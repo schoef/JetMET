@@ -70,7 +70,7 @@ products = {
 reader = sample.fwliteReader( products = products )
 
 new_variables =  [ "evt/l", "run/I", "lumi/I", "nVert/I" ] 
-new_variables += [ "genPt/F", "rawPt/F", "eta/F", "phi/F", "chHEF/F", "neHEF/F", "phEF/F", "eEF/F", "muEF/F", "HFHEF/F", "HFEMEF/F" ]
+new_variables += [ "genPt/F", "genEta/F", "genPhi/F", "rawPt/F", "eta/F", "phi/F", "chHEF/F", "neHEF/F", "phEF/F", "eEF/F", "muEF/F", "HFHEF/F", "HFEMEF/F" ]
 
 if not os.path.exists( output_filename ) or args.overwrite:
     # Maker
@@ -87,8 +87,10 @@ def jet_filler(struct, jet):
 
     gen_jet = jet.genJet()
 
-    struct.genPt =  gen_jet.pt() if gen_jet else float('nan')
-    struct.rawPt =  jet.correctedJet("Uncorrected").pt()
+    struct.genPt  =  gen_jet.pt()  if gen_jet else float('nan')
+    struct.genEta =  gen_jet.eta() if gen_jet else float('nan')
+    struct.genPhi =  gen_jet.phi() if gen_jet else float('nan')
+    struct.rawPt  =  jet.correctedJet("Uncorrected").pt()
     for name, func in [
         ("eta",   "eta"),
         ("phi",   "phi"),
