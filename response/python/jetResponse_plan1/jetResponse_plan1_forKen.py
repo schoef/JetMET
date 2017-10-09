@@ -1,4 +1,4 @@
-''' FWLiteReader.
+''' FWLiteReader - HCal Plan 1 jet-by-jet matching.
 '''
 # Standard imports
 import os
@@ -31,7 +31,6 @@ max_events  = -1  # Process all events
 max_files   =  3  # Process all or fewer number of files
 
 #files from Kenichi Feb. 2016
-
 #sample_prefix = "kenichi_private_qcd_"
 #/afs/cern.ch/user/d/deguio/public/ForKen/Plan0_10024.0_TTbar_13.txt
 #/afs/cern.ch/user/d/deguio/public/ForKen/Plan0_10043.0_QCDForPF_14TeV.txt
@@ -42,12 +41,17 @@ max_files   =  3  # Process all or fewer number of files
 #files_qcd_plan0     = [ 'root://eoscms.cern.ch/%s'%s.rstrip() for s in open('/afs/cern.ch/user/d/deguio/public/ForKen/Plan0_10043.0_QCDForPF_14TeV.txt').readlines() if os.path.split(s)[-1].startswith('step3_') ]
 #files_qcd_plan1     = [ 'root://eoscms.cern.ch/%s'%s.rstrip() for s in open('/afs/cern.ch/user/d/deguio/public/ForKen/Plan1_10043.0_QCDForPF_14TeV.txt').readlines() if os.path.split(s)[-1].startswith('step3_') ]
 
-veto = ['step3_800.root']
+# files from Federico March 3rd (now deleted)
+#veto = ['step3_800.root'] # broken files
+#sample_prefix = "federico_private_qcd_new_"
+#dir_qcd_plan0 = "/eos/cms/store/group/dpg_hcal/comm_hcal/deguio/Plan0/10043.0_QCDForPF_14TeV+QCDForPF_14TeV_TuneCUETP8M1_2017_GenSimFull+DigiFull_2017+RecoFull_2017+ALCAFull_2017+HARVESTFull_2017/submit_20170320_202716/"
+#dir_qcd_plan1 = "/eos/cms/store/group/dpg_hcal/comm_hcal/deguio/Plan1/10043.0_QCDForPF_14TeV+QCDForPF_14TeV_TuneCUETP8M1_2017_GenSimFull+DigiFull_2017+RecoFull_2017+ALCAFull_2017+HARVESTFull_2017/submit_20170405_123609/"
 
 # files from Federico March 3rd
+veto = []
 sample_prefix = "federico_private_qcd_new_"
-dir_qcd_plan0 = "/eos/cms/store/group/dpg_hcal/comm_hcal/deguio/Plan0/10043.0_QCDForPF_14TeV+QCDForPF_14TeV_TuneCUETP8M1_2017_GenSimFull+DigiFull_2017+RecoFull_2017+ALCAFull_2017+HARVESTFull_2017/submit_20170303_005403/"
-dir_qcd_plan1 = "/eos/cms/store/group/dpg_hcal/comm_hcal/deguio/Plan1/10043.0_QCDForPF_14TeV+QCDForPF_14TeV_TuneCUETP8M1_2017_GenSimFull+DigiFull_2017+RecoFull_2017+ALCAFull_2017+HARVESTFull_2017/submit_20170303_005702/"
+dir_qcd_plan0 = "/eos/cms/store/group/dpg_hcal/comm_hcal/deguio/Plan0/10043.0_QCDForPF_14TeV+QCDForPF_14TeV_TuneCUETP8M1_2017_GenSimFull+DigiFull_2017+RecoFull_2017+ALCAFull_2017+HARVESTFull_2017/submit_20170320_202716/"
+dir_qcd_plan1 = "/eos/cms/store/group/dpg_hcal/comm_hcal/deguio/Plan1/10043.0_QCDForPF_14TeV+QCDForPF_14TeV_TuneCUETP8M1_2017_GenSimFull+DigiFull_2017+RecoFull_2017+ALCAFull_2017+HARVESTFull_2017/submit_20170405_123609"
 
 # Make two list of files 
 files_qcd_plan0 = []
@@ -64,7 +68,7 @@ for f in os.listdir(dir_qcd_plan1):
 plan0 = FWLiteSample.fromFiles("plan0", files = files_qcd_plan0, maxN = max_files)
 plan1 = FWLiteSample.fromFiles("plan1", files = files_qcd_plan1, maxN = max_files)
 
-plan1RefJet = True
+plan1RefJet = True  # the reference should be the plan-1 jet
 refname = "plan1" if plan1RefJet else "plan0"
 pt_threshold = 50
 preprefix = "refIs%s_%s_pt%i" % ( refname, sample_prefix, pt_threshold )
@@ -147,7 +151,11 @@ position_r1 = {}
 count=0
 while r1.run( readProducts = False ):
     file_n1 =  int(os.path.split(r1.sample.events._filenames[r1.sample.events.fileIndex()])[-1].split('.')[0].split('_')[1])
-    position_r1[(r1.evt, file_n1)] = r1.position-1
+    # FIXME IMPORTANT: Fede/Ken did NOT produce unique event/run/lumi, therefore I need to add the filename to the key since it is needed to uniquely identify an event
+    # For any centrally produced sample, use  
+    # position_r1[r1.evt] = r1.position-1 
+    position_r1[(r1.evt, file_n1)] = r1.position-1 
+    
     count+=1
     if max_events is not None and max_events>0 and count>=max_events:break
 
@@ -157,6 +165,9 @@ position_r2 = {}
 count=0
 while r2.run( readProducts = False ):
     file_n2 =  int(os.path.split(r2.sample.events._filenames[r2.sample.events.fileIndex()])[-1].split('.')[0].split('_')[1])
+    # FIXME IMPORTANT: Fede/Ken did NOT produce unique event/run/lumi, therefore I need to add the filename to the key since it is needed to uniquely identify an event
+    # For any centrally produced sample, use  
+    # position_r2[r2.evt] = r2.position-1 
     position_r2[(r2.evt, file_n2)] = r2.position-1
     count+=1
     if max_events is not None and max_events>0 and count>=max_events:break
