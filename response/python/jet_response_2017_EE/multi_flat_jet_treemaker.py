@@ -22,7 +22,7 @@ from JetMET.response.jet_response_2017_EE.samples import *
 # Arguments
 import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
-argParser.add_argument('--logLevel',           action='store',      default='DEBUG',          nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging")
+argParser.add_argument('--logLevel',           action='store',      default='INFO',  nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging")
 argParser.add_argument('--small',              action='store_true', help='Run only on a small subset of the data?')#, default = True)
 argParser.add_argument('--maxEvents',          action='store',      type=int, default=-1, help='Maximum number of events')
 argParser.add_argument('--maxFiles',           action='store',      type=int, default=-1, help='Maximum number of files')
@@ -48,7 +48,7 @@ logger_rt = logger_rt.get_logger(args.logLevel, logFile = None)
 if args.small: 
     args.targetDir += "_small"
 
-output_directory = os.path.join(skim_ntuple_directory, args.targetDir, "ECAL_merged") 
+output_directory = os.path.join(skim_ntuple_directory, args.targetDir, "merged_RelValQCD_FlatPt_15_3000HS_13UP17_CMSSW_9_2_9") 
 output_filename =  os.path.join(output_directory, 'jets.root') 
 if not os.path.exists( output_directory ): 
     os.makedirs( output_directory )
@@ -57,11 +57,11 @@ if not os.path.exists( output_directory ):
 samples = [ { 'prefix':name, 'sample':dataset } for name, dataset in \
   [
     ( "GTv1_SRPFoff_NoPU"    ,   RelVal_QCD_flat_GTv1_SRPFoff_NoPU),
-  #  ( "GTv1_SRPFoff_PUpmx25ns",  RelVal_QCD_flat_GTv1_SRPFoff_PUpmx25ns),
-  #  ( "GTv2_SRPFoff_NoPU"    ,   RelVal_QCD_flat_GTv2_SRPFoff_NoPU),
-  #  ( "GTv2_SRPFoff_PUpmx25ns",  RelVal_QCD_flat_GTv2_SRPFoff_PUpmx25ns),
+    ( "GTv1_SRPFoff_PUpmx25ns",  RelVal_QCD_flat_GTv1_SRPFoff_PUpmx25ns),
+    ( "GTv2_SRPFoff_NoPU"    ,   RelVal_QCD_flat_GTv2_SRPFoff_NoPU),
+    ( "GTv2_SRPFoff_PUpmx25ns",  RelVal_QCD_flat_GTv2_SRPFoff_PUpmx25ns),
     ( "GTv2_SRPFon_NoPU"     ,   RelVal_QCD_flat_GTv2_SRPFon_NoPU),
-  #  ( "GTv2_SRPFon_PUpmx25ns",   RelVal_QCD_flat_GTv2_SRPFon_PUpmx25ns),
+    ( "GTv2_SRPFon_PUpmx25ns",   RelVal_QCD_flat_GTv2_SRPFon_PUpmx25ns),
  ] ]
 
 variables_firstsample =  [ "evt/l", "run/I", "lumi/I" ]

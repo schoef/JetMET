@@ -4,7 +4,8 @@ def get_logger(logLevel, logFile = None):
     ''' Logger for JetMET.
     
     '''
-
+    # Use stdout
+    logging.basicConfig(stream=sys.stdout)
     # add TRACE (numerical level 5, less than DEBUG) to logging (similar to apache) 
     # see default levels at https://docs.python.org/2/library/logging.html#logging-levels
     logging.TRACE = 5

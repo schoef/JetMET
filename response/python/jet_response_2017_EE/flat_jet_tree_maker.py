@@ -25,7 +25,7 @@ argParser.add_argument('--small',              action='store_true', help='Run on
 argParser.add_argument('--maxEvents',          action='store',      type=int, default=-1, help='Maximum number of events')
 argParser.add_argument('--maxFiles',           action='store',      type=int, default=-1, help='Maximum number of files')
 argParser.add_argument('--overwrite',          action='store_true', help='overwrite?')#, default = True)
-argParser.add_argument('--targetDir',          action='store',      default='flat_jet_trees/v1')
+argParser.add_argument('--targetDir',          action='store',      default='flat_jet_trees/v2')
 argParser.add_argument('--sample',             action='store',      default='/RelValNuGun/CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_Candidate_forECALStudies-v1/MINIAODSIM')
 args = argParser.parse_args()
  
@@ -48,7 +48,7 @@ elif args.maxFiles>0:
 else:
     maxN = -1 
 
-sample = FWLiteSample.fromDAS( sample_name, args.sample, maxN = maxN ) 
+sample = FWLiteSample.fromDAS( sample_name, args.sample, maxN = maxN, dbFile = None) 
 
 if args.maxFiles > 0:
     sample.files = sample.files[:args.maxFiles]
