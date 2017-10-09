@@ -133,10 +133,16 @@ resp_pt_ref = ROOT.TProfile("response_pt_ref", "response_pt_ref", len(thresholds
 resp_pt_ref.style = styles.lineStyle( ROOT.kBlack )
 resp_pt_ref.legendText = "other"
 
+## This is how you define the products which should be read. Structure is {'name1':{'type':'<type1>', 'label':(<label1>)}, etc.}
 products = {
     'jets':      {'type': 'vector<reco::PFJet>', 'label':"ak4PFJetsCHS"},
 #    'jets':     {'type':'vector<reco::CaloJet>', 'label': "ak4CaloJets" },
     'met':      {'type':'vector<reco::PFMET>', 'label': "pfMet"},
+
+    #'pfRecHitsHBHE':{ 'label':("particleFlowRecHitHBHE"), 'type':"vector<reco::PFRecHit>"},
+    #'caloRecHits':  { 'label':("reducedHcalRecHits"), 'type':'edm::SortedCollection<HBHERecHit,edm::StrictWeakOrdering<HBHERecHit> >'},
+    #'clusterHCAL':  {  'label': "particleFlowClusterHCAL", "type":"vector<reco::PFCluster>"},
+    #'pf':           { 'label':('particleFlow'), 'type':'vector<reco::PFCandidate>'},
     }
 
 r1 = plan1.fwliteReader( products=products )
