@@ -58,6 +58,9 @@ for f in os.listdir(dir_qcd_plan1):
     if os.path.isfile(os.path.join(dir_qcd_plan1, f)) and f.startswith('step3') and not any(v in f for v in veto):
         files_qcd_plan1.append( os.path.join(dir_qcd_plan1, f) )
 
+
+plot_directory = "/afs/hephy.at/user/r/rschoefbeck/www/etc/" # where your plots go
+
 # Make RootTools sample instance
 plan0 = FWLiteSample.fromFiles("plan0", files = files_qcd_plan0, maxN = max_files)
 plan1 = FWLiteSample.fromFiles("plan1", files = files_qcd_plan1, maxN = max_files)
@@ -181,18 +184,25 @@ logger.info("Have %i events in common.", len(intersec))
 
 #Looping over common events
 for i, p in enumerate(positions):
+    # Set the readers to common positions 
     p1,p2 = p
     r1.goToPosition(p1)
     r2.goToPosition(p2)
     if i%10000==0: logger.info("At %i/%i of common events.", i, len(positions))
 
+    # Fill per-event histos
     met_2D.Fill( r2.products['met'][0].pt(), r1.products['met'][0].pt() )
     met_2D_wide.Fill( r2.products['met'][0].pt(), r1.products['met'][0].pt() )
 
+    # get the jets
     jets1_ = [ j for j in r1.products['jets'] ] #if helpers.jetID( j )]
     jets2_ = [ j for j in r2.products['jets'] ] #if helpers.jetID( j )]
-    jets1 = [{'pt':j.pt(), 'eta':j.eta(), 'phi':j.phi(), 'j':j } for j in jets1_]
+
+    # for convinience, make dictionaries from the jets
+    jets1 = [{'pt':j.pt(), 'eta':j.eta(), 'phi':j.phi(), 'j':j } for j in jets1_] 
     jets2 = [{'pt':j.pt(), 'eta':j.eta(), 'phi':j.phi(), 'j':j } for j in jets2_]
+
+    # zip & match jets
     for c in zip(jets1, jets2):
         if helpers.deltaR2(*c)<0.2**2:
 
@@ -241,7 +251,7 @@ for i, h in enumerate(histos):
     h[0].__dict__.update(profiles[i].__dict__)
 
 jetResponsePlot = Plot.fromHisto(name = prefix+"jetResponseRatio_relval", histos = histos, texX = "%s Jet #phi"%refname , texY = "response ratio plan1/plan0" )
-plotting.draw(jetResponsePlot, plot_directory = "/afs/hephy.at/user/r/rschoefbeck/www/etc/", ratio = None, logY = False, logX = False, yRange=(0.7,1.2))
+plotting.draw(jetResponsePlot, plot_directory = plot_directory, ratio = None, logY = False, logX = False, yRange=(0.7,1.2))
 
 profiles = [resp_eta, resp_eta_HEP17, resp_eta_nonHEP17 ]
 histos = [ [h.ProjectionX()] for h in profiles ]
@@ -249,12 +259,12 @@ for i, h in enumerate(histos):
     h[0].__dict__.update(profiles[i].__dict__)
 
 jetResponsePlot = Plot.fromHisto(name = prefix+"jetResponseRatio_relVal_HEP_comparison", histos = histos, texX = "%s Jet #eta"%refname , texY = "response ratio plan1/plan0" )
-plotting.draw(jetResponsePlot, plot_directory = "/afs/hephy.at/user/r/rschoefbeck/www/etc/", ratio = None, logY = False, logX = False, yRange=(0.7,1.2))
+plotting.draw(jetResponsePlot, plot_directory = plot_directory, ratio = None, logY = False, logX = False, yRange=(0.7,1.2))
 
 h2d = resp_eta_phi.ProjectionXY()
 plotting.draw2D(
     plot = Plot2D.fromHisto(name = prefix+"jetResponseRatio_2D", histos = [[h2d]], texX = "%s jet #eta"%refname, texY = "%s jet #phi"%refname),
-    plot_directory = "/afs/hephy.at/user/r/rschoefbeck/www/etc/",
+    plot_directory = plot_directory,
     logX = False, logY = False, logZ = False, zRange = (0.95,1.05),
 )
 
@@ -264,22 +274,22 @@ for i, h in enumerate(histos):
     h[0].__dict__.update(profiles[i].__dict__)
 
 jetResponsePlot = Plot.fromHisto(name = prefix+"jetResponseRatio_pt", histos = histos, texX = "%s Jet p_{T}"%refname , texY = "response ratio plan1/plan0" )
-plotting.draw(jetResponsePlot, plot_directory = "/afs/hephy.at/user/r/rschoefbeck/www/etc/", ratio = None, logY = False, logX = True, yRange=(0.7,1.2))
+plotting.draw(jetResponsePlot, plot_directory = plot_directory, ratio = None, logY = False, logX = True, yRange=(0.7,1.2))
 
 
 NHEF_nonHEP17.Scale(NHEF_HEP17.Integral()/NHEF_nonHEP17.Integral())
 
 NHEFPlot = Plot.fromHisto(name = prefix+"NHEF", histos = [[NHEF_HEP17],[NHEF_nonHEP17]], texX = "plan-1 NHEF" , texY = "Events" )
-plotting.draw(NHEFPlot, plot_directory = "/afs/hephy.at/user/r/rschoefbeck/www/etc/", ratio = None, logY = False, logX = False)
+plotting.draw(NHEFPlot, plot_directory = plot_directory, ratio = None, logY = False, logX = False)
 
 plotting.draw2D(
     plot = Plot2D.fromHisto(name = prefix+"met_2D", histos = [[met_2D]], texX = "plan0 PF E_{T}^{miss}", texY = "plan1 PF E_{T}^{miss}"),
-    plot_directory = "/afs/hephy.at/user/r/rschoefbeck/www/etc/",
+    plot_directory = plot_directory,
     logX = False, logY = False, logZ = False,
 )
 
 plotting.draw2D(
     plot = Plot2D.fromHisto(name = prefix+"met_2D_wide", histos = [[met_2D_wide]], texX = "plan0 PF E_{T}^{miss}", texY = "plan1 PF E_{T}^{miss}"),
-    plot_directory = "/afs/hephy.at/user/r/rschoefbeck/www/etc/",
+    plot_directory = plot_directory,
     logX = False, logY = False, logZ = False,
 )
