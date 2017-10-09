@@ -11,7 +11,7 @@ from RootTools.core.standard import *
 
 small = True
 
-collection='photons_2_raw'
+collection='pfrechits'
 
 #2016 MC
 events_2016_MC   = Events(['root://cms-xrd-global.cern.ch//store/mc/RunIISummer16DR80Premix/SingleNeutrino/AODSIM/PUMoriond17_magnetOff_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/0006AA18-32B3-E611-806C-001E67DFF4F6.root'])
@@ -21,23 +21,30 @@ events_2017_data = Events(['root://cms-xrd-global.cern.ch//store/data/Run2017B/Z
 events_2017_MC_forECALStudies = Events(['root://cms-xrd-global.cern.ch//store/relval/CMSSW_9_2_9/RelValNuGun/GEN-SIM-RECO/PUpmx25ns_92X_upgrade2017_realistic_Candidate_forECALStudies-v1/00000/0002061F-E393-E711-A12C-0025905A48BA.root'])
 events_2017_noSRPF=Events(['root://cms-xrd-global.cern.ch//store/relval/CMSSW_9_2_9/RelValQCD_FlatPt_15_3000HS_13/GEN-SIM-RECO/PUpmx25ns_92X_upgrade2017_realistic_Candidate_forECALStudies_HS_PF16-v1/00000/00461C42-EE9C-E711-B3E3-0CC47A7C3450.root'])
 # RECO
-edmCollections = { 
-    'pf': { 'label': ( "particleFlow"), 'type':"vector<reco::PFCandidate>" },
-#    'rechits':{ 'label':("particleFlowRecHitECAL","Cleaned","RECO"), 'type':'vector<reco::PFRecHit>'},
-    'rechits':{'label':('reducedEcalRecHitsEE'), 'type':'edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> >' },    
-   }
 
+if collection.startswith('ph'):
+    edmCollections = { 
+        'pf': { 'label': ( "particleFlow"), 'type':"vector<reco::PFCandidate>" },
+       }
+elif collection.endswith('pfrechits'):
+    edmCollections = { 
+    'pfrechits':{'type':'vector<reco::PFRecHit> ', 'label': ("particleFlowRecHitECAL", "Cleaned", "RECO") }
+       }
+elif collection.endswith('rechits'):
+    edmCollections = { 
+    'rechits':{'label':('reducedEcalRecHitsEE'), 'type':'edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> >' },    
+       }
 
 theta_max = 2*atan(exp(-1.479))
 h={}
 
 for name, events in [ 
-#    ['2016_MC',   events_2016_MC],
-#    ['2016_data', events_2016_data],
+    ['2016_MC',   events_2016_MC],
+    ['2016_data', events_2016_data],
     ['2017_MC',   events_2017_MC],
     ['2017_data', events_2017_data],
-#    ['2017_MC_forECALSt', events_2017_MC_forECALStudies],
-    ['2017_MC_noSRPF', events_2017_noSRPF],
+    ['2017_MC_forECALSt', events_2017_MC_forECALStudies],
+#    ['2017_MC_noSRPF', events_2017_noSRPF],
     ]:
 
     print "At", name
@@ -76,8 +83,8 @@ for name, events in [
                 en = p.rawEcalEnergy() if collection.endswith('raw') else p.energy()
                 if abs(p.eta())>2.5:
                     h[name].Fill( en )
-        elif collection=='rechits':
-            rechits = [ p for p in products['rechits']  ]
+        elif collection == 'rechits':
+            rechits = [ p for p in products[collection]  ]
             for p in rechits:
                 o=ROOT.EEDetId(p.detid())
 
@@ -89,23 +96,36 @@ for name, events in [
                 eta   = -log(tan(theta/2))*o.zside() 
                 if abs(eta)>2.5:
                     h[name].Fill(p.energy())
+        elif collection == 'pfrechits':
+            rechits = [ p for p in products[collection]  ]
+            for p in rechits:
+                o=ROOT.EEDetId(p.detId())
 
-#h['2016_MC'].legendText = "2016 MC"
-#h['2016_MC'].style = styles.lineStyle(ROOT.kBlack)
-#h['2016_data'].legendText = "2016 data"
-#h['2016_data'].style = styles.lineStyle(ROOT.kBlue)
+                ix = o.ix() - 50.5 # from https://github.com/cms-sw/cmssw/blob/CMSSW_8_0_X/DQMOffline/JetMET/src/ECALRecHitAnalyzer.cc#L253-L255
+                iy = o.iy() - 50.5
+
+                ir    = sqrt(ix**2 + iy**2)/50.5 # normalize to 1
+                theta = asin(ir*sin(theta_max))  # scale 
+                eta   = -log(tan(theta/2))*o.zside() 
+                if abs(eta)>2.5:
+                    h[name].Fill(p.energy())
+
+h['2016_MC'].legendText = "2016 MC"
+h['2016_MC'].style = styles.lineStyle(ROOT.kBlack)
+h['2016_data'].legendText = "2016 data"
+h['2016_data'].style = styles.lineStyle(ROOT.kBlue)
 h['2017_MC'].legendText = "2017 MC"
 h['2017_MC'].style = styles.lineStyle(ROOT.kGreen)
 h['2017_data'].legendText = "2017 data"
 h['2017_data'].style = styles.lineStyle(ROOT.kRed)
-#h['2017_MC_forECALSt'].legendText = "2017 MC (new)"
-#h['2017_MC_forECALSt'].style = styles.lineStyle(ROOT.kMagenta)
-h['2017_MC_noSRPF'].legendText = "2017 MC (noSRPF)"
-h['2017_MC_noSRPF'].style = styles.lineStyle(ROOT.kBlue)
+h['2017_MC_forECALSt'].legendText = "2017 MC (new)"
+h['2017_MC_forECALSt'].style = styles.lineStyle(ROOT.kMagenta)
+#h['2017_MC_noSRPF'].legendText = "2017 MC (noSRPF)"
+#h['2017_MC_noSRPF'].style = styles.lineStyle(ROOT.kBlue)
 
-#histos = [[h[x]] for x in ['2016_MC','2016_data','2017_MC','2017_data', '2017_MC_forECALSt']]
-histos = [[h[x]] for x in ['2017_MC','2017_data', '2017_MC_noSRPF']]
-p = Plot.fromHisto(collection, histos=histos, texX = "raw photon energy") 
+histos = [[h[x]] for x in ['2016_MC','2016_data','2017_MC','2017_data', '2017_MC_forECALSt']]
+#histos = [[h[x]] for x in ['2017_MC','2017_data', '2017_MC_noSRPF']]
+p = Plot.fromHisto(collection, histos=histos, texX = "PF rechit energy") 
 
 plotting.draw(
     p, 

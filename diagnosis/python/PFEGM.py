@@ -9,7 +9,7 @@ from math import atan, sin, sqrt, log , exp, tan, asin
 
 small = True
 
-collection='rechits'
+collection='pfrechits'
 
 #2016 MC
 events = Events(['root://cms-xrd-global.cern.ch//store/mc/RunIISummer16DR80Premix/SingleNeutrino/AODSIM/PUMoriond17_magnetOff_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/0006AA18-32B3-E611-806C-001E67DFF4F6.root'])
@@ -32,7 +32,7 @@ edmCollections = {
     'pf': { 'label': ( "particleFlow"), 'type':"vector<reco::PFCandidate>" },
 #    'rechits':{ 'label':("particleFlowRecHitECAL","Cleaned","RECO"), 'type':'vector<reco::PFRecHit>'},
     'rechits':{'label':('reducedEcalRecHitsEE'), 'type':'edm::SortedCollection<EcalRecHit,edm::StrictWeakOrdering<EcalRecHit> >' },    
-
+    'pfrechits':{'type':'vector<reco::PFRecHit> ', 'label': ("particleFlowRecHitECAL") },
    }
 
 # add handles
@@ -67,6 +67,32 @@ for i in range(nevents):
             h.Fill( p.eta(), p.energy() )
     elif collection=='rechits':
         rechits = [ p for p in products['rechits']  ]
+        for p in rechits:
+            o=ROOT.EEDetId(p.detid())
+
+            ix = o.ix() - 50.5 # from https://github.com/cms-sw/cmssw/blob/CMSSW_8_0_X/DQMOffline/JetMET/src/ECALRecHitAnalyzer.cc#L253-L255
+            iy = o.iy() - 50.5
+
+            ir    = sqrt(ix**2 + iy**2)/50.5 # normalize to 1
+            theta = asin(ir*sin(theta_max))  # scale 
+            eta   = -log(tan(theta/2))*o.zside() 
+
+            h.Fill( eta, p.energy() )
+    elif collection=='pfrechits':
+        rechits = [ p for p in products['pfrechits']  ]
+        for p in rechits:
+            o=ROOT.EEDetId(p.detId())
+
+            ix = o.ix() - 50.5 # from https://github.com/cms-sw/cmssw/blob/CMSSW_8_0_X/DQMOffline/JetMET/src/ECALRecHitAnalyzer.cc#L253-L255
+            iy = o.iy() - 50.5
+
+            ir    = sqrt(ix**2 + iy**2)/50.5 # normalize to 1
+            theta = asin(ir*sin(theta_max))  # scale 
+            eta   = -log(tan(theta/2))*o.zside() 
+
+            h.Fill( eta, p.energy() )
+    elif collection=='rechits':
+        rechits = [ p for p in products['pfrechits']  ]
         for p in rechits:
             o=ROOT.EEDetId(p.detid())
 

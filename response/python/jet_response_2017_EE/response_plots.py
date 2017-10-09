@@ -113,11 +113,11 @@ genPt_bins = [
 ]
 
 absEta_bins = [
-    (1.7, 2.1), 
+    # (1.7, 2.1), 
     #(0, 1.3), 
-    #(1.3, 2), 
+    (1.3, 2), 
     #(2, 2.5), 
-    #(2.5, 2.75), 
+    #(2.4, 2.75), 
     #(2.75, 3), 
 ]
 
@@ -296,7 +296,7 @@ for i_absEta_bin, absEta_bin in enumerate( absEta_bins ):
         yRange=(0, 0.5),
         legend = [0.15,0.92-0.05*len(eta_resolution_histos[absEta_bin]),0.48,0.88])
 
- Make plot
+# Make plot
 for s in samples:
     # Plots vs. nVert
     scale_histos        = []
