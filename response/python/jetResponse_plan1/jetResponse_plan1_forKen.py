@@ -136,8 +136,8 @@ products = {
     'met':      {'type':'vector<reco::PFMET>', 'label': "pfMet"},
     }
 
-r1 = plan1.fwliteReader( )
-r2 = plan0.fwliteReader( )
+r1 = plan1.fwliteReader( products=products )
+r2 = plan0.fwliteReader( products=products )
 
 r1.start()
 runs_1 = set()
