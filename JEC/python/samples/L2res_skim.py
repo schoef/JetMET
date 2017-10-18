@@ -4,7 +4,7 @@ from RootTools.core.standard import *
 
 from JetMET.tools.user import skim_ntuple_directory
 
-sub_directory = "L2res/v11/default/"
+sub_directory = "L2res/v11_03FebV6/default/" #FIXME
 
 JetHT_Run2016B    = Sample.fromDirectory("JetHT_Run2016B", os.path.join( skim_ntuple_directory, sub_directory, "JetHT_Run2016B"))
 JetHT_Run2016C    = Sample.fromDirectory("JetHT_Run2016C", os.path.join( skim_ntuple_directory, sub_directory, "JetHT_Run2016C"))
@@ -28,6 +28,16 @@ JetHT_Run2016FlateG.setSelectionString("run>=278802")
 JetHT_Run2016H       = Sample.combine("JetHT_Run2016H", [JetHT_Run2016H_v2, JetHT_Run2016H_v3])
 JetHT_Run2016        = Sample.combine("JetHT_Run2016", [JetHT_Run2016B, JetHT_Run2016C, JetHT_Run2016D, JetHT_Run2016E, JetHT_Run2016F, JetHT_Run2016G, JetHT_Run2016H_v2, JetHT_Run2016H_v3] )
 
+sub_directory_07Aug17 = "L2res/v11/default/"
+JetHT_Run2016B_07Aug17 = Sample.fromDirectory("JetHT_Run2016B_07Aug17", os.path.join( skim_ntuple_directory, sub_directory_07Aug17, "JetHT_Run2016B_07Aug17"))
+JetHT_Run2016C_07Aug17 = Sample.fromDirectory("JetHT_Run2016C_07Aug17", os.path.join( skim_ntuple_directory, sub_directory_07Aug17, "JetHT_Run2016C_07Aug17"))
+#JetHT_Run2016D_07Aug17 = Sample.fromDirectory("JetHT_Run2016D_07Aug17", os.path.join( skim_ntuple_directory, sub_directory, "JetHT_Run2016D_07Aug17"))
+#JetHT_Run2016E_07Aug17 = Sample.fromDirectory("JetHT_Run2016E_07Aug17", os.path.join( skim_ntuple_directory, sub_directory, "JetHT_Run2016E_07Aug17"))
+JetHT_Run2016F_07Aug17 = Sample.fromDirectory("JetHT_Run2016F_07Aug17", os.path.join( skim_ntuple_directory, sub_directory_07Aug17, "JetHT_Run2016F_07Aug17"))
+JetHT_Run2016G_07Aug17 = Sample.fromDirectory("JetHT_Run2016G_07Aug17", os.path.join( skim_ntuple_directory, sub_directory_07Aug17, "JetHT_Run2016G_07Aug17"))
+JetHT_Run2016H_07Aug17 = Sample.fromDirectory("JetHT_Run2016H_07Aug17", os.path.join( skim_ntuple_directory, sub_directory_07Aug17, "JetHT_Run2016H_07Aug17"))
+
+
 #JetHT_Run2016B_18Apr = Sample.fromDirectory("JetHT_Run2016B_18Apr", os.path.join( skim_ntuple_directory, sub_directory, "JetHT_Run2016B_18Apr"))
 #JetHT_Run2016C_18Apr = Sample.fromDirectory("JetHT_Run2016C_18Apr", os.path.join( skim_ntuple_directory, sub_directory, "JetHT_Run2016C_18Apr"))
 #JetHT_Run2016D_18Apr = Sample.fromDirectory("JetHT_Run2016D_18Apr", os.path.join( skim_ntuple_directory, sub_directory, "JetHT_Run2016D_18Apr"))
@@ -48,6 +58,8 @@ JetHT_Run2016        = Sample.combine("JetHT_Run2016", [JetHT_Run2016B, JetHT_Ru
 #JetHT_Run2016FlateG_18Apr.setSelectionString("run>=278802")
 #JetHT_Run2016H_18Apr       = Sample.combine("JetHT_Run2016H_18Apr", [JetHT_Run2016H_18Apr])
 #JetHT_Run2016_18Apr        = Sample.combine("JetHT_Run2016_18Apr", [JetHT_Run2016B_18Apr, JetHT_Run2016C_18Apr, JetHT_Run2016D_18Apr, JetHT_Run2016E_18Apr, JetHT_Run2016F_18Apr, JetHT_Run2016G_18Apr, JetHT_Run2016H_18Apr] )
+
+sub_directory = "L2res/v11/default/" #FIXME
 
 QCD_Pt_50to80     = Sample.fromDirectory("QCD_Pt_50to80", os.path.join( skim_ntuple_directory, sub_directory, "QCD_Pt_50to80"))
 QCD_Pt_80to120    = Sample.fromDirectory("QCD_Pt_80to120", os.path.join( skim_ntuple_directory, sub_directory, "QCD_Pt_80to120"))

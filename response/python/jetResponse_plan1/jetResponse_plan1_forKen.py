@@ -28,7 +28,7 @@ args = argParser.parse_args()
 logger = get_logger(args.logLevel, logFile = None)
 
 max_events  = -1  # Process all events
-max_files   =  3  # Process all or fewer number of files
+max_files   = 3   # Process all or fewer number of files
 
 #files from Kenichi Feb. 2016
 #sample_prefix = "kenichi_private_qcd_"
@@ -58,7 +58,6 @@ for f in os.listdir(dir_qcd_plan1):
     if os.path.isfile(os.path.join(dir_qcd_plan1, f)) and f.startswith('step3') and not any(v in f for v in veto):
         files_qcd_plan1.append( os.path.join(dir_qcd_plan1, f) )
 
-
 plot_directory = "/afs/hephy.at/user/r/rschoefbeck/www/etc/" # where your plots go
 
 # Make RootTools sample instance
@@ -69,13 +68,6 @@ plan1RefJet = True  # the reference should be the plan-1 jet
 refname = "plan1" if plan1RefJet else "plan0"
 pt_threshold = 50
 preprefix = "refIs%s_%s_pt%i" % ( refname, sample_prefix, pt_threshold )
-
-#plan0    = FWLiteSample.fromFiles("plan0", files = files_qcd_plan0, maxN = max_files)
-#plan1    = FWLiteSample.fromFiles("plan1", files = files_qcd_plan1, maxN = max_files)
-#preprefix = "kenichi_private_ttbar_pt%i" % pt_threshold
-#plan0    = FWLiteSample.fromFiles("plan0", files = files_ttbar_plan0, maxN = max_files)
-#plan1    = FWLiteSample.fromFiles("plan1", files = files_ttbar_plan1, maxN = max_files)
-
 
 # define TProfiles
 pt_thresholds = [ 10**(x/10.) for x in range(11,36) ] 

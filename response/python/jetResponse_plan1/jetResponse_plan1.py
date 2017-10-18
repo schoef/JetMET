@@ -28,7 +28,7 @@ args = argParser.parse_args()
 logger = get_logger(args.logLevel, logFile = None)
 
 max_events  = -1
-max_files   = 300
+max_files   = -1
 
 #Kenichi Feb. 2016
 
@@ -42,9 +42,8 @@ max_files   = 300
 #files_qcd_plan0     = [ 'root://eoscms.cern.ch/%s'%s.rstrip() for s in open('/afs/cern.ch/user/d/deguio/public/ForKen/Plan0_10043.0_QCDForPF_14TeV.txt').readlines() if os.path.split(s)[-1].startswith('step3_') ]
 #files_qcd_plan1     = [ 'root://eoscms.cern.ch/%s'%s.rstrip() for s in open('/afs/cern.ch/user/d/deguio/public/ForKen/Plan1_10043.0_QCDForPF_14TeV.txt').readlines() if os.path.split(s)[-1].startswith('step3_') ]
 
-veto = ['step3_800.root']
-
 # Federico March 3rd
+veto = ['step3_800.root']
 sample_prefix = "federico_private_qcd_new_"
 dir_qcd_plan0 = "/eos/cms/store/group/dpg_hcal/comm_hcal/deguio/Plan0/10043.0_QCDForPF_14TeV+QCDForPF_14TeV_TuneCUETP8M1_2017_GenSimFull+DigiFull_2017+RecoFull_2017+ALCAFull_2017+HARVESTFull_2017/submit_20170303_005403/"
 dir_qcd_plan1 = "/eos/cms/store/group/dpg_hcal/comm_hcal/deguio/Plan1/10043.0_QCDForPF_14TeV+QCDForPF_14TeV_TuneCUETP8M1_2017_GenSimFull+DigiFull_2017+RecoFull_2017+ALCAFull_2017+HARVESTFull_2017/submit_20170303_005702/"
@@ -62,21 +61,15 @@ for f in os.listdir(dir_qcd_plan1):
 plan0 = FWLiteSample.fromFiles("plan0", files = files_qcd_plan0, maxN = max_files)
 plan1 = FWLiteSample.fromFiles("plan1", files = files_qcd_plan1, maxN = max_files)
 
+assert False, ""
+
 plan1RefJet = True
 refname = "plan1" if plan1RefJet else "plan0"
 pt_threshold = 50
 preprefix = "refIs%s_%s_pt%i" % ( refname, sample_prefix, pt_threshold )
 
-#plan0    = FWLiteSample.fromFiles("plan0", files = files_qcd_plan0, maxN = max_files)
-#plan1    = FWLiteSample.fromFiles("plan1", files = files_qcd_plan1, maxN = max_files)
-#preprefix = "kenichi_private_ttbar_pt%i" % pt_threshold
-#plan0    = FWLiteSample.fromFiles("plan0", files = files_ttbar_plan0, maxN = max_files)
-#plan1    = FWLiteSample.fromFiles("plan1", files = files_ttbar_plan1, maxN = max_files)
-
-
 # define TProfiles
 pt_thresholds = [ 10**(x/10.) for x in range(11,36) ] 
-
 
 phi_low  = 310/180.*pi - 0.2 - 2*pi
 phi_high = 330/180.*pi + 0.2 - 2*pi

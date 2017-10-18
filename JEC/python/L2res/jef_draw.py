@@ -32,7 +32,7 @@ argParser.add_argument('--small',                                   action='stor
 argParser.add_argument('--cleaned',                                 action='store_true',       help='Apply jet cleaning in data')#, default = True)
 argParser.add_argument('--bad',                                     action='store_true',       help='Cut on phEF*pT>300')#, default = True)
 argParser.add_argument('--fraction',                                action='store_true',       help='plot energy fraction.')#, default = True)
-argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_jef_v11',  help="subdirectory for plots")
+argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_jef_v11_07Aug17',  help="subdirectory for plots")
 args = argParser.parse_args()
 
 if args.cleaned:
@@ -100,10 +100,15 @@ logger_rt = logger_rt.get_logger(args.logLevel, logFile = None)
 from JetMET.JEC.samples.L2res_skim import *
 
 data = [
-    JetHT_Run2016BCD,
-    JetHT_Run2016E,
-    JetHT_Run2016Fearly,
-    JetHT_Run2016Flate,
+#    JetHT_Run2016BCD,
+#    JetHT_Run2016E,
+#    JetHT_Run2016Fearly,
+#    JetHT_Run2016Flate,
+#    JetHT_Run2016G,
+#    JetHT_Run2016H,
+    JetHT_Run2016B,
+    JetHT_Run2016C,
+    JetHT_Run2016F,
     JetHT_Run2016G,
     JetHT_Run2016H,
 ]

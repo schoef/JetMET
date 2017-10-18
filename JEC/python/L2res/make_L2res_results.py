@@ -41,7 +41,7 @@ argParser.add_argument('--makeResponsePlots',                       action='stor
 argParser.add_argument('--overwrite',                               action='store_true',     help='Overwrite results.pkl?')
 argParser.add_argument('--useFit',                                  action='store_true',     help='Use a fit to determine the response')#, default= True
 argParser.add_argument('--metOverSumET',                            action='store_true',     help='add MET/sumET<0.2 cut')#, default= True
-argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v10', help="subdirectory for plots")
+argParser.add_argument('--plot_directory',     action='store',      default='JEC/L2res_v11_03FebV6', help="subdirectory for plots")
 args = argParser.parse_args()
 
 if args.jer == '':
