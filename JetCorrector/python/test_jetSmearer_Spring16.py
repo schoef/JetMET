@@ -12,6 +12,8 @@ if __name__ == "__main__":
     #logger.info( "Hybrid pt: '%r' -> '%r'" , args, smearer_mc.hybrid_correction(*args) )
     args = (50, 2.5, 35 )
     logger.info( "Resolution '%r' -> '%r'" , args, smearer_mc.get_jet_resolution(*args) )
+    args = (50, 2.5, 0 )
+    logger.info( "Resolution '%r' -> '%r'" , args, smearer_mc.get_jet_resolution(*args) )
 
     # Segfault otherwise (no, destructor doesn't work)
     smearer_mc.delete()
