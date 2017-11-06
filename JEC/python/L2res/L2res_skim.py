@@ -67,14 +67,14 @@ logger_rt = logger_rt.get_logger(options.logLevel, logFile = None )
 
 # JetCorrector config
 Summer16_03Feb2017_DATA = \
-[(1,      'Summer16_03Feb2017BCD_V2_DATA'),
- (276831, 'Summer16_03Feb2017EF_V2_DATA' ),
- (278802, 'Summer16_03Feb2017G_V2_DATA' ),
- (280919, 'Summer16_03Feb2017H_V2_DATA')]
-#[(1,      'Summer16_23Sep2016BCDV4_DATA'), #FIXME For Anastasia sync
-# (276831, 'Summer16_23Sep2016EFV4_DATA' ),
-# (278802, 'Summer16_23Sep2016GV4_DATA' ),
-# (280919, 'Summer16_23Sep2016HV4_DATA')]
+[(1,      'Summer16_03Feb2017BCD_V6_DATA'),
+ (276831, 'Summer16_03Feb2017EF_V6_DATA' ),
+ (278802, 'Summer16_03Feb2017G_V6_DATA' ),
+ (280919, 'Summer16_03Feb2017H_V6_DATA')]
+#[(1,      'Summer16_03Feb2017BCD_V2_DATA'),
+# (276831, 'Summer16_03Feb2017EF_V2_DATA' ),
+# (278802, 'Summer16_03Feb2017G_V2_DATA' ),
+# (280919, 'Summer16_03Feb2017H_V2_DATA')]
 
 Summer16_03Feb2017_MC = [(1, 'Summer16_03Feb2017_V1_MC') ]
 

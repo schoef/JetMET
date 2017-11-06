@@ -17,6 +17,13 @@ L2res_master = {
 "JetHT_Run2016G_18Apr":       [master_ntuple_directory+"/L2res/JetHT_Run2016G-18Apr2017-v1"],
 "JetHT_Run2016H_18Apr":       [master_ntuple_directory+"/L2res/JetHT_Run2016H-18Apr2017-v1"],
 
+"JetHT_Run2016B_07Aug17" : [master_ntuple_directory+"/L2res/JetHT_Run2016B-07Aug17_ver2-v1"],
+"JetHT_Run2016C_07Aug17" : [master_ntuple_directory+"/L2res/JetHT_Run2016C-07Aug17-v1"],
+"JetHT_Run2016F_07Aug17" : [master_ntuple_directory+"/L2res/JetHT_Run2016F-07Aug17-v1"],
+"JetHT_Run2016G_07Aug17" : [master_ntuple_directory+"/L2res/JetHT_Run2016G-07Aug17-v1"],
+"JetHT_Run2016H_07Aug17" : [master_ntuple_directory+"/L2res/JetHT_Run2016H-07Aug17-v1"],
+
+
 "QCD_Pt_50to80":    [master_ntuple_directory+"/L2res/QCD_Pt_50to80_TuneCUETP8M1_13TeV_pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1"],
 "QCD_Pt_80to120":   [master_ntuple_directory+"/L2res/QCD_Pt_80to120_TuneCUETP8M1_13TeV_pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1",
                      master_ntuple_directory+"/L2res/QCD_Pt_80to120_TuneCUETP8M1_13TeV_pythia8_RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext2-v1"],

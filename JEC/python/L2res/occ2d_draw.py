@@ -23,10 +23,10 @@ from JetMET.tools.objectSelection        import getFilterCut, getJets, jetVars
 import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',           action='store',      default='INFO',          nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging" )
-argParser.add_argument('--triggers',           action='store',      default='exclDiPFJetAveHFJEC',  nargs='?', choices=['DiPFJetAve', 'DiPFJetAve_HFJEC', 'PFJet', 'exclPFJet', 'exclDiPFJetAve', 'exclDiPFJetAveHFJEC'], help="trigger suite" )
+argParser.add_argument('--triggers',           action='store',      default='noTriggers',    nargs='?', choices=['DiPFJetAve', 'DiPFJetAve_HFJEC', 'PFJet', 'exclPFJet', 'exclDiPFJetAve', 'exclDiPFJetAveHFJEC', 'noTriggers'], help="trigger suite" )
 argParser.add_argument('--ptBin',              action='store',      default=(163, 230),      type = int,    nargs=2,  help="tag jet pt bin" )
 argParser.add_argument('--etaSign',            action='store',      default=0             ,  type = int,    choices = [-1,0,+1], help="sign of probe jet eta." )
-argParser.add_argument('--era',                action='store',      default='Run2016H',      nargs='?', choices=['Run2016', 'Run2016BCD', 'Run2016EFearly', 'Run2016FlateG', 'Run2016H', 'Run2016_18Apr', 'Run2016BCD_18Apr', 'Run2016EFearly_18Apr', 'Run2016FlateG_18Apr', 'Run2016H_18Apr'], help="era" )
+argParser.add_argument('--era',                action='store',      default='Run2016H',      nargs='?', choices=['Run2016', 'Run2016BCD', 'Run2016EFearly', 'Run2016FlateG', 'Run2016H', 'Run2016_18Apr', 'Run2016BCD_18Apr', 'Run2016EFearly_18Apr', 'Run2016FlateG_18Apr', 'Run2016H_18Apr', 'Run2016B_07Aug17', 'Run2016C_07Aug17', 'Run2016F_07Aug17', 'Run2016G_07Aug17', 'Run2016H_07Aug17'], help="era" )
 argParser.add_argument('--small',                                   action='store_true',     help='Run only on a small subset of the data?')#, default = True)
 argParser.add_argument('--cleaned',                                 action='store_true',     help='Apply jet cleaning in data')#, default = True)
 argParser.add_argument('--bad',                                     action='store_true',     help='Cut on phEF*pT>300')#, default = True)
@@ -105,8 +105,20 @@ elif args.era == 'Run2016FlateG_18Apr':
     data = JetHT_Run2016FlateG_18Apr
 elif args.era == 'Run2016H_18Apr':
     data = JetHT_Run2016H_18Apr
+elif args.era == 'Run2016B_07Aug17':
+    data = JetHT_Run2016B_07Aug17
+elif args.era == 'Run2016C_07Aug17':
+    data = JetHT_Run2016C_07Aug17
+elif args.era == 'Run2016F_07Aug17':
+    data = JetHT_Run2016F_07Aug17
+elif args.era == 'Run2016G_07Aug17':
+    data = JetHT_Run2016G_07Aug17
+elif args.era == 'Run2016H_07Aug17':
+    data = JetHT_Run2016H_07Aug17
 
-if args.triggers=='DiPFJetAve':
+if args.triggers == 'noTriggers':
+    triggers = []
+elif args.triggers=='DiPFJetAve':
     triggers = [ 
         "HLT_DiPFJetAve40",
         "HLT_DiPFJetAve60",
@@ -155,13 +167,15 @@ else:
 samples = data
 
 from JetMET.JEC.L2res.jet_cleaning import jet_cleaning
-data.addSelectionString( "("+"||".join(triggers)+")")
+if len(triggers)>0:
+    data.addSelectionString( "("+"||".join(triggers)+")")
 if args.cleaned:
     data.addSelectionString( jet_cleaning )
 
 selection = [
-   ("btb", "cos(Jet_phi[tag_jet_index] - Jet_phi[probe_jet_index]) < cos(2.7)"),
-   ("a30", "alpha<0.3"), 
+#   ("btb", "cos(Jet_phi[tag_jet_index] - Jet_phi[probe_jet_index]) < cos(2.7)"),
+#   ("a30", "alpha<0.3"), 
+("EGM", "A>0.4&&Jet_phEF[probe_jet_index]>0.8")
 ]
 if args.bad:
     selection.append( ("bad", "Jet_phEF[probe_jet_index]*Jet_pt[probe_jet_index]>250") )
