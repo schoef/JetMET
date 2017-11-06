@@ -28,7 +28,7 @@ args = argParser.parse_args()
 logger = get_logger(args.logLevel, logFile = None)
 
 max_events  = -1
-max_files   = 300
+max_files   = -1
 
 #Kenichi Feb. 2016
 
@@ -72,7 +72,6 @@ preprefix = "refIs%s_%s_pt%i" % ( refname, sample_prefix, pt_threshold )
 #preprefix = "kenichi_private_ttbar_pt%i" % pt_threshold
 #plan0    = FWLiteSample.fromFiles("plan0", files = files_ttbar_plan0, maxN = max_files)
 #plan1    = FWLiteSample.fromFiles("plan1", files = files_ttbar_plan1, maxN = max_files)
-
 
 # define TProfiles
 pt_thresholds = [ 10**(x/10.) for x in range(11,36) ] 

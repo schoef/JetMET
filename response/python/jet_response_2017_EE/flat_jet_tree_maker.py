@@ -25,7 +25,7 @@ argParser.add_argument('--small',              action='store_true', help='Run on
 argParser.add_argument('--maxEvents',          action='store',      type=int, default=-1, help='Maximum number of events')
 argParser.add_argument('--maxFiles',           action='store',      type=int, default=-1, help='Maximum number of files')
 argParser.add_argument('--overwrite',          action='store_true', help='overwrite?')#, default = True)
-argParser.add_argument('--targetDir',          action='store',      default='flat_jet_trees/v2')
+argParser.add_argument('--targetDir',          action='store',      default='flat_jet_trees/v3')
 argParser.add_argument('--sample',             action='store',      default='/RelValNuGun/CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_Candidate_forECALStudies-v1/MINIAODSIM')
 args = argParser.parse_args()
  
@@ -70,7 +70,10 @@ products = {
 reader = sample.fwliteReader( products = products )
 
 new_variables =  [ "evt/l", "run/I", "lumi/I", "nVert/I" ] 
-new_variables += [ "genPt/F", "genEta/F", "genPhi/F", "rawPt/F", "eta/F", "phi/F", "chHEF/F", "neHEF/F", "phEF/F", "eEF/F", "muEF/F", "HFHEF/F", "HFEMEF/F" ]
+new_variables += [ "genPt/F", "genEta/F", "genPhi/F", "rawPt/F", "eta/F", "phi/F", 
+                   "chHEF/F", "neHEF/F", "phEF/F", "eEF/F", "muEF/F", "HFHEF/F", "HFEMEF/F",
+                   "chHMult/F", "neHMult/F", "phMult/F", "eMult/F", "muMult/F", "HFHMult/F", "HFEMMult/F",
+ ]
 
 if not os.path.exists( output_filename ) or args.overwrite:
     # Maker
@@ -101,6 +104,13 @@ def jet_filler(struct, jet):
         ("muEF",  "muonEnergyFraction"),
         ("HFHEF", "HFHadronEnergyFraction"),
         ("HFEMEF","HFEMEnergyFraction"),
+        ("chHMult", "chargedHadronMultiplicity"),
+        ("neHMult", "neutralHadronMultiplicity"),
+        ("phMult",  "photonMultiplicity"),
+        ("eMult",   "electronMultiplicity"),
+        ("muMult",  "muonMultiplicity"),
+        ("HFHMult", "HFHadronMultiplicity"),
+        ("HFEMMult","HFEMMultiplicity"),
         ]:
             setattr(struct, name, getattr(jet, func)() )
     return
