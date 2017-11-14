@@ -18,8 +18,8 @@ argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',           action='store',      default='INFO', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE', 'NOTSET'], help="Log level for logging")
 #argParser.add_argument('--small',              action='store_true', help='Run only on a small subset of the data?')#, default = True)
 #argParser.add_argument('--overwrite',          action='store_true', help='overwrite?')#, default = True)
-argParser.add_argument('--samples',            type = str,          nargs = '+', default = ["RelVal_QCD_flat_GTv1_SRPFoff_NoPU", "RelVal_QCD_flat_GTv2_SRPFoff_NoPU", "RelVal_QCD_flat_GTv2_SRPFon_NoPU"], help='Which samples? ')
-argParser.add_argument('--plot_directory',     action='store',      default='EE_2017_NoPU')
+argParser.add_argument('--samples',            type = str,          nargs = '+', default = ["RelVal_QCD_flat_GTv2_SRPFon_PUpmx25ns", "RelVal_QCD_flat_GTv2_SRPFon_PUpmx25ns_ZeroN"], help='Which samples? ')
+argParser.add_argument('--plot_directory',     action='store',      default='EE_2017_ZeroN')
 args = argParser.parse_args()
  
 #
@@ -96,6 +96,8 @@ def varShape_1D( chain, var, binning, selection = "(1)"):
 
     hname = 'p_'+uuid.uuid4().hex
     h = ROOT.TH1D( hname, hname, *binning)
+    #print (hname, hname, binning)
+    #print var+">>"+hname, selection
     chain.Draw( var+">>"+hname, selection )
     return h
 
@@ -133,7 +135,6 @@ absEta_bins = [
 ]
 
 # response shape plots 1D
-
 for name, var, binning, texX, logY in [\
     #[ "responseShapes", "rawPt/genPt", [50, 0, 1.5], "gen jet p_{T}", False],
     [ "phEF", "phEF", [50, 0, 1], "photon EF", True]
@@ -143,10 +144,9 @@ for name, var, binning, texX, logY in [\
         for i_genPt_bin, genPt_bin in enumerate( genPt_bins ):
             for i_s, s in enumerate(samples):
                 responseShape               = varShape_1D( s.chain, var, binning, cut_string( "genPt", genPt_bin )+"&&"+cut_string( "abs(eta)", absEta_bin ))
-                responseShape.legendText    = (s.texName+", "+pt_tex_string("p_{T,gen.}", genPt_bin)).replace( "GT","").replace( "SR@PF ", "").replace( "NoPU,", "").replace( "PU,", "")
-                responseShape.style         = styles.lineStyle( color[i_genPt_bin], dotted = ('v1' in s.name), dashed = ('off_' in s.name and 'v2' in s.name))
+                responseShape.legendText    = (s.texName+", "+pt_tex_string("p_{T,gen.}", genPt_bin)).replace( "GT","").replace( "SR@PF ", "")#.replace( "NoPU,", "").replace( "PU,", "")
+                responseShape.style         = styles.lineStyle( color[i_genPt_bin], dotted = ('v1' in s.name), dashed = ('off_' in s.name and 'v2' in s.name or 'ZeroN' in s.name))
                 responseShape_histos.append( [responseShape] )
-
 
         for histo in responseShape_histos:
             h = histo[0]
@@ -155,10 +155,9 @@ for name, var, binning, texX, logY in [\
 
         jetResponsePlot = Plot.fromHisto(name = name+"_eta_%3.2f_%3.2f"%absEta_bin, histos = responseShape_histos, texX = texX , texY = "" )
         plotting.draw(jetResponsePlot, plot_directory = os.path.join( plot_directory, args.plot_directory), ratio = None, logY = logY, logX = False, 
-            yRange=(0.001, 20) if logY else (0.5, 1.2),  
-            legend      = ([0.15,0.7,0.90,0.90], 3),
+            #yRange=(0.001, 20) if logY else (0.5, 1.2),  
+            legend      = ([0.15,0.7,0.90,0.90], len(samples)),
             )
-
 
 ### PHEF Plots 
 #for var in ["phEF", "neHEF", "phMult"]:

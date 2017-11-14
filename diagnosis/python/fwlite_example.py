@@ -5,11 +5,11 @@ import ROOT
 from DataFormats.FWLite import Events, Handle
 from PhysicsTools.PythonAnalysis import *
 
-small = True
+small = False
 
 # example file
 #events = Events(['root://eoscms.cern.ch//store/relval/CMSSW_8_0_25/JetHT/RECO/2016_12_21_06_38_PRnewco_80X_dataRun2_2016LegacyRepro_Candidate_v2-v2/10000/007FD8F2-E8CA-E611-8B61-0025905B85D2.root'])
-events = Events(['file:/afs/hephy.at/work/r/rschoefbeck/CMS/CMSSW_8_0_26_patch1/src/CMGTools/ObjectStudies/cfg/test/QCD_flat_noPU_34/cmsswPreProcessing.root'])
+events = Events(['file:/afs/cern.ch/user/a/amassiro/work/public/ECAL/step3_RAW2DIGI_L1Reco_RECO_EI_PAT_VALIDATION_DQM_inMINIAODSIM.QCD.root'])
 
 # Use 'edmDumpEventContent <file>' to list all products. Then, make a simple dictinary as below for the products you want to read.
 # These are the PF rechit collections:
@@ -30,12 +30,13 @@ events = Events(['file:/afs/hephy.at/work/r/rschoefbeck/CMS/CMSSW_8_0_26_patch1/
 
 # RECO
 edmCollections = { 
+'jets':{'type':'vector<pat::Jet>', 'label': ( "slimmedJets" ) },
 #    'pfMet':        { 'label':('pfMet'), 'type':'vector<reco::PFMET>'},
     #'pfRecHitsHBHE':{ 'label':("particleFlowRecHitHBHE"), 'type':"vector<reco::PFRecHit>"},
     #'caloRecHits':  { 'label':("reducedHcalRecHits"), 'type':'edm::SortedCollection<HBHERecHit,edm::StrictWeakOrdering<HBHERecHit> >'},
 #    'clusterHCAL':  {  'label': "particleFlowClusterHCAL", "type":"vector<reco::PFCluster>"},
 #    'pf':           { 'label':('particleFlow'), 'type':'vector<reco::PFCandidate>'},
-   'ecalBadCalibFilter':{'label':( "ecalBadCalibFilter",  "", "USER"), 'type':'bool'}
+   #'ecalBadCalibFilter':{'label':( "ecalBadCalibFilter",  "", "USER"), 'type':'bool'}
  
    }
 
@@ -62,7 +63,10 @@ for i in range(nevents):
     products[k] = v['handle'].product()
 
   print run,lumi,event
-  
+  for jet in products['jets']:
+    print jet.pt(), jet.photonEnergyFraction()
+
+
 #  #print RecHits
 #  for i, cl in enumerate(products["clusterHCAL"]):
 #    print "cluster   n %i E %3.2f"%(i, cl.energy())
