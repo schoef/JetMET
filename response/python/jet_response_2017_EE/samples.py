@@ -30,9 +30,9 @@ RelVal_QCD_flat_GTv2_SRPFon_NoPU        = Sample.fromDirectory("RelVal_QCD_flat_
 RelVal_QCD_flat_GTv2_SRPFon_PUpmx25ns   = Sample.fromDirectory("RelVal_QCD_flat_GTv2_SRPFon_PUpmx25ns", texName = "SR@PF on PU", treeName = "jets", directory = os.path.join( skim_directory, "RelValQCD_FlatPt_15_3000HS_13UP17_CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_Candidate_forECALStudies_HS1M_PF17-v1_MINIAODSIM"))
 
 
-RelVal_QCD_flat_GTv2_SRPFoff_NoPU_ZeroN      = Sample.fromDirectory("RelVal_QCD_flat_GTv2_SRPFoff_noPU_ZeroN",      texName="SR@PF off NoPU ZN", treeName = "jets", directory = os.path.join( skim_directory, 'RelValQCD_FlatPt_15_3000HS_13UP17_CMSSW_9_2_9-92X_upgrade2017_realistic_forECALStudies_ZeroN_HS1M_PF16-v1_MINIAODSIM'))
-RelVal_QCD_flat_GTv2_SRPFoff_PUpmx25ns_ZeroN = Sample.fromDirectory("RelVal_QCD_flat_GTv2_SRPFoff_PUpmx25ns_ZeroN", texName="SR@PF off PU ZN", treeName = "jets", directory = os.path.join( skim_directory, 'RelValQCD_FlatPt_15_3000HS_13UP17_CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_forECALStudies_ZeroN_HS1M_PF16-v2_MINIAODSIM'))
-RelVal_QCD_flat_GTv2_SRPFon_PUpmx25ns_ZeroN  = Sample.fromDirectory("RelVal_QCD_flat_GTv2_SRPFon_PUpmx25ns_ZeroN",  texName="SR@PF on PU ZN", treeName = "jets", directory = os.path.join( skim_directory, 'RelValQCD_FlatPt_15_3000HS_13UP17_CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_forECALStudies_ZeroN_HS1M_PF17-v1_MINIAODSIM'))
+RelVal_QCD_flat_GTv2_SRPFoff_NoPU_ZeroN      = Sample.fromDirectory("RelVal_QCD_flat_GTv2_SRPFoff_noPU_ZeroN",      texName="SR@PF off NoPU ZN", treeName = "jets", directory = os.path.join( skim_directory, 'RelValQCD_FlatPt_15_3000HS_13UP17_CMSSW_9_2_9-92X_upgrade2017_realistic_forECALStudies_rms0p2887_HS1M_PF16-v1_MINIAODSIM'))
+#RelVal_QCD_flat_GTv2_SRPFoff_PUpmx25ns_ZeroN = Sample.fromDirectory("RelVal_QCD_flat_GTv2_SRPFoff_PUpmx25ns_ZeroN", texName="SR@PF off PU ZN", treeName = "jets", directory = os.path.join( skim_directory, 'RelValQCD_FlatPt_15_3000HS_13UP17_CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_forECALStudies_ZeroN_HS1M_PF16-v2_MINIAODSIM'))
+RelVal_QCD_flat_GTv2_SRPFon_PUpmx25ns_ZeroN  = Sample.fromDirectory("RelVal_QCD_flat_GTv2_SRPFon_PUpmx25ns_ZeroN",  texName="SR@PF on PU ZN", treeName = "jets", directory = os.path.join( skim_directory, 'RelValQCD_FlatPt_15_3000HS_13UP17_CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_forECALStudies_rms0p2887_HS1M_PF17-v1_MINIAODSIM'))
 
 
 #skim_directory = os.path.join( skim_ntuple_directory, "flat_jet_trees/v1_small")
