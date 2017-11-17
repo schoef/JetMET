@@ -37,11 +37,17 @@ max_files = -1
 #sample_ZN = FWLiteSample.fromDAS( 'SRPFon PU ZN', '/RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_forECALStudies_rms0p2887_HS1M_PF17-v1/MINIAODSIM', maxN = max_files, dbFile = None)
 
 
-prefix = 'EE_2017_ZeroN_NoPU_SRPFoff' 
-##1M, v2 GT and SR@PF off,no PU
-sample    = FWLiteSample.fromDAS( 'SRPFOff noPU',    '/RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-92X_upgrade2017_realistic_Candidate_forECALStudies_HS1M_PF16-v1/MINIAODSIM', maxN = max_files, dbFile = None )
-# v2 GT, SR@PF off, no PU, ZeroN
-sample_ZN = FWLiteSample.fromDAS( 'SRPFOff noPU ZN', '/RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-92X_upgrade2017_realistic_forECALStudies_rms0p2887_HS1M_PF16-v1/MINIAODSIM', maxN = max_files, dbFile = None )
+#prefix = 'EE_2017_ZeroN_NoPU_SRPFoff' 
+###1M, v2 GT and SR@PF off,no PU
+#sample    = FWLiteSample.fromDAS( 'SRPFOff noPU',    '/RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-92X_upgrade2017_realistic_Candidate_forECALStudies_HS1M_PF16-v1/MINIAODSIM', maxN = max_files, dbFile = None )
+## v2 GT, SR@PF off, no PU, ZeroN
+#sample_ZN = FWLiteSample.fromDAS( 'SRPFOff noPU ZN', '/RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-92X_upgrade2017_realistic_forECALStudies_rms0p2887_HS1M_PF16-v1/MINIAODSIM', maxN = max_files, dbFile = None )
+
+prefix = 'EE_2017_ZeroN_PU_SRPFoff' 
+# v2 GT, SR@PF off, PU
+sample    = FWLiteSample.fromDAS( 'SRPFOff PU',    '/RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_Candidate_forECALStudies_HS1M_PF16-v1/MINIAODSIM', maxN = max_files, dbFile = None )
+# v2 GT, SR@PF off, PU, ZeroN
+sample_ZN = FWLiteSample.fromDAS( 'SRPFOff PU ZN',    '/RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_forECALStudies_rms0p2887_HS1M_PF16-v1/MINIAODSIM', maxN = max_files, dbFile = None )
 
 samples = [sample, sample_ZN]
 
