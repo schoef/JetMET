@@ -140,7 +140,7 @@ for i, h in enumerate(histos):
 #    h[0].Divide(jetResponse_M2_0_100.ProjectionX())
 
 jetResponsePlot = Plot.fromHisto(name = prefix+"gOverE", histos = histos, texX = "photon p_{T}", texY = "p_{T}(#gamma)/p_{T}(e)" )
-plotting.draw(jetResponsePlot, plot_directory = "/afs/hephy.at/user/r/rschoefbeck/www/etc/", ratio = {'num':0,'den':1, 'yRange':(0.98,1.02)}, logY = False, logX = True, yRange=(0.95,1.07))
+plotting.draw(jetResponsePlot, plot_directory = "/afs/hephy.at/user/r/rschoefbeck/www/etc/", ratio = {'histos':[(0,1)], 'yRange':(0.98,1.02)}, logY = False, logX = True, yRange=(0.95,1.07))
 
 for sample in samples:
     jetResponsePlot2D = Plot2D.fromHisto(name = prefix+"gOverE_2D_"+sample.name, histos = [[gOverE_2D[sample.name]]], texX = "photon p_{T}", texY = "p_{T}(#gamma)/p_{T}(e)" )
