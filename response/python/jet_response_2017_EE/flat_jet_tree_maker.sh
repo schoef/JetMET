@@ -24,11 +24,39 @@
 # 0 noise
 
 # v2 GT, SR@PF off, no PU, ZeroN
-python flat_jet_tree_maker.py --overwrite --sample /RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-92X_upgrade2017_realistic_forECALStudies_rms0p2887_HS1M_PF16-v1/MINIAODSIM
+#python flat_jet_tree_maker.py --overwrite --sample /RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-92X_upgrade2017_realistic_forECALStudies_rms0p2887_HS1M_PF16-v1/MINIAODSIM
  
 # v2 GT, SR@PF off, PU, ZeroN
 ##python flat_jet_tree_maker.py --overwrite --sample /RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_forECALStudies_ZeroN_HS1M_PF16-v2/MINIAODSIM
 # v2 GT, SR@PF on, PU, ZeroN
-python flat_jet_tree_maker.py --overwrite --sample /RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_forECALStudies_rms0p2887_HS1M_PF17-v1/MINIAODSIM 
+#python flat_jet_tree_maker.py --overwrite --sample /RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_forECALStudies_rms0p2887_HS1M_PF17-v1/MINIAODSIM 
 
 #python flat_jet_tree_maker.py --overwrite --sample /RelValNuGun_UP17/CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_forECALStudies_ZeroN_HS1M_PF16-v1/MINIAODSIM
+
+
+#50 PU         
+python flat_jet_tree_maker.py --overwrite --sample /RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_Candidate_forECALStudies_HS1M_PF17th50-v1/MINIAODSIM
+#50 NoPU       
+python flat_jet_tree_maker.py --overwrite --sample /RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-92X_upgrade2017_realistic_Candidate_forECALStudies_HS1M_PF17th50-v1/MINIAODSIM
+#50 ZeroN PU   
+python flat_jet_tree_maker.py --overwrite --sample /RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_forECALStudies_rms0p2887_HS1M_PF17th50-v1/MINIAODSIM
+#50 ZeroN NoPU 
+python flat_jet_tree_maker.py --overwrite --sample /RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-92X_upgrade2017_realistic_forECALStudies_rms0p2887_HS1M_PF17th50-v1/MINIAODSIM
+
+#70 PU         
+python flat_jet_tree_maker.py --overwrite --sample /RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_Candidate_forECALStudies_HS1M_PF17th70-v1/MINIAODSIM
+#70 NoPU       
+python flat_jet_tree_maker.py --overwrite --sample /RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-92X_upgrade2017_realistic_Candidate_forECALStudies_HS1M_PF17th70-v1/MINIAODSIM
+#70 ZeroN PU   
+python flat_jet_tree_maker.py --overwrite --sample /RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_forECALStudies_rms0p2887_HS1M_PF17th70-v1/MINIAODSIM
+#70 ZeroN NoPU 
+python flat_jet_tree_maker.py --overwrite --sample /RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-92X_upgrade2017_realistic_forECALStudies_rms0p2887_HS1M_PF17th70-v1/MINIAODSIM
+
+#90 PU         
+python flat_jet_tree_maker.py --overwrite --sample /RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_Candidate_forECALStudies_HS1M_PF17th90-v1/MINIAODSIM
+#90 NoPU       
+python flat_jet_tree_maker.py --overwrite --sample /RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-92X_upgrade2017_realistic_Candidate_forECALStudies_HS1M_PF17th90-v1/MINIAODSIM
+#90 ZeroN PU   
+python flat_jet_tree_maker.py --overwrite --sample /RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-PUpmx25ns_92X_upgrade2017_realistic_forECALStudies_rms0p2887_HS1M_PF17th90-v1/MINIAODSIM
+#90 ZeroN NoPU 
+python flat_jet_tree_maker.py --overwrite --sample /RelValQCD_FlatPt_15_3000HS_13UP17/CMSSW_9_2_9-92X_upgrade2017_realistic_forECALStudies_rms0p2887_HS1M_PF17th90-v1/MINIAODSIM
