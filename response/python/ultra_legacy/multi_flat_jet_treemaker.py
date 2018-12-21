@@ -17,7 +17,7 @@ from RootTools.core.standard             import *
 from JetMET.tools.user                   import skim_ntuple_directory, cache_directory
 
 # samples
-from JetMET.response.jet_response_2017_EE.samples import *
+from JetMET.response.ultra_legacy.samples import *
 
 # Arguments
 import argparse
@@ -27,7 +27,7 @@ argParser.add_argument('--small',              action='store_true', help='Run on
 argParser.add_argument('--maxEvents',          action='store',      type=int, default=-1, help='Maximum number of events')
 argParser.add_argument('--maxFiles',           action='store',      type=int, default=-1, help='Maximum number of files')
 argParser.add_argument('--overwrite',          action='store_true', help='overwrite?')
-argParser.add_argument('--targetDir',          action='store',      default='flat_jet_trees/v1')
+argParser.add_argument('--targetDir',          action='store',      default='flat_jet_trees/v3')
 args = argParser.parse_args()
 
 if args.small:
@@ -48,20 +48,20 @@ logger_rt = logger_rt.get_logger(args.logLevel, logFile = None)
 if args.small: 
     args.targetDir += "_small"
 
-output_directory = os.path.join(skim_ntuple_directory, args.targetDir, "merged_RelValQCD_FlatPt_15_3000HS_13UP17_CMSSW_9_2_9") 
+output_directory = os.path.join(skim_ntuple_directory, args.targetDir, "merged_RelValQCD_FlatPt_15_3000HS") 
 output_filename =  os.path.join(output_directory, 'jets.root') 
 if not os.path.exists( output_directory ): 
     os.makedirs( output_directory )
     logger.info( "Created output directory %s", output_directory )
 
+
 samples = [ { 'prefix':name, 'sample':dataset } for name, dataset in \
   [
-    ( "GTv1_SRPFoff_NoPU"    ,   RelVal_QCD_flat_GTv1_SRPFoff_NoPU),
-    ( "GTv1_SRPFoff_PUpmx25ns",  RelVal_QCD_flat_GTv1_SRPFoff_PUpmx25ns),
-    ( "GTv2_SRPFoff_NoPU"    ,   RelVal_QCD_flat_GTv2_SRPFoff_NoPU),
-    ( "GTv2_SRPFoff_PUpmx25ns",  RelVal_QCD_flat_GTv2_SRPFoff_PUpmx25ns),
-    ( "GTv2_SRPFon_NoPU"     ,   RelVal_QCD_flat_GTv2_SRPFon_NoPU),
-    ( "GTv2_SRPFon_PUpmx25ns",   RelVal_QCD_flat_GTv2_SRPFon_PUpmx25ns),
+    ("AB", QCD_flat_AB_v01),
+    ("AC", QCD_flat_AC_v01),
+    ("AC_2", QCD_flat_AC_2sigma_v01),
+    ("AC_3", QCD_flat_AC_3sigma_v01),
+    ("AC_4", QCD_flat_AC_4sigma_v01),
  ] ]
 
 variables_firstsample =  [ "evt/l", "run/I", "lumi/I" ]
