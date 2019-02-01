@@ -31,7 +31,7 @@ argParser.add_argument('--targetDir',          action='store',      default='fla
 args = argParser.parse_args()
 
 if args.small:
-    maxN = 1
+    maxN = 1000
 elif args.maxFiles>0:
     maxN = args.maxFiles
 else:
@@ -122,7 +122,11 @@ while reader.run():
             setattr( jet_out, s['prefix']+'_'+jet_var, getattr( r.event, jet_var ) )
 
     # fill ntuple
-    maker.run()        
+    maker.run()
+    
+    # stop?
+    if maxN>0 and counter>=maxN:
+        break 
     
 output_file.cd()
 maker.tree.Write()

@@ -123,6 +123,10 @@ while reader.run():
 
     # fill ntuple
     maker.run()        
+
+    # stop?
+    if maxN>0 and counter>=maxN:
+        break 
     
 output_file.cd()
 maker.tree.Write()
