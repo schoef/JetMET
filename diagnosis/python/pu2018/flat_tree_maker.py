@@ -83,16 +83,17 @@ products = {
 }
 extra_products = {
      'jets':                                     {'skip':True, 'type':'vector<pat::Jet>', 'label': ("slimmedJets")},
-     'fixedGridRhoAll':                          {'skip':True,'type':'double', 'label': ("fixedGridRhoAll", "", "RECO")},
-     'fixedGridRhoFastjetAll':                   {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetAll", "", "RECO")},
-     'fixedGridRhoFastjetAllCalo':               {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetAllCalo", "", "RECO")},
-     'fixedGridRhoFastjetCentral':               {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetCentral", "", "RECO")},
-     'fixedGridRhoFastjetCentralCalo':           {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetCentralCalo", "", "RECO")},
-     'fixedGridRhoFastjetCentralChargedPileUp':  {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetCentralChargedPileUp", "", "RECO")},
-     'fixedGridRhoFastjetCentralNeutral':        {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetCentralNeutral", "", "RECO")},
+     'fixedGridRhoAll':                          {'skip':True,'type':'double', 'label': ("fixedGridRhoAll")},
+     'fixedGridRhoFastjetAll':                   {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetAll")},
+     'fixedGridRhoFastjetAllCalo':               {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetAllCalo")},
+     'fixedGridRhoFastjetCentral':               {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetCentral")},
+     'fixedGridRhoFastjetCentralCalo':           {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetCentralCalo")},
+     'fixedGridRhoFastjetCentralChargedPileUp':  {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetCentralChargedPileUp")},
+     'fixedGridRhoFastjetCentralNeutral':        {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetCentralNeutral")},
      'met':                                      {'skip':True,'type':'vector<pat::MET>', 'label': ("slimmedMETs")},
      'pf':                                       {'skip':True,'type':'vector<pat::PackedCandidate>', 'label': ("packedPFCandidates")},
      'triggerResults':                           {'skip':True,'type':'edm::TriggerResults', 'label':("TriggerResults")},
+     'electron':                                 {'skip':True,'type':'vector<pat::Electron>','label':( "slimmedElectrons" )},
 }
 products.update( extra_products )
 
@@ -103,6 +104,8 @@ new_variables =  [ "evt/l", "run/I", "lumi/I", "nVert/I", "nVertAll/I", "closest
 new_variables += [ "jet[pt/F,genPt/F,genEta/F,genPhi/F,rawPt/F,eta/F,phi/F,chHEF/F,neHEF/F,phEF/F,eEF/F,muEF/F,HFHEF/F,HFEMEF/F,chHMult/F,neHMult/F,phMult/F,eMult/F,muMult/F,HFHMult/F,HFEMMult/F]"]
 new_variables += [ "met_pt/F", "met_phi/F"]
 new_variables += [ "fixedGridRhoAll/F", "fixedGridRhoFastjetAll/F", "fixedGridRhoFastjetAllCalo/F", "fixedGridRhoFastjetCentral/F", "fixedGridRhoFastjetCentralCalo/F", "fixedGridRhoFastjetCentralChargedPileUp/F", "fixedGridRhoFastjetCentralNeutral/F" ]
+
+new_variables += ["minDRGoodMuBadMu/F", "minDRGoodMuCh/F"]
 
 filters = ["Flag_goodVertices", "Flag_globalSuperTightHalo2016Filter", "Flag_HBHENoiseFilter", "Flag_HBHENoiseIsoFilter", "Flag_EcalDeadCellTriggerPrimitiveFilter", "Flag_BadPFMuonFilter", "Flag_BadChargedCandidateFilter", "Flag_eeBadScFilter"]
 for f in filters:
@@ -198,11 +201,20 @@ while reader.run():
     if counter_read%100==0: logger.info("Reading event %i.", counter_read)
 
     maker.event.run, maker.event.lumi, maker.event.evt = reader.evt
+
     # json
     if lumiList is not None and not lumiList.contains(maker.event.run, maker.event.lumi): continue
 
-    muons = filter( lambda p:p.pt()>15 and abs(p.eta())<2.4 and p.CutBasedIdMedium and relIso03(p)<0.2, reader.products['muon'] )
-    if len(muons)<2: continue
+    # muons in acceptance
+    accepted_muons = filter(  lambda p:p.pt()>15 and abs(p.eta())<2.4,  reader.products['muon'] )
+
+    # good and veto muons (CutBasedIdMediumPrompt = CutBasedIdMedium +  and dz<0.1 and dxy< 0.02 )
+    good_muons = filter( lambda p: p.CutBasedIdMediumPrompt and relIso03(p)<0.2, accepted_muons )
+    veto_muons = filter( lambda p: relIso03(p)<0.4 and p not in good_muons, accepted_muons )
+
+    # require Z from first two good muons. Always veto Medium muons.
+    if len(good_muons)!=2: continue
+    if abs( ( good_muons[0].p4() + good_muons[1].p4() ).M() - 91.2 ) > 10. : continue
 
     # Vertices
     maker.event.nVertAll = len( reader.products['vertices'] )
@@ -264,7 +276,24 @@ while reader.run():
 
             setattr( maker.event, name+'_met',     sqrt(MEx**2 + MEy**2 ) )
             setattr( maker.event, name+'_metPhi',  atan2( MEy, MEx ) )
-                 
+                
+    # minimumDR of good muons to high pt charged candidates
+    highPt_ch      = filter( lambda p: p.pt()>15 and abs(p.pdgId()) == 211, pf )
+    maker.event.minDRGoodMuCh  = sqrt( min( [ deltaR2( ch, mu ) for mu in good_muons for ch in highPt_ch ], 0.) )
+
+    # get PF Mu's
+    pf_mu          = filter( lambda p: p.pt()>15 and abs(p.pdgId()) == 13, pf )
+    # match with the good_muons from slimmed mu
+    good_to_pf_mu = {}
+    if len( pf_mu )>2:
+        for i_good_muon, good_muon in enumerate(good_muons):
+            pf_mu.sort( key = lambda pf: -deltaR2(good_muon, pf) )
+            good_to_pf_mu[i_good_muon] = pf_mu[0]
+        
+        if good_to_pf_mu[0] != good_to_pf_mu[1]:
+            bad_pf_muons = filter( lambda p: p not in good_to_pf_mu.values(), pf_mu )
+            maker.event.minDRGoodMuBadMu  = sqrt( min( [ deltaR2( good, bad ) for good in good_to_pf_mu.values() for bad in bad_pf_muons], 0.) )
+             
     # fill ntuple
     maker.run()        
 

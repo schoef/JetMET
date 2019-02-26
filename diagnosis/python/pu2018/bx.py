@@ -20,9 +20,9 @@ variables = [
 #    [ "HFsumPt",  "all_3p1_5p1_sumPt+all_m5p1_m3p1_sumPt", None, 700, .9],
 #    [ "PhEnEndCapSumPt",  "ga_m3p1_m2p5_sumPt+ga_2p5_3p1_sumPt", None, 25, .9],
 #    [ "NhEnEndCapSumPt",  "nh_m3p1_m2p5_sumPt+nh_2p5_3p1_sumPt", None, 35, .9],
-    [ "PhEnBarrelSumPt",  "ga_m1p5_1p5_sumPt", None, 100, .9],
-    [ "NhEnBarrelSumPt",  "nh_m1p5_1p5_sumPt", None, 70, .9],
-#    [ "MET", "met_pt", 50, 100, .9 ],
+#    [ "PhEnBarrelSumPt",  "ga_m1p5_1p5_sumPt", None, 100, .9],
+#    [ "NhEnBarrelSumPt",  "nh_m1p5_1p5_sumPt", None, 70, .9],
+    [ "MET", "met_pt", 50, 100, .9 ],
 #    [ "nVert",  "nVert", 40, 40,.9 ],
 #    [ "nVertAll",  "nVertAll", 40, 40,.9],
 ]

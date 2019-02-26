@@ -10,8 +10,8 @@ rho_thresholds  = [2*i for i in range(33)]
 
 variables = [ 
     [ "nVert", "nVert", nvtx_thresholds],
+    [ "HF_sumPt", "all_3p1_5p1_sumPt+all_m5p1_m3p1_sumPt", [50*i for i in range(41)]],
 #    [ "nVertAll", "nVertAll", nvtx_thresholds],
-#    [ "HF_sumPt", "all_3p1_5p1_sumPt+all_m5p1_m3p1_sumPt", [50*i for i in range(41)]],
 #    [ "mu_met", "mu_all_met", [5*i for i in range(41)]],
 #    [ "rhoAll", "fixedGridRhoAll", rho_thresholds],
 #    [ "rhoFastjetAll", "fixedGridRhoFastjetAll", rho_thresholds],
@@ -157,8 +157,8 @@ variables = [
 
 
 #selectionString = "met_pt>150"
-selectionString = None
-sample = dy_2018
+selectionString = "nVert>40"
+sample = dm_2018
 #dy_2018.reduceFiles( to = 1 )
 prefix = sample.name
 #profile = ROOT.TProfile("response", "response", len(pt_thresholds)-1, array.array('d', pt_thresholds) )
@@ -168,6 +168,6 @@ for i_var, ( name1, expr1, thresholds1) in enumerate(variables[:1]):
 
         plotting.draw2D(
             plot = Plot2D.fromHisto(name = "%s_%s"%( name1, name2), histos = [[h_2D]], texX = name1, texY = name2),
-            plot_directory = "/afs/hephy.at/user/r/rschoefbeck/www/JetMET/PU2018_2/"+sample.name,
+            plot_directory = "/afs/hephy.at/user/r/rschoefbeck/www/JetMET/PU2018_2_nVert40/"+sample.name,
             logX = False, logY = False, logZ = True, copyIndexPHP = True,
         )
