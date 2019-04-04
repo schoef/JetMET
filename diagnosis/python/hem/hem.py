@@ -21,8 +21,7 @@ args = argParser.parse_args()
 from JetMET.tools.user import plot_directory
 
 directory = "/afs/hephy.at/data/rschoefbeck02/postProcessed/flat_jet_trees/v9/"
-dm_2018 = Sample.fromDirectory( "DoubleMuon", os.path.join( directory, "DoubleMuon_Run2018C-17Sep2018-v1_MINIAOD" ), isData = True)
-from JetMET.diagnosis.pu2018.samples import *
+sample = Sample.fromDirectory( "DoubleMuon", os.path.join( directory, "DoubleMuon_Run2018C-17Sep2018-v1_MINIAOD" ), isData = True)
 
 #
 # Logger
@@ -49,12 +48,12 @@ def drawObjects( extra ):
     lines = tex_common + extra 
     return [tex.DrawLatex(*l) for l in lines] 
 
-quantiles = [0, 0.31, 0.5, 0.68, 0.95, 0.99, 0.999]
-colors    = [ROOT.kBlack, ROOT.kMagenta, ROOT.kBlue, ROOT.kMagenta, ROOT.kGreen, ROOT.kRed, ROOT.kOrange]
-
-sample.reduceFiles( to = -1 )
+if args.small: sample.reduceFiles( to = 1 )
 
 selectionString = "Flag_goodVertices&&Flag_globalSuperTightHalo2016Filter&&Flag_HBHENoiseFilter&&Flag_HBHENoiseIsoFilter&&Flag_EcalDeadCellTriggerPrimitiveFilter&&Flag_BadPFMuonFilter&&Flag_BadChargedCandidateFilter&&Flag_eeBadScFilter"
+
+quantiles = [0, 0.31, 0.5, 0.68, 0.95, 0.99, 0.999]
+colors    = [ROOT.kBlack, ROOT.kMagenta, ROOT.kBlue, ROOT.kMagenta, ROOT.kGreen, ROOT.kRed, ROOT.kOrange]
 
 for name, variable, lines in variables:
     # Get inclusive histogam
@@ -66,7 +65,7 @@ for name, variable, lines in variables:
     h_inclusive.GetQuantiles( len(quantiles), thresholds, array.array('d', quantiles) )
 
     # 1D plot
-    plot_inclusive = Plot.fromHisto( name = prefix+'1D_'+name, histos = [ [h_inclusive] ], texX = name, texY = "Number of Events")
+    plot_inclusive = Plot.fromHisto( name = '1D_'+name, histos = [ [h_inclusive] ], texX = name, texY = "Number of Events")
     
     q_lines = []
     for i_threshold, threshold in enumerate(thresholds):
@@ -78,26 +77,7 @@ for name, variable, lines in variables:
     plotting.draw(plot_inclusive, 
         #ratio = {},
         legend      = ( [0.15, 0.80, 0.70, 0.90], 3 ),
-        plot_directory = os.path.join( plot_directory, "JetMET/BX_quantiles", sample.name ),
+        plot_directory = os.path.join( plot_directory, "JetMET/HEM", sample.name ),
         logX = False, logY = True, copyIndexPHP = True,
         drawObjects = q_lines,
-        )
-
-    h_quantiles = {}
-
-    for i_quantile, quantile in enumerate(quantiles):
-        h_quantiles[quantile] = sample.get1DHistoFromDraw( 'bx', bx_thresholds, selectionString = selectionString+"&&%s>=%f"% ( variable, thresholds[i_quantile]) ,  binningIsExplicit = True ) 
-        h_quantiles[quantile].style = styles.lineStyle( colors[i_quantile] )
-        h_quantiles[quantile].legendText = "#geq %3.1f ( %3.1f "%( thresholds[i_quantile], 100*quantiles[i_quantile]) + "% )"
-
-    plot = Plot.fromHisto( name = prefix+name, histos = [ [h_quantiles[quantile]] for quantile in quantiles ], texX = "BX", texY = "Number of Events")
-
-    plotting.draw(plot, 
-        #ratio = {},
-        widths = {'x_width':1300, 'y_width':600},
-        #yRange=(0, maximum),  
-        legend      = ( [0.15, 0.80, 0.70, 0.90], 3 ),
-        plot_directory = os.path.join( plot_directory, "JetMET/BX_quantiles", sample.name ),
-        logX = False, logY = True, copyIndexPHP = True,
-        drawObjects = drawObjects( lines )
         )
