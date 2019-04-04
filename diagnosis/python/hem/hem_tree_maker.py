@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-''' Analysis script for gen plots
+''' NTupler for MiniAOD 
 '''
 #
 # Standard imports and batch mode
@@ -24,9 +24,7 @@ argParser.add_argument('--logLevel',           action='store',      default='INF
 argParser.add_argument('--small',              action='store_true', help='Run only on a small subset of the data?')#, default = True)
 argParser.add_argument('--maxEvents',          action='store',      type=int, default=-1, help='Maximum number of events')
 argParser.add_argument('--maxFiles',           action='store',      type=int, default=-1, help='Maximum number of files')
-argParser.add_argument('--minNVert',           action='store',      type=int, default=-1, help="minimum vertex multiplicity")
-argParser.add_argument('--minMET',             action='store',      type=int, default=-1, help="minimum ETmiss")
-argParser.add_argument('--targetDir',          action='store',      default='flat_jet_trees/v9')
+argParser.add_argument('--targetDir',          action='store',      default='hem/v2')
 argParser.add_argument('--sample',             action='store',      default='/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM')
 argParser.add_argument('--nJobs',              action='store',      nargs='?', type=int, default=1,  help="Maximum number of simultaneous jobs.")
 argParser.add_argument('--job',                action='store',      nargs='?', type=int, default=0,  help="Run only job i")
@@ -87,40 +85,58 @@ products = {
 }
 extra_products = {
      'jets':                                     {'skip':True, 'type':'vector<pat::Jet>', 'label': ("slimmedJets")},
-     'fixedGridRhoAll':                          {'skip':True,'type':'double', 'label': ("fixedGridRhoAll")},
+     #'fixedGridRhoAll':                          {'skip':True,'type':'double', 'label': ("fixedGridRhoAll")},
      'fixedGridRhoFastjetAll':                   {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetAll")},
-     'fixedGridRhoFastjetAllCalo':               {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetAllCalo")},
-     'fixedGridRhoFastjetCentral':               {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetCentral")},
-     'fixedGridRhoFastjetCentralCalo':           {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetCentralCalo")},
-     'fixedGridRhoFastjetCentralChargedPileUp':  {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetCentralChargedPileUp")},
-     'fixedGridRhoFastjetCentralNeutral':        {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetCentralNeutral")},
+     #'fixedGridRhoFastjetAllCalo':               {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetAllCalo")},
+     #'fixedGridRhoFastjetCentral':               {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetCentral")},
+     #'fixedGridRhoFastjetCentralCalo':           {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetCentralCalo")},
+     #'fixedGridRhoFastjetCentralChargedPileUp':  {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetCentralChargedPileUp")},
+     #'fixedGridRhoFastjetCentralNeutral':        {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetCentralNeutral")},
      'pf':                                       {'skip':True,'type':'vector<pat::PackedCandidate>', 'label': ("packedPFCandidates")},
      'triggerResults':                           {'skip':True,'type':'edm::TriggerResults', 'label':("TriggerResults")},
-     'electron':                                 {'skip':True,'type':'vector<pat::Electron>','label':( "slimmedElectrons" )},
+     #'electron':                                 {'skip':True,'type':'vector<pat::Electron>','label':( "slimmedElectrons" )},
 }
 products.update( extra_products )
 
 
 reader = sample.fwliteReader( products = products )
 
-new_variables =  [ "evt/l", "run/I", "lumi/I", "nVert/I", "nVertAll/I", "closest_dz_good/F", "closest_dz_all/F", "bx/I"] 
+new_variables =  [ "evt/l", "run/I", "lumi/I", "nVert/I", "nVertAll/I", "bx/I"] 
 new_variables += [ "jet[pt/F,genPt/F,genEta/F,genPhi/F,rawPt/F,eta/F,phi/F,chHEF/F,neHEF/F,phEF/F,eEF/F,muEF/F,HFHEF/F,HFEMEF/F,chHMult/F,neHMult/F,phMult/F,eMult/F,muMult/F,HFHMult/F,HFEMMult/F]"]
-new_variables += [ "met_pt/F", "met_phi/F"]
-new_variables += [ "fixedGridRhoAll/F", "fixedGridRhoFastjetAll/F", "fixedGridRhoFastjetAllCalo/F", "fixedGridRhoFastjetCentral/F", "fixedGridRhoFastjetCentralCalo/F", "fixedGridRhoFastjetCentralChargedPileUp/F", "fixedGridRhoFastjetCentralNeutral/F" ]
-
-new_variables += ["minDRGoodMuBadMu/F", "minDRGoodMuCh/F", "maxPtChCloseToMu/F"]
+new_variables += [ "met_pt/F", "met_phi/F", "mll/F"]
+new_variables += [  
+                    #"fixedGridRhoAll/F", 
+                    "fixedGridRhoFastjetAll/F", 
+                    #"fixedGridRhoFastjetAllCalo/F", 
+                    #"fixedGridRhoFastjetCentral/F", 
+                    #"fixedGridRhoFastjetCentralCalo/F", 
+                    #"fixedGridRhoFastjetCentralChargedPileUp/F", 
+                    #"fixedGridRhoFastjetCentralNeutral/F" 
+                 ]
 
 filters = ["Flag_goodVertices", "Flag_globalSuperTightHalo2016Filter", "Flag_HBHENoiseFilter", "Flag_HBHENoiseIsoFilter", "Flag_EcalDeadCellTriggerPrimitiveFilter", "Flag_BadPFMuonFilter", "Flag_BadChargedCandidateFilter", "Flag_eeBadScFilter"]
 for f in filters:
     new_variables.append( "%s/I"%f )
 
-eta_bins_ = [ ( -5.1, -3.1), (-3.1, -2.5), (-2.5, -1.5), (-1.5, 1.5), (1.5, 2.5), (2.5, 3.1), (3.1, 5.1) ] 
-pf_types_ = [ ("el", 11), ("mu", 13), ("ga", 22), ("ch", 211), ("nh", 130), ("HFh", 1), ("HFe", 2) ]
+HEM_phi   = (-1.57, -0.87)
+eta_bins_ = [ ( -5.1, -3.2), (-3.2, -1.3), (-1.3, 1.3), (1.3, 3.2), (3.2, 5.1) ] 
+#eta_bins_ = [ (-3.2, -1.3) ] 
+pf_types_ = [ ("ga", 22), ("ch", 211), ("nh", 130) ]
 
 def eta_selector( eta_bin ):
     def func( p ):
         eta = p.eta()
-        return p.eta()>=eta_bin[0] and p.eta()<eta_bin[1]
+        return eta>=eta_bin[0] and eta<eta_bin[1]
+    return func
+def phi_selector( phi_bin ):
+    def func( p ):
+        phi = p.phi()
+        return phi>=phi_bin[0] and phi<phi_bin[1]
+    return func
+def phi_veto_selector( phi_bin ):
+    def func( p ):
+        phi = p.phi()
+        return not( p.phi()>=phi_bin[0] and p.phi()<phi_bin[1])
     return func
 def pf_selector( pf_type ):
     def func( p ):
@@ -140,13 +156,18 @@ def toDict( p ):
 eta_bins = [ {'name':str_name(e), 'sel':eta_selector(e)} for e in eta_bins_]
 eta_bins.append( {'name':'all', 'sel': alwaysTrue } )
 
+phi_bins = [ {'name':'HEMphi', 'sel':phi_selector(HEM_phi)} ]
+phi_bins.append( {'name':'noHEMphi', 'sel':phi_veto_selector(HEM_phi)} )
+phi_bins.append( {'name':'all', 'sel': alwaysTrue } )
+
 pf_types = [ {'name':p[0],  'sel':pf_selector(p)}  for p in pf_types_]
 pf_types.append( {'name':'all', 'sel': alwaysTrue} )
 
 for eta_bin in eta_bins:
-    for pf_type in pf_types:
-        for var in ['met/F', 'sumPt/F', 'metPhi/F', 'mult/I']:
-            new_variables.append( '%s_%s_%s' % ( pf_type['name'], eta_bin['name'], var ) )
+    for phi_bin in phi_bins:
+        for pf_type in pf_types:
+            for var in ['met/F', 'sumPt/F', 'metPhi/F']:
+                new_variables.append( '%s_%s_%s_%s' % ( pf_type['name'], eta_bin['name'], phi_bin['name'], var ) )
 
 if not (os.path.exists( output_filename ) and checkRootFile( output_filename, ["Events"]))  or args.overwrite:
     # Maker
@@ -221,30 +242,26 @@ while reader.run():
 
     # require Z from first two good muons. Always veto Medium muons.
     if len(good_muons)<2: continue
-    if abs( ( good_muons[0].p4() + good_muons[1].p4() ).M() - 91.2 ) > 10. : continue
-    
+
+    mll = ( good_muons[0].p4() + good_muons[1].p4() ).M()
+    #if abs( ( good_muons[0].p4() + good_muons[1].p4() ).M() - 91.2 ) > 10. : continue
+    if mll  < 20. : continue
+
+    maker.event.mll = mll
+ 
     # Vertices
     maker.event.nVertAll = len( reader.products['vertices'] )
     vertices       = filter( vertexID, reader.products['vertices'] )
     maker.event.nVert    = len( vertices )
     maker.event.bx = reader.sample.events._event.bunchCrossing()
 
-    # steerable minimum
-    if len ( vertices ) < args.minNVert:
-        continue
     # require 1 good vertex
     if len(vertices)==0: continue
-
-    if reader.products['met'][0].pt()<args.minMET:
-        continue
+    leading_vertex = vertices[0]  
 
     # read the rest of the stuff when selection is done
     for name in extra_products.keys():
         reader.readProduct( name ) 
-
-    leading_vertex = vertices[0]  
-    maker.event.closest_dz_good = min( [abs( leading_vertex.z() - vertex.z() ) for vertex in vertices if vertex != leading_vertex ] )
-    maker.event.closest_dz_all  = min( [abs( leading_vertex.z() - vertex.z() ) for vertex in reader.products['vertices'] if vertex != leading_vertex ] )
 
     # Jets
     jets      = filter( jetID, reader.products['jets'] )
@@ -261,57 +278,33 @@ while reader.run():
         setattr( maker.event, f, triggerResults.accept(triggerNames.triggerIndex(f)))
 
     # rhos
-    maker.event.fixedGridRhoAll                   = reader.products['fixedGridRhoAll'][0]
+    #maker.event.fixedGridRhoAll                   = reader.products['fixedGridRhoAll'][0]
     maker.event.fixedGridRhoFastjetAll            = reader.products['fixedGridRhoFastjetAll'][0]
-    maker.event.fixedGridRhoFastjetAllCalo        = reader.products['fixedGridRhoFastjetAllCalo'][0]
-    maker.event.fixedGridRhoFastjetCentral        = reader.products['fixedGridRhoFastjetCentral'][0]
-    maker.event.fixedGridRhoFastjetCentralCalo    = reader.products['fixedGridRhoFastjetCentralCalo'][0]
-    maker.event.fixedGridRhoFastjetCentralChargedPileUp = reader.products['fixedGridRhoFastjetCentralChargedPileUp'][0]
-    maker.event.fixedGridRhoFastjetCentralNeutral = reader.products['fixedGridRhoFastjetCentralNeutral'][0]
+    #maker.event.fixedGridRhoFastjetAllCalo        = reader.products['fixedGridRhoFastjetAllCalo'][0]
+    #maker.event.fixedGridRhoFastjetCentral        = reader.products['fixedGridRhoFastjetCentral'][0]
+    #maker.event.fixedGridRhoFastjetCentralCalo    = reader.products['fixedGridRhoFastjetCentralCalo'][0]
+    #maker.event.fixedGridRhoFastjetCentralChargedPileUp = reader.products['fixedGridRhoFastjetCentralChargedPileUp'][0]
+    #maker.event.fixedGridRhoFastjetCentralNeutral = reader.products['fixedGridRhoFastjetCentralNeutral'][0]
 
     # pf Candidates
     pf = reader.products['pf']
     for eta_bin in eta_bins:
         particles_eta_bin = filter( eta_bin['sel'], pf )
-        for pf_type in pf_types:
+        for phi_bin in phi_bins:
+            particles_eta_phi_bin = filter( phi_bin['sel'], particles_eta_bin )
+            for pf_type in pf_types:
 
-            name = pf_type['name']+'_'+eta_bin['name']
-            particles_eta_bin_pf_type = filter( pf_type['sel'], particles_eta_bin )
-            setattr( maker.event, name+'_sumPt',  sum( [p.pt() for p in particles_eta_bin_pf_type], 0.))
-            setattr( maker.event, name+'_mult',   len( particles_eta_bin_pf_type ) )
+                name = pf_type['name']+'_'+eta_bin['name']+'_'+phi_bin['name']
+                particles_eta_phi_bin_pf_type = filter( pf_type['sel'], particles_eta_phi_bin )
+                setattr( maker.event, name+'_sumPt',  sum( [p.pt() for p in particles_eta_phi_bin_pf_type], 0.))
+                #setattr( maker.event, name+'_mult',   len( particles_eta_bin_pf_type ) )
 
-            MEx = sum( [ -p.pt()*cos(p.phi()) for p in particles_eta_bin_pf_type], 0.)
-            MEy = sum( [ -p.pt()*sin(p.phi()) for p in particles_eta_bin_pf_type], 0.)
+                MEx = sum( [ -p.pt()*cos(p.phi()) for p in particles_eta_phi_bin_pf_type], 0.)
+                MEy = sum( [ -p.pt()*sin(p.phi()) for p in particles_eta_phi_bin_pf_type], 0.)
 
-            setattr( maker.event, name+'_met',     sqrt(MEx**2 + MEy**2 ) )
-            setattr( maker.event, name+'_metPhi',  atan2( MEy, MEx ) )
+                setattr( maker.event, name+'_met',     sqrt(MEx**2 + MEy**2 ) )
+                setattr( maker.event, name+'_metPhi',  atan2( MEy, MEx ) )
                 
-    # minimumDR of good muons to high pt charged candidates
-    highPt_ch      = filter( lambda p: p.pt()>5 and abs(p.pdgId()) == 211, pf )
-    maker.event.minDRGoodMuCh  = sqrt( min( [ deltaR2( toDict(ch), toDict(mu) ) for mu in good_muons for ch in highPt_ch ] + [99**2]) )
-    maker.event.maxPtChCloseToMu = 0
-    for mu in good_muons:
-        chCloseToMu = filter( lambda p: deltaR2( toDict(p), toDict( mu ) )< 0.01**2, highPt_ch )
-        ptChCloseToMu = sum( [ p.pt() for p in chCloseToMu ], 0. )
-        print mu, ptChCloseToMu
-        if ptChCloseToMu>maker.event.maxPtChCloseToMu:
-            maker.event.maxPtChCloseToMu = ptChCloseToMu
-
-    #if maker.event.minDRGoodMuCh<0.01: assert False, ""
-
-    # get PF Mu's
-    pf_mu          = filter( lambda p: p.pt()>15 and abs(p.pdgId()) == 13, pf )
-    # match with the good_muons from slimmed mu
-    good_to_pf_mu = {}
-    if len( pf_mu )>=2:
-        for i_good_muon, good_muon in enumerate(good_muons):
-            pf_mu.sort( key = lambda pf: -deltaR2(toDict(good_muon), toDict(pf)) )
-            good_to_pf_mu[i_good_muon] = pf_mu[0]
-        if good_to_pf_mu[0] != good_to_pf_mu[1]:
-            bad_pf_muons = filter( lambda p: p not in good_to_pf_mu.values(), pf_mu )
-            maker.event.minDRGoodMuBadMu  = sqrt( min( [ deltaR2( toDict(good), toDict(bad) ) for good in good_to_pf_mu.values() for bad in bad_pf_muons] + [99**2]) )
-
-
     # fill ntuple
     maker.run()        
 
