@@ -24,8 +24,9 @@ argParser.add_argument('--logLevel',           action='store',      default='INF
 argParser.add_argument('--small',              action='store_true', help='Run only on a small subset of the data?')#, default = True)
 argParser.add_argument('--maxEvents',          action='store',      type=int, default=-1, help='Maximum number of events')
 argParser.add_argument('--maxFiles',           action='store',      type=int, default=-1, help='Maximum number of files')
-argParser.add_argument('--minNVert',           action='store',      type=int, default=-1, help="minimum number of good vertices")
-argParser.add_argument('--targetDir',          action='store',      default='flat_jet_trees/v6')
+argParser.add_argument('--minNVert',           action='store',      type=int, default=-1, help="minimum vertex multiplicity")
+argParser.add_argument('--minMET',             action='store',      type=int, default=-1, help="minimum ETmiss")
+argParser.add_argument('--targetDir',          action='store',      default='flat_jet_trees/v9')
 argParser.add_argument('--sample',             action='store',      default='/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM')
 argParser.add_argument('--nJobs',              action='store',      nargs='?', type=int, default=1,  help="Maximum number of simultaneous jobs.")
 argParser.add_argument('--job',                action='store',      nargs='?', type=int, default=0,  help="Run only job i")
@@ -51,7 +52,9 @@ elif args.maxFiles>0:
 else:
     maxN = -1 
 
-sample = FWLiteSample.fromDAS( sample_name, args.sample, maxN = maxN, dbFile = os.path.join( cache_directory, 'fwlite_cache.db' ))  
+dbFile = os.path.join( cache_directory, 'JME_fwlite_cache.db' )
+logger.info( "Using sample cache %s", dbFile )
+sample = FWLiteSample.fromDAS( sample_name, args.sample, maxN = maxN, dbFile = dbFile)  
 output_directory = os.path.join(skim_ntuple_directory, args.targetDir, sample.name) 
 
 # Run only job number "args.job" from total of "args.nJobs"
@@ -80,6 +83,7 @@ if not os.path.exists( output_directory ):
 products = {
      'muon':                                     {'skip':False,'type':'vector<pat::Muon>', 'label': ("slimmedMuons")},
      'vertices':                                 {'skip':False, 'type':'vector<reco::Vertex>', 'label':('offlineSlimmedPrimaryVertices')},
+     'met':                                      {'skip':False,'type':'vector<pat::MET>', 'label': ("slimmedMETs")},
 }
 extra_products = {
      'jets':                                     {'skip':True, 'type':'vector<pat::Jet>', 'label': ("slimmedJets")},
@@ -90,7 +94,6 @@ extra_products = {
      'fixedGridRhoFastjetCentralCalo':           {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetCentralCalo")},
      'fixedGridRhoFastjetCentralChargedPileUp':  {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetCentralChargedPileUp")},
      'fixedGridRhoFastjetCentralNeutral':        {'skip':True,'type':'double', 'label': ("fixedGridRhoFastjetCentralNeutral")},
-     'met':                                      {'skip':True,'type':'vector<pat::MET>', 'label': ("slimmedMETs")},
      'pf':                                       {'skip':True,'type':'vector<pat::PackedCandidate>', 'label': ("packedPFCandidates")},
      'triggerResults':                           {'skip':True,'type':'edm::TriggerResults', 'label':("TriggerResults")},
      'electron':                                 {'skip':True,'type':'vector<pat::Electron>','label':( "slimmedElectrons" )},
@@ -105,7 +108,7 @@ new_variables += [ "jet[pt/F,genPt/F,genEta/F,genPhi/F,rawPt/F,eta/F,phi/F,chHEF
 new_variables += [ "met_pt/F", "met_phi/F"]
 new_variables += [ "fixedGridRhoAll/F", "fixedGridRhoFastjetAll/F", "fixedGridRhoFastjetAllCalo/F", "fixedGridRhoFastjetCentral/F", "fixedGridRhoFastjetCentralCalo/F", "fixedGridRhoFastjetCentralChargedPileUp/F", "fixedGridRhoFastjetCentralNeutral/F" ]
 
-new_variables += ["minDRGoodMuBadMu/F", "minDRGoodMuCh/F"]
+new_variables += ["minDRGoodMuBadMu/F", "minDRGoodMuCh/F", "maxPtChCloseToMu/F"]
 
 filters = ["Flag_goodVertices", "Flag_globalSuperTightHalo2016Filter", "Flag_HBHENoiseFilter", "Flag_HBHENoiseIsoFilter", "Flag_EcalDeadCellTriggerPrimitiveFilter", "Flag_BadPFMuonFilter", "Flag_BadChargedCandidateFilter", "Flag_eeBadScFilter"]
 for f in filters:
@@ -130,6 +133,9 @@ def str_name( eta_bin ):
 
 def alwaysTrue( *args, **kwargs):
     return True
+
+def toDict( p ):
+    return {'pt':p.pt(), 'eta':p.eta(), 'phi':p.phi()}
 
 eta_bins = [ {'name':str_name(e), 'sel':eta_selector(e)} for e in eta_bins_]
 eta_bins.append( {'name':'all', 'sel': alwaysTrue } )
@@ -209,29 +215,32 @@ while reader.run():
     accepted_muons = filter(  lambda p:p.pt()>15 and abs(p.eta())<2.4,  reader.products['muon'] )
 
     # good and veto muons (CutBasedIdMediumPrompt = CutBasedIdMedium +  and dz<0.1 and dxy< 0.02 )
-    good_muons = filter( lambda p: p.CutBasedIdMediumPrompt and relIso03(p)<0.2, accepted_muons )
+    good_muons = filter( lambda p: p.CutBasedIdMediumPrompt and relIso03(p)<0.12 and abs(p.dB(ROOT.pat.Muon.PV3D)/p.edB(ROOT.pat.Muon.PV3D))<4, accepted_muons )
+    #good_muons = filter( lambda p: p.CutBasedIdMediumPrompt and relIso03(p)<0.2, accepted_muons )
     veto_muons = filter( lambda p: relIso03(p)<0.4 and p not in good_muons, accepted_muons )
 
     # require Z from first two good muons. Always veto Medium muons.
-    if len(good_muons)!=2: continue
+    if len(good_muons)<2: continue
     if abs( ( good_muons[0].p4() + good_muons[1].p4() ).M() - 91.2 ) > 10. : continue
-
+    
     # Vertices
     maker.event.nVertAll = len( reader.products['vertices'] )
     vertices       = filter( vertexID, reader.products['vertices'] )
     maker.event.nVert    = len( vertices )
     maker.event.bx = reader.sample.events._event.bunchCrossing()
 
+    # steerable minimum
     if len ( vertices ) < args.minNVert:
+        continue
+    # require 1 good vertex
+    if len(vertices)==0: continue
+
+    if reader.products['met'][0].pt()<args.minMET:
         continue
 
     # read the rest of the stuff when selection is done
     for name in extra_products.keys():
         reader.readProduct( name ) 
-
-
-    # require 1 good vertex
-    if len(vertices)==0: continue
 
     leading_vertex = vertices[0]  
     maker.event.closest_dz_good = min( [abs( leading_vertex.z() - vertex.z() ) for vertex in vertices if vertex != leading_vertex ] )
@@ -278,26 +287,35 @@ while reader.run():
             setattr( maker.event, name+'_metPhi',  atan2( MEy, MEx ) )
                 
     # minimumDR of good muons to high pt charged candidates
-    highPt_ch      = filter( lambda p: p.pt()>15 and abs(p.pdgId()) == 211, pf )
-    maker.event.minDRGoodMuCh  = sqrt( min( [ deltaR2( ch, mu ) for mu in good_muons for ch in highPt_ch ], 0.) )
+    highPt_ch      = filter( lambda p: p.pt()>5 and abs(p.pdgId()) == 211, pf )
+    maker.event.minDRGoodMuCh  = sqrt( min( [ deltaR2( toDict(ch), toDict(mu) ) for mu in good_muons for ch in highPt_ch ] + [99**2]) )
+    maker.event.maxPtChCloseToMu = 0
+    for mu in good_muons:
+        chCloseToMu = filter( lambda p: deltaR2( toDict(p), toDict( mu ) )< 0.01**2, highPt_ch )
+        ptChCloseToMu = sum( [ p.pt() for p in chCloseToMu ], 0. )
+        print mu, ptChCloseToMu
+        if ptChCloseToMu>maker.event.maxPtChCloseToMu:
+            maker.event.maxPtChCloseToMu = ptChCloseToMu
+
+    #if maker.event.minDRGoodMuCh<0.01: assert False, ""
 
     # get PF Mu's
     pf_mu          = filter( lambda p: p.pt()>15 and abs(p.pdgId()) == 13, pf )
     # match with the good_muons from slimmed mu
     good_to_pf_mu = {}
-    if len( pf_mu )>2:
+    if len( pf_mu )>=2:
         for i_good_muon, good_muon in enumerate(good_muons):
-            pf_mu.sort( key = lambda pf: -deltaR2(good_muon, pf) )
+            pf_mu.sort( key = lambda pf: -deltaR2(toDict(good_muon), toDict(pf)) )
             good_to_pf_mu[i_good_muon] = pf_mu[0]
-        
         if good_to_pf_mu[0] != good_to_pf_mu[1]:
             bad_pf_muons = filter( lambda p: p not in good_to_pf_mu.values(), pf_mu )
-            maker.event.minDRGoodMuBadMu  = sqrt( min( [ deltaR2( good, bad ) for good in good_to_pf_mu.values() for bad in bad_pf_muons], 0.) )
-             
+            maker.event.minDRGoodMuBadMu  = sqrt( min( [ deltaR2( toDict(good), toDict(bad) ) for good in good_to_pf_mu.values() for bad in bad_pf_muons] + [99**2]) )
+
+
     # fill ntuple
     maker.run()        
 
-    # Stop.
+    # Stop?
     counter_write += 1
     if args.maxEvents>0 and counter_write>=args.maxEvents: break
 
