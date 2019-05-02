@@ -182,9 +182,9 @@ else:
 # Filler for data struct of maker
 def jet_filler(struct, jets):
 
+    struct.njet = len(jets)
     for i, jet in enumerate(jets):
 
-        struct.njet = len(jets)
         struct.jet_pt    [i] =  jet.pt()
 
         gen_jet = jet.genJet()

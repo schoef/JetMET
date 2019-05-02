@@ -6,7 +6,6 @@ import tarfile
 import ROOT
 
 # Logging
-
 import logging
 logger = logging.getLogger(__name__)
 
