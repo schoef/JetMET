@@ -40,16 +40,16 @@ products_rerun = {
     'cleanedPatJets':{'type':'vector<pat::Jet>', 'label': ( "cleanedPatJets" )},
     'patJets':{'type':'vector<pat::Jet>', 'label': ( "patJets" )},
     'basicJetsForMet':{'type':'vector<pat::Jet>', 'label': ( "basicJetsForMet" )},
-    'slimmedJets':{'type':'vector<pat::Jet>', 'label': ( "slimmedJets" )},
-    'pf':           {'type':'vector<pat::PackedCandidate>', 'label': ("packedPFCandidates")}, 
+    'slimmedJets':   {'type':'vector<pat::Jet>', 'label': ( "slimmedJets" )},
+    'pf':            {'type':'vector<pat::PackedCandidate>', 'label': ("packedPFCandidates")}, 
    }
 
 # sample  
 #2018D, 1 event
-#original = FWLiteSample.fromFiles("test", files = ['file:event_0.root'])
-#rerun    = FWLiteSample.fromFiles("test", files = ['file:event_0_corMETMiniAOD.root'])
-original = FWLiteSample.fromFiles("test", files = ['file:tail.root'])
-rerun    = FWLiteSample.fromFiles("test", files = ['file:tail_corMETMiniAOD.root'])
+original = FWLiteSample.fromFiles("test", files = ['file:event_0.root'])
+rerun    = FWLiteSample.fromFiles("test", files = ['file:event_0_corMETMiniAOD.root'])
+#original = FWLiteSample.fromFiles("test", files = ['file:tail.root'])
+#rerun    = FWLiteSample.fromFiles("test", files = ['file:tail_corMETMiniAOD.root'])
 
 # Event loop
 r_original = original.fwliteReader( products = products_original )
@@ -98,13 +98,10 @@ while r_original.run():
         print "slimmedJets        {:d} pt(Uncorrected) {:10.4} pt(L1FastJet) {:10.4} pt(Corrected) {:10.4}  muEF {:10.4f}".format( i_jet, uncor_pt, jet.correctedJet("L1FastJet").pt(), jet.pt(), jet.muonEnergyFraction())
         print "offline corrected                               pt(L1FastJet) {:10.4} pt(Corrected) {:10.4}".format( uncor_pt*jec_L1, uncor_pt*jec  )
 
-
     print "##################### Compare CorMetData and cleanPatJets ##################################"
-
     # type1 jet selection in PFJetMETcorrInputProducerT.h
     # https://github.com/cms-sw/cmssw/blob/CMSSW_10_2_X/JetMETCorrections/Type1MET/interface/PFJetMETcorrInputProducerT.h#L188
     # FIRST check EMF < 0.9, THEN subtract muon momentum from jets
-
     shift_px, shift_py = 0., 0.
     for i_jet, jet in enumerate(r_rerun.event.cleanedPatJets):
         # check EMF
@@ -114,7 +111,7 @@ while r_original.run():
 
         rawJetp4 = jet.correctedJet("Uncorrected").p4()
 
-        # subtract muons (Global | SA)
+        # subtract muons (Global | SA) 4 momentum
         for p_ in jet.getJetConstituents():
             p = p_.get()
             if abs(p.pdgId())==13 and ( p.isGlobalMuon() or p.isStandAloneMuon() ):
@@ -122,22 +119,20 @@ while r_original.run():
                 rawJetp4 -= p.p4()
 
         rawJetPt = rawJetp4.pt()
-        jec    = corrector   .correction( rawJetPt, jet.eta(), jet.jetArea(), r_original.event.rho[0], r_rerun.event.run )
-        jec_L1 = corrector_L1.correction( rawJetPt, jet.eta(), jet.jetArea(), r_original.event.rho[0], r_rerun.event.run )
-        #jec    = corrector   .correction( jet.correctedJet("Uncorrected").pt(), jet.eta(), jet.jetArea(), r_original.event.rho[0], r_rerun.event.run )
-        #jec_L1 = corrector_L1.correction( jet.correctedJet("Uncorrected").pt(), jet.eta(), jet.jetArea(), r_original.event.rho[0], r_rerun.event.run )
+        # Evaluate JEC at the non-mu subtracted raw momentum. This looks different PFJetMETcorrInputProducerT, however, Mathieu back-corrected the missing muon in PATJetCorrExtractor
+        # Note further that JEC are evaluated at the eta of the subtracted jet
+        jec    = corrector   .correction( jet.correctedJet("Uncorrected").pt(), rawJetp4.eta(), jet.jetArea(), r_original.event.rho[0], r_rerun.event.run )
+        jec_L1 = corrector_L1.correction( jet.correctedJet("Uncorrected").pt(), rawJetp4.eta(), jet.jetArea(), r_original.event.rho[0], r_rerun.event.run )
 
         # check pt 
         if jec*rawJetPt>15:
-            #shift_px += jet.correctedJet("L1FastJet").px() - jet.px()
-            #shift_py += jet.correctedJet("L1FastJet").py() - jet.py()
-            shift_px += (jec_L1*rawJetPt - jec*rawJetPt)*cos(jet.phi())
-            shift_py += (jec_L1*rawJetPt - jec*rawJetPt)*sin(jet.phi())
+            shift_px += (jec_L1*rawJetPt - jec*rawJetPt)*cos(rawJetp4.phi())
+            shift_py += (jec_L1*rawJetPt - jec*rawJetPt)*sin(rawJetp4.phi())
         else:
             print "Not using the next one (jec*rawJetPt = {:6.4}):".format( rawJetPt )
 
-        print "Rerun: cleanedPatJets: {:d}: pt(cor) {:10.4} shift_x = L1 - L1L2L3 becomes {:10.4} - {:10.4} = {:10.4}".format( i_jet, jet.pt(), jet.correctedJet("L1FastJet").px(), jet.px(), jet.correctedJet("L1FastJet").px() - jet.px()) 
-        print "                       {:d}:                    shift_y = L1 - L1L2L3 becomes {:10.4} - {:10.4} = {:10.4}".format( i_jet, jet.correctedJet("L1FastJet").py(), jet.py(), jet.correctedJet("L1FastJet").py() - jet.py()) 
+        print "Rerun: cleanedPatJets: {:d}: pt(cor) {:10.4} shift_x = L1 - L1L2L3 becomes {:10.4} - {:10.4} = {:10.4}".format( i_jet, jet.pt(), jec_L1*rawJetPt*cos(rawJetp4.phi()), jec*rawJetPt*cos(rawJetp4.phi()), (jec_L1*rawJetPt - jec*rawJetPt)*cos(rawJetp4.phi())) 
+        print "                       {:d}:                    shift_y = L1 - L1L2L3 becomes {:10.4} - {:10.4} = {:10.4} pt@JEC {:10.4}".format( i_jet, jec_L1*rawJetPt*sin(rawJetp4.phi()), jec*rawJetPt*sin(rawJetp4.phi()), (jec_L1*rawJetPt - jec*rawJetPt)*sin(rawJetp4.phi()), rawJetPt) 
         
     print "rerun cleanedPatJets give shifts: {:10.4},{:10.4} in corMEtData it was: {:10.4},{:10.4}".format( shift_px, shift_py, r_rerun.event.CorrMETData.mex, r_rerun.event.CorrMETData.mey ) 
     print "rerun recalculated MET from shifts: {:6.4}".format( sqrt( (shift_px + r_rerun.event.slimmedMETs[0].uncorPx())**2 + ( shift_py + r_rerun.event.slimmedMETs[0].uncorPy() )**2 ) )
