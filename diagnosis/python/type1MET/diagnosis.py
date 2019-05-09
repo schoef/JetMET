@@ -46,10 +46,10 @@ products_rerun = {
 
 # sample  
 #2018D, 1 event
-original = FWLiteSample.fromFiles("test", files = ['file:event_0.root'])
-rerun    = FWLiteSample.fromFiles("test", files = ['file:event_0_corMETMiniAOD.root'])
-#original = FWLiteSample.fromFiles("test", files = ['file:tail.root'])
-#rerun    = FWLiteSample.fromFiles("test", files = ['file:tail_corMETMiniAOD.root'])
+#original = FWLiteSample.fromFiles("test", files = ['file:event_0.root'])
+#rerun    = FWLiteSample.fromFiles("test", files = ['file:event_0_corMETMiniAOD.root'])
+original = FWLiteSample.fromFiles("test", files = ['file:tail.root'])
+rerun    = FWLiteSample.fromFiles("test", files = ['file:tail_corMETMiniAOD.root'])
 
 # Event loop
 r_original = original.fwliteReader( products = products_original )
@@ -121,8 +121,8 @@ while r_original.run():
         rawJetPt = rawJetp4.pt()
         # Evaluate JEC at the non-mu subtracted raw momentum. This looks different PFJetMETcorrInputProducerT, however, Mathieu back-corrected the missing muon in PATJetCorrExtractor
         # Note further that JEC are evaluated at the eta of the subtracted jet
-        jec    = corrector   .correction( jet.correctedJet("Uncorrected").pt(), rawJetp4.eta(), jet.jetArea(), r_original.event.rho[0], r_rerun.event.run )
-        jec_L1 = corrector_L1.correction( jet.correctedJet("Uncorrected").pt(), rawJetp4.eta(), jet.jetArea(), r_original.event.rho[0], r_rerun.event.run )
+        jec    = corrector   .correction( jet.correctedJet("Uncorrected").pt(), jet.eta(), jet.jetArea(), r_original.event.rho[0], r_rerun.event.run )
+        jec_L1 = corrector_L1.correction( jet.correctedJet("Uncorrected").pt(), jet.eta(), jet.jetArea(), r_original.event.rho[0], r_rerun.event.run )
 
         # check pt 
         if jec*rawJetPt>15:
